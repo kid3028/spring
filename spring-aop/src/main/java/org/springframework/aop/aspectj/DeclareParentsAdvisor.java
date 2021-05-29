@@ -26,6 +26,9 @@ import org.springframework.aop.support.DelegatePerTargetObjectIntroductionInterc
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 
 /**
+ * 获取DeclareParents注解
+ * DeclareParents主要用于引介增强的注解形式的实现，而其实现方式与普通增强很类似，
+ * 只不过使用DeclareParentsAdvisor对功能进行封装
  * Introduction advisor delegating to the given object.
  * Implements AspectJ annotation-style behavior for the DeclareParents annotation.
  *

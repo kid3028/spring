@@ -16,15 +16,18 @@
 
 package org.springframework.aop.aspectj;
 
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.AfterAdvice;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-
-import org.springframework.aop.AfterAdvice;
-
 /**
+ * 后置增强与前置增强不同，前置增强是在拦截器链中放置MethodBeforeAdviceInterceptor，
+ * 而在MethodBeforeAdviceInterceptor中又放置了AspectJMethodBeforeAdvice，并在调用
+ * invoke时首先串联调用。但是后置增强器的时候却不一样，没有提供中间类，直接在拦截器中
+ * 使用了中间的AspectJAfterAdvice
  * Spring AOP advice wrapping an AspectJ after advice method.
  *
  * @author Rod Johnson

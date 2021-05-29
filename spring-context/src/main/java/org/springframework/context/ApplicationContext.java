@@ -24,6 +24,10 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.lang.Nullable;
 
 /**
+ * ApplicationContext包含了BeanFactory所有的功能，同时还提供了更多的扩展
+ *  xml加载
+ *    BeanFactory factory = new XmlBeanFactory(new ClassPathResource("beanFactory.xml"))
+ *    ApplicationContext ctx = new ClassPathXmlApplicationContext("applicationContext.xml")
  * Central interface to provide configuration for an application.
  * This is read-only while the application is running, but may be
  * reloaded if the implementation supports this.

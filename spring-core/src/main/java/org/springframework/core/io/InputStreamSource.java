@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
+ * InputStreamSource 封装任何能返回InputStream的类，比如File，Classpath下的资源和ByteArray等。
+ *
  * Simple interface for objects that are sources for an {@link InputStream}.
  *
  * <p>This is the base interface for Spring's more extensive {@link Resource} interface.
@@ -41,6 +43,7 @@ import java.io.InputStream;
 public interface InputStreamSource {
 
 	/**
+	 * 代表底层对象的InputStream
 	 * Return an {@link InputStream} for the content of an underlying resource.
 	 * <p>It is expected that each call creates a <i>fresh</i> stream.
 	 * <p>This requirement is particularly important when you consider an API such

@@ -19,6 +19,11 @@ package org.springframework.beans;
 import java.beans.PropertyDescriptor;
 
 /**
+ * spring中用于封装bean的，间接实现了PropertyEditorRegistry。
+ * 默认实现是BeanWrapperImpl，BeanWrapperImpl继承了PropertyEditorRegistrySupport.
+ *
+ * @see {@link PropertyEditorRegistrySupport#createDefaultEditors()} spring自带的一堆属性编辑器
+ *
  * The central interface of Spring's low-level JavaBeans infrastructure.
  *
  * <p>Typically not used directly but rather implicitly via a

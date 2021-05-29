@@ -24,6 +24,13 @@ compileGroovy {
 	options.compilerArgs += "-Werror"
 }
 
+tasks.named('compileGroovy') {
+	classpath = sourceSets.main.compileClasspath
+}
+tasks.named('compileKotlin') {
+	classpath +=files(sourceSets.main.groovy.classesDirectory)
+}
+
 // This module also builds Kotlin code and the compileKotlin task naturally depends on
 // compileJava. We need to redefine dependencies to break task cycles.
 def deps = compileGroovy.taskDependencies.immutableValues + compileGroovy.taskDependencies.mutableValues

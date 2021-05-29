@@ -16,16 +16,18 @@
 
 package org.springframework.aop.framework.adapter;
 
-import java.io.Serializable;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.BeforeAdvice;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.util.Assert;
 
+import java.io.Serializable;
+
 /**
+ * 前置增强是在拦截器链中放置MethodBeforeAdviceInterceptor，
+ * 而在MethodBeforeAdviceInterceptor中又放置了AspectJMethodBeforeAdvice，并在调用
+ * invoke时首先串联调用。
  * Interceptor to wrap am {@link org.springframework.aop.MethodBeforeAdvice}.
  * Used internally by the AOP framework; application developers should not need
  * to use this class directly.
@@ -37,6 +39,9 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class MethodBeforeAdviceInterceptor implements MethodInterceptor, BeforeAdvice, Serializable {
 
+	/**
+	 * 前值增强器的AspectJMethodBeforeAdvice
+	 */
 	private final MethodBeforeAdvice advice;
 
 

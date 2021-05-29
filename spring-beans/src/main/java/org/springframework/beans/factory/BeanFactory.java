@@ -21,12 +21,15 @@ import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 
 /**
+ * bean工厂，定义bean的各种属性 和 获取bean
+ * 访问 spring bean 容器的根接口。提供了bean容器的基础客户端视角，更多的接口定义在 ListableBeanFactory  ConfigurableBeanFactory
  * The root interface for accessing a Spring bean container.
  * This is the basic client view of a bean container;
  * further interfaces such as {@link ListableBeanFactory} and
  * {@link org.springframework.beans.factory.config.ConfigurableBeanFactory}
  * are available for specific purposes.
  *
+ * beanFactory管理着各个bean definition，每个definition有着唯一的name。根据bean definition，bean Factory可能返回prototype or singleton实例
  * <p>This interface is implemented by objects that hold a number of bean definitions,
  * each uniquely identified by a String name. Depending on the bean definition,
  * the factory will return either an independent instance of a contained object
@@ -36,6 +39,8 @@ import org.springframework.lang.Nullable;
  * depends on the bean factory configuration: the API is the same. Since Spring
  * 2.0, further scopes are available depending on the concrete application
  * context (e.g. "request" and "session" scopes in a web environment).
+ *
+ * BeanFactory是应用组件的注册中心、应用的配置中心
  *
  * <p>The point of this approach is that the BeanFactory is a central registry
  * of application components, and centralizes configuration of application
@@ -49,6 +54,8 @@ import org.springframework.lang.Nullable;
  * BeanFactory lookup. Spring's Dependency Injection functionality is
  * implemented using this BeanFactory interface and its subinterfaces.
  *
+ * BeanFactory只加载存储在配置源中bean definition，并且使用 spring-bean 包来完成对bean的配置。
+ * BeanFactory不约束bean definition的存储方式，可以是LDAP、RDBMS、XML、properties等
  * <p>Normally a BeanFactory will load bean definitions stored in a configuration
  * source (such as an XML document), and use the {@code org.springframework.beans}
  * package to configure the beans. However, an implementation could simply return
@@ -63,6 +70,7 @@ import org.springframework.lang.Nullable;
  * the immediate parent factory will be asked. Beans in this factory instance
  * are supposed to override beans of the same name in any parent factory.
  *
+ * ioc容器定了了 bean 生命周期下会执行到方法
  * <p>Bean factory implementations should support the standard bean lifecycle interfaces
  * as far as possible. The full set of initialization methods and their standard order is:
  * <ol>
@@ -87,6 +95,7 @@ import org.springframework.lang.Nullable;
  * <li>{@code postProcessAfterInitialization} methods of BeanPostProcessors
  * </ol>
  *
+ * ioc容器关闭，下面的方法将会被调用
  * <p>On shutdown of a bean factory, the following lifecycle methods apply:
  * <ol>
  * <li>{@code postProcessBeforeDestruction} methods of DestructionAwareBeanPostProcessors

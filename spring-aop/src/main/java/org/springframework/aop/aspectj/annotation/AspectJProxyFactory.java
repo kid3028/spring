@@ -16,12 +16,7 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.aspectj.lang.reflect.PerClauseKind;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJProxyUtils;
 import org.springframework.aop.aspectj.SimpleAspectInstanceFactory;
@@ -30,6 +25,10 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * AspectJ-based proxy factory, allowing for programmatic building
@@ -118,9 +117,11 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	 * @see AspectJProxyUtils#makeAdvisorChainAspectJCapableIfNecessary(List)
 	 */
 	private void addAdvisorsFromAspectInstanceFactory(MetadataAwareAspectInstanceFactory instanceFactory) {
+		// 完成所有增强器的解析
 		List<Advisor> advisors = this.aspectFactory.getAdvisors(instanceFactory);
 		Class<?> targetClass = getTargetClass();
 		Assert.state(targetClass != null, "Unresolvable target class");
+		// 但是对于所有增强器来讲，并不一定都适用于当前的bean，还要挑选出合适的增强器,即满足我们配置的通配符的增强器
 		advisors = AopUtils.findAdvisorsThatCanApply(advisors, targetClass);
 		AspectJProxyUtils.makeAdvisorChainAspectJCapableIfNecessary(advisors);
 		AnnotationAwareOrderComparator.sort(advisors);

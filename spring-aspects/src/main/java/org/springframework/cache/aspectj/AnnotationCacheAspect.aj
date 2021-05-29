@@ -23,6 +23,31 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 
 /**
+ * aspect  ajc 编译器识别
+ *
+ * public class HelloWorld {
+ *     public void sayHello() {
+ *         System.out.println("Hello World");
+ *     }
+ *
+ *     public static void main(String[] args) {
+ * 			HelloWorld h = new HelloWorld();
+ * 			h.sayHello();
+ *     }
+ * }
+ *
+ * public aspect TxAspect {
+ *     void around():call(void sayHello()) {
+ *         System.out.println("Tx begin");
+ *         proceed();
+ *         System.out.println("Tx end");
+ *     }
+ * }
+ *
+ * ajc HelloWorld.java TxAspect.java
+ *
+ *
+ *
  * Concrete AspectJ cache aspect using Spring's @{@link Cacheable} annotation.
  *
  * <p>When using this aspect, you <i>must</i> annotate the implementation class (and/or

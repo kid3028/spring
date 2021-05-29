@@ -19,6 +19,29 @@ package org.springframework.beans.factory.config;
 import org.springframework.beans.BeansException;
 
 /**
+ * BeanFactoryPostProcessor对beanDefinition进行处理。可以配置多个BeanFactoryPostProcessor
+ * ioc容器允许BeanFactoryPostProcessor在容器实际实例化任何其他bean之前读取配置袁术，并有可能修改它。
+ * 可以通过设置 order 属性来控制BeanFactoryPostProcessor的执行次序（当且仅当BeanFactoryPostProcessor实现了Ordered
+ * 接口是才可以设置该属性，因此在实现BeanFactoryPostProcessor时，应考虑实现Ordered接口）
+ *
+ * 如果想改变实际的Bean实例(例如像从配置元数据创建的对象)，那么最好使用BeanPostProcessor
+ * BeanFactoryPostProcessor的作用域是容器级的，
+ *
+ * BeanFactoryPostProcessor 的典型使用 —— PropertyPlaceholderConfigurer
+ *   <bean id="message" class="com.test.Message">
+ *   	<property name="msg">
+ *   		<value>${bean.message}</value>
+ *   	</property>
+ *   </bean>
+ * 	 ${bean.message} 就是spring的分散配置，可以在另外的配置文件中位bean.message指定值，如
+ * 	   bean.message=hi,i am message!
+ * 当访问message这个bean时，msg属性就会被置为“hi,i am message!”
+ * PropertyPlaceholderConfigurer的作用就是告诉spring该文件
+ *    <bean id="msgHandler" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+ *    	<property name="locations">
+ *    		<value>config/bean.properties</value>
+ *    	</property>
+ *    </bean>
  * Allows for custom modification of an application context's bean definitions,
  * adapting the bean property values of the context's underlying bean factory.
  *

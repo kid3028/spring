@@ -16,6 +16,8 @@
 
 package org.springframework.core.io;
 
+import org.springframework.lang.Nullable;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,9 +26,15 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
-import org.springframework.lang.Nullable;
-
 /**
+ * 资源描述符：对底层资源类型的抽象，例如文件或者classpath
+ *
+ * 在Java中，将不同来源的资源抽象为URL，通过注册不同的handler(URLStreamHandler)来处理不同来源的资源读取逻辑，
+ * 一般handler的类型使用不同的前缀(协议，Protocol)来标识，如"file:"/"http:"/"jar:"等，
+ * 然而URL没有定义相对ClassPath或者ServletContext等资源的handler，虽然可以注册自己的URLStreamHandler来解析
+ * 特定对的URL前缀，比如"classpath:"，然而这需要了解URL的实现机制，而且URL没有提供基本的方法，
+ * 如检查当前资源是否存在、检查当前资源是否可读的等方法。
+ * 故spring对其内部使用到的资源实现了自己的抽象结构——Resource，来封装底层资源。
  * Interface for a resource descriptor that abstracts from the actual
  * type of underlying resource, such as a file or class path resource.
  *
@@ -40,6 +48,8 @@ import org.springframework.lang.Nullable;
  * @see #getURL()
  * @see #getURI()
  * @see #getFile()
+ *
+ * 实现类
  * @see WritableResource
  * @see ContextResource
  * @see UrlResource
@@ -52,6 +62,7 @@ import org.springframework.lang.Nullable;
 public interface Resource extends InputStreamSource {
 
 	/**
+	 * resource是否真实存在
 	 * Determine whether this resource actually exists in physical form.
 	 * <p>This method performs a definitive existence check, whereas the
 	 * existence of a {@code Resource} handle only guarantees a valid
@@ -60,6 +71,7 @@ public interface Resource extends InputStreamSource {
 	boolean exists();
 
 	/**
+	 * resource 非空，并且可以通过getInputStream读取
 	 * Indicate whether non-empty contents of this resource can be read via
 	 * {@link #getInputStream()}.
 	 * <p>Will be {@code true} for typical resource descriptors that exist
@@ -75,6 +87,8 @@ public interface Resource extends InputStreamSource {
 	}
 
 	/**
+	 * resource 已经是一个打开的stream
+	 * true 时，InputStream只能读取一次，并且需要close，避免内存泄漏
 	 * Indicate whether this resource represents a handle with an open stream.
 	 * If {@code true}, the InputStream cannot be read multiple times,
 	 * and must be read and closed to avoid resource leaks.
@@ -85,6 +99,7 @@ public interface Resource extends InputStreamSource {
 	}
 
 	/**
+	 * resource是否一个文件系统中的文件
 	 * Determine whether this resource represents a file in a file system.
 	 * A value of {@code true} strongly suggests (but does not guarantee)
 	 * that a {@link #getFile()} call will succeed.
@@ -97,6 +112,7 @@ public interface Resource extends InputStreamSource {
 	}
 
 	/**
+	 * 返回resource代表的 URL
 	 * Return a URL handle for this resource.
 	 * @throws IOException if the resource cannot be resolved as URL,
 	 * i.e. if the resource is not available as descriptor
@@ -104,6 +120,7 @@ public interface Resource extends InputStreamSource {
 	URL getURL() throws IOException;
 
 	/**
+	 * 返回resource代表的 URI
 	 * Return a URI handle for this resource.
 	 * @throws IOException if the resource cannot be resolved as URI,
 	 * i.e. if the resource is not available as descriptor
@@ -112,6 +129,7 @@ public interface Resource extends InputStreamSource {
 	URI getURI() throws IOException;
 
 	/**
+	 * 返回resource代表 File
 	 * Return a File handle for this resource.
 	 * @throws java.io.FileNotFoundException if the resource cannot be resolved as
 	 * absolute file path, i.e. if the resource is not available in a file system

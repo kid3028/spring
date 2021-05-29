@@ -16,8 +16,6 @@
 
 package org.springframework.context;
 
-import java.io.Closeable;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -25,6 +23,8 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ProtocolResolver;
 import org.springframework.lang.Nullable;
+
+import java.io.Closeable;
 
 /**
  * SPI interface to be implemented by most if not all application contexts.
@@ -52,6 +52,23 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	String CONFIG_LOCATION_DELIMITERS = ",; \t\n";
 
 	/**
+	 * 实现string -> date的另一种方式
+	 * public class String2DateConverter implements Converter<String, Date> {
+	 * 		@override
+	 * 		public Date convert(String arg0) {
+	 * 		 	return DateUtils.parseDate(arg0, new String[]{"yyyy-MM-dd HH:mm:ss"})
+	 * 		}
+	 * }
+	 *
+	 * <bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+	 *  	<property name="converters">
+	 *  		<list>
+	 *  		 	<bean class="String2DateConverter"/>
+	 *  		</list>
+	 *  	</property>
+	 * </bean>
+	 *
+	 *
 	 * Name of the ConversionService bean in the factory.
 	 * If none is supplied, default conversion rules apply.
 	 * @since 3.0

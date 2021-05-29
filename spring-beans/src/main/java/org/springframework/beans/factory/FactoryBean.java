@@ -19,6 +19,54 @@ package org.springframework.beans.factory;
 import org.springframework.lang.Nullable;
 
 /**
+ * 一般情况下，Spring通过反射机制利用bean的class属性指定实现类来实例化bean。但是在某些情况下，实例化bean的过程比较复杂，
+ * 如果按照传统的方式，则需要在<bean>标签下提供大量的配置信息，配置方式的灵活性受限，这时采用编码的方式会比较方便。
+ * spring为此提供了FactoryBean的工厂类接口，用户可以实现这个接口，定制实例化bean的逻辑。
+ * 
+ * FactoryBean接口对于spring来说有比较重要的地位，spring自身提供了70多个FactoryBean的实现，隐藏了实例化复杂bean的细节，
+ * 给上层应用带来了便利。
+ *
+ * 当配置文件中<bean>的class属性配置是FactoryBean的实现类时，通过getBean()方法返回的不是FactoryBean本身，
+ * 而是FactoryBean#getObject()方法返回的对象，相当于FactoryBean#getObject()代理了getBean()方法。
+ *
+ * public class Car {
+ *     private int maxSpeed;
+ *     private String brand;
+ *     private double price;
+ * }
+ *
+ * <bean id="car" class="com.test.Car">
+ *     <property name="maxSpeed" value="100"/>
+ *     <property name="brand" value="tesla"/>
+ *     <property name="price" value="20"
+ * <bean/>
+ *
+ * -------------------------
+ *
+ * public class CarFactoryBean implements FactoryBean<Car> {
+ *     private String carInfo;
+ *
+ *     public Car getObject() throws Exception {
+ *         Car car = new Car();
+ *         String[] infos = carInfo.split(",")
+ *         car.setBead(infos[0]);
+ *         car.setMaxSpeed(Integer.valueOf(infos[1]));
+ *         car.setPrice(Double.valueOf(infos[2]));
+ *     }
+ *
+ *     public Class<Car> getObjectType() {
+ *         return Car.class;
+ *     }
+ *
+ *     public boolean isSingleton() {
+ *         return false;
+ *     }
+ * }
+ *
+ * <bean id="car" class="com.test.CarFactoryBean" carInfo="tesla,100,20"/>
+ * 当调用getBean("car")时，spring通过反射机制发现CarFactoryBean实现了FactoryBean，便会调用接口方法CarFactoryBean#getObject
+ * 方法返回。如果希望回去CarFactoryBean的实例，则需要在使用getBean(beanName)方法时在beanName前面显示加上 & 前缀，如 getBean("&car")
+ *
  * Interface to be implemented by objects used within a {@link BeanFactory} which
  * are themselves factories for individual objects. If a bean implements this
  * interface, it is used as a factory for an object to expose, not directly as a
@@ -65,6 +113,7 @@ import org.springframework.lang.Nullable;
 public interface FactoryBean<T> {
 
 	/**
+	 * 返回由FactoryBean创建的bean实例，如果是isSingleton返回true，则该实例会放到spring ioc容器的单例缓存池中
 	 * Return an instance (possibly shared or independent) of the object
 	 * managed by this factory.
 	 * <p>As with a {@link BeanFactory}, this allows support for both the
@@ -85,6 +134,7 @@ public interface FactoryBean<T> {
 	T getObject() throws Exception;
 
 	/**
+	 * 返回FactoryBean创建的bean的类型
 	 * Return the type of object that this FactoryBean creates,
 	 * or {@code null} if not known in advance.
 	 * <p>This allows one to check for specific types of beans without
@@ -107,6 +157,7 @@ public interface FactoryBean<T> {
 	Class<?> getObjectType();
 
 	/**
+	 * 返回bean实例的scope
 	 * Is the object managed by this factory a singleton? That is,
 	 * will {@link #getObject()} always return the same object
 	 * (a reference that can be cached)?

@@ -16,14 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.lang.reflect.Constructor;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Supplier;
-
 import org.springframework.beans.BeanMetadataAttributeAccessor;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -36,6 +28,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import java.lang.reflect.Constructor;
+import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * Base class for concrete, full-fledged {@link BeanDefinition} classes,
@@ -140,64 +136,153 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	@Nullable
 	private volatile Object beanClass;
 
+	/**
+	 * bean的作用范围，对应 <bean scope=""></>
+	 * bool singleton / boll prototype 都来自scope属性
+	 */
 	@Nullable
 	private String scope = SCOPE_DEFAULT;
 
+	/**
+	 * 是否是抽象， <bean abstract=""></>
+	 */
 	private boolean abstractFlag = false;
 
+	/**
+	 * 是否延迟加载 <bean lazy-init=""></>
+	 */
 	private boolean lazyInit = false;
 
+	/**
+	 * 自动注入模式， <bean autowire></>
+	 */
 	private int autowireMode = AUTOWIRE_NO;
 
+	/**
+	 * 依赖检查，2.0后废弃了
+	 */
 	private int dependencyCheck = DEPENDENCY_CHECK_NONE;
 
+	/**
+	 * 用来表示一个bean的实例化依靠另一个bean先实例化，<bean depend-on=""></bean>
+	 */
 	@Nullable
 	private String[] dependsOn;
 
+	/**
+	 * autowire-candidate 属性设置为false，这样容器在查找自动装配对象时，将不考虑该bean，
+	 * 即他不会被考虑作为其他bean自动装配的候选者，但是该bean本身还是可以使用自动装配来注入其他bean
+	 */
 	private boolean autowireCandidate = true;
 
+	/**
+	 * 自动装配时当出现多个bean候选者时，将作为首选者 <bean primary=""></>
+	 */
 	private boolean primary = false;
 
+	/**
+	 * 用于记录qualifier  <bean qualifier=""></bean>
+	 */
 	private final Map<String, AutowireCandidateQualifier> qualifiers = new LinkedHashMap<>();
 
 	@Nullable
 	private Supplier<?> instanceSupplier;
 
+	/**
+	 * 允许访问非公开的构造器和方法，程序设置
+	 */
 	private boolean nonPublicAccessAllowed = true;
 
+	/**
+	 * 是否以一种宽松对的模式解析构造函数，默认是true
+	 * 如果设置为false，则存在：
+	 * interface Test {}
+	 * class TestImpl implements Test {}
+	 * class Main {
+	 *     Main(Test t) {}
+	 *     Main(TestImpl t) {}
+	 * }
+	 * 如上将会抛出异常，因为spring无法准确定位该使用哪个构造函数
+	 */
 	private boolean lenientConstructorResolution = true;
 
+	/**
+	 * <bean id="instanceFactoryBean" class="test.InstanceFactoryBean"></bean>
+	 * <bean id="currentTime" factory-bean="instanceFactoryBean" factory-method="createTime"></bean>
+	 *
+	 */
 	@Nullable
 	private String factoryBeanName;
 
 	@Nullable
 	private String factoryMethodName;
 
+	/**
+	 * 记录构造函数注入属性，
+	 * <bean>
+	 * 		<constructor-arg></constructor-arg>
+	 * </bean>
+	 */
 	@Nullable
 	private ConstructorArgumentValues constructorArgumentValues;
 
+	/**
+	 * 普通属性集合
+	 */
 	@Nullable
 	private MutablePropertyValues propertyValues;
 
+	/**
+	 * 方法重写持有者，记录lookup-method replaced-method
+	 */
 	private MethodOverrides methodOverrides = new MethodOverrides();
 
+	/**
+	 * 初始化方法
+	 * <bean init-method=""></bean>
+	 */
 	@Nullable
 	private String initMethodName;
 
+	/**
+	 * 销毁方法
+	 * <bean destroy-method></bean>
+	 */
 	@Nullable
 	private String destroyMethodName;
 
+	/**
+	 * 是否执行init-method,程序设置
+	 */
 	private boolean enforceInitMethod = true;
 
+	/**
+	 * 是否执行destroy-method，程序设置
+	 */
 	private boolean enforceDestroyMethod = true;
 
+	/**
+	 * 是否是用户定义的而不是应用程序本身定义的，创建aop时候为true，程序设置
+	 */
 	private boolean synthetic = false;
 
+	/**
+	 * 定义bean的应用， 程序设置
+	 * APPLICATION 用户
+	 * INFRASTRUCTURE 完全内部使用，与用户无关
+	 * SUPPORT 某些复杂配置的一部分
+	 */
 	private int role = BeanDefinition.ROLE_APPLICATION;
 
+	/**
+	 * bean的描述
+	 */
 	@Nullable
 	private String description;
 
+	/**
+	 * bean定义的资源
+	 */
 	@Nullable
 	private Resource resource;
 
@@ -1096,13 +1181,20 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @throws BeanDefinitionValidationException in case of validation failure
 	 */
 	protected void prepareMethodOverride(MethodOverride mo) throws BeanDefinitionValidationException {
+		// 获取对应类中对应方法名的个数
 		int count = ClassUtils.getMethodCountForName(getBeanClass(), mo.getMethodName());
 		if (count == 0) {
 			throw new BeanDefinitionValidationException(
 					"Invalid method override: no method with name '" + mo.getMethodName() +
 					"' on class [" + getBeanClassName() + "]");
 		}
+		/**
+		 * 如果一个类中存在若干重载方法，那么在函数调用及增强的时候需要根据参数类型进行匹配，来最终确定当前调用的到底是哪个。
+		 * 但是spring将一部分工作在这里完成，如果当前类中的方法只有一个，那么久设置该方法没有重载，
+		 * 这样在后续调用的时候便可以直接找到方法，不需要进行方法的参数匹配验证，而且还可以对方法存在性进行验证。
+		 */
 		else if (count == 1) {
+			// 标记MethodOverride暂未被覆盖，避免参数类型检查的开始
 			// Mark override as not overloaded, to avoid the overhead of arg type checking.
 			mo.setOverloaded(false);
 		}
