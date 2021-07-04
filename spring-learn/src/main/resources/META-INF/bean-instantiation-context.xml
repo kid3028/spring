@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="user-created-by-static-factory-method" class="org.springframework.learn.ioc.domain.User" factory-method="createUser"/>
+
+	<bean id="user-created-by-static-factory" factory-bean="userFactory" factory-method="createUser"/>
+	<bean id="userFactory" class="org.springframework.learn.bean.factory.DefaultUserFactory"/>
+
+	<bean id="user-created-by-factory-bean" class="org.springframework.learn.bean.factory.UserFactoryBean"/>
+</beans>

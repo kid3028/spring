@@ -17,6 +17,9 @@
 package org.springframework.beans.factory;
 
 /**
+ * 通常在ApplicationContext环境下（自动）调用，beanFactory环境下不会自动调用，需要显示调用
+ *
+ * 该方法调用时所有的bean已经都完成了初始化，在这里进行操作，不需要担心依赖的bean初始化不完整的情况
  * Callback interface triggered at the end of the singleton pre-instantiation phase
  * during {@link BeanFactory} bootstrap. This interface can be implemented by
  * singleton beans in order to perform some initialization after the regular

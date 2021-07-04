@@ -1383,6 +1383,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// =======控制程序是否继续进行属性填充=========
 		// 给InstantiationAwareBeanPostProcessors最后一次机会在属性设置前改变bean，如支持属性注入的类型
+		// mbd.isSynthetic 是否是合成的
 		// Give any InstantiationAwareBeanPostProcessors the opportunity to modify the
 		// state of the bean before properties are set. This can be used, for example,
 		// to support styles of field injection.

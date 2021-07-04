@@ -1,0 +1,15 @@
+description = "Spring Learn"
+
+
+dependencies {
+    compile(project(":spring-beans"))
+    compile(project(":spring-context"))
+    compile(project(":spring-context-support"))
+    compile(project(":spring-core"))
+    compile("org.yaml:snakeyaml:1.23")
+    compile("commons-io:commons-io:2.6")
+    compile("org.hibernate.validator:hibernate-validator:6.0.18.Final")
+//    compile("javax.el:javax.el-api:2.2.4")
+//    compile("org.glassfish.web:javax.el:2.2.4")
+    compile("org.mortbay.jasper:apache-el:9.0.48")
+}

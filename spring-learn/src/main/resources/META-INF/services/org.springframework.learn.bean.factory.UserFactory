@@ -1,0 +1,3 @@
+org.springframework.learn.bean.factory.DefaultUserFactory
+org.springframework.learn.bean.factory.DefaultUserFactory
+# 重复定义会进行去重

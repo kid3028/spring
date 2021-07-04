@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:util="http://www.springframework.org/schema/util"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="
+	   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	   http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+">
+
+	<bean id="user" class="org.springframework.learn.ioc.domain.User">
+		<property name="id" value="11"/>
+		<property name="name" value="qull"/>
+		<property name="context">
+			<value>
+				id = 11
+				name = qull
+			</value>
+		</property>
+		<property name="contextAsText" ref="context"/>
+	</bean>
+
+	<bean class="org.springframework.learn.conversion.CustomPropertyEditorRegistrar"/>
+
+	<bean id="propertiesToStringConverter" class="org.springframework.learn.conversion.PropertiesToStringConverter"/>
+
+
+	<!--	id必须为 conversionService org.springframework.context.support.AbstractApplicationContext#finishBeanFactoryInitialization-->
+	<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+		<property name="converters" ref="propertiesToStringConverter"/>
+	</bean>
+
+	<util:properties id="context">
+		<prop key="id">1</prop>
+		<prop key="name">qull</prop>
+	</util:properties>
+</beans>

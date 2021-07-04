@@ -1,0 +1,2 @@
+# 定义namespace与NamespaceHandler的映射
+#http\://www.learnspring.com/schema/users=org.springframework.learn.ioc.metadata.handler.UsersNamespaceHandler
