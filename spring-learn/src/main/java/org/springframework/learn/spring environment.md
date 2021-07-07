@@ -69,3 +69,22 @@ Api：`org.springframework.core.env.ConfigurableEnvironment`
 与依赖注入的environment是同一个对象。关键`ApplicationContextAwareProcessor`
 6.2、间接依赖查找
 通过`org.springframework.context.ConfurableApplicationContext#getEnvironment`
+
+7、依赖注入`@Value`
+通过注入`@Value`: `org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor`
+
+8、Spring类型转换在Environment中的运用
+Environment底层实现：
+- 底层实现：`org.springframework.core.env.PropertySourcePropertyResolver#convertValueIfNecessary(Object, Class)`
+- 底层服务：`org.springframework.core.convert.ConversionService` 
+ - 默认实现：`org.springframework.core.convert.support.DefaultConversionService`
+
+9、Spring类型转换在`@Value`中的运用
+`@Value`底层实现
+- 底层实现：`org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor`
+  `org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency`
+- 底层服务：`org.springframework.beans.TypeConverter`
+ - 底层实现：`org.springframework.beans.TypeConverterDelegate`
+   `java.beans.PropertyEditor`
+   `org.springframework.core.convert.ConversionService`
+   
