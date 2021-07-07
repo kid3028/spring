@@ -743,7 +743,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Configure the bean factory with context callbacks.
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
 
-		// 设置忽略的自动装配接口
+		// 忽略Aware回调接口作为依赖注入接口。Aware一般不作为自动注入，意义不大，实现接口回调，就能获得aware的能力
 		// ApplicationContextAwareProcessor在上面注册后，在invokeAwareInterfaces方法中间接调用的aware类已经不是普通的bean，需要在自动自动注入时忽略掉
 		beanFactory.ignoreDependencyInterface(EnvironmentAware.class);
 		beanFactory.ignoreDependencyInterface(EmbeddedValueResolverAware.class);

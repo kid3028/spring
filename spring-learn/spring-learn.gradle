@@ -6,6 +6,7 @@ dependencies {
     compile(project(":spring-context"))
     compile(project(":spring-context-support"))
     compile(project(":spring-core"))
+    testCompile(project(":spring-test"))
     compile("org.yaml:snakeyaml:1.23")
     compile("commons-io:commons-io:2.6")
     compile("org.hibernate.validator:hibernate-validator:6.0.18.Final")

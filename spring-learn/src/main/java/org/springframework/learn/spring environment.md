@@ -88,3 +88,53 @@ Environment底层实现：
    `java.beans.PropertyEditor`
    `org.springframework.core.convert.ConversionService`
    
+10、Spring配置属性源PropertySource
+10.1、Api
+- 单配置属性源：`org.springframework.core.env.PropertySource`
+- 多配置属性源：`org.springframework.core.env.PropertySources`
+
+10.2、注解
+- 单属性配置源：`org.springframework.context.annotation.PropertySource`
+- 多属性配置源：`org.springframework.context.annotation.PropertySources`
+
+10.3、关联
+- 存储对象：`org.springframework.core.env.MutablePropertySources`
+- 关联方法：`org.springframework.core.env.ConfigurableEnvironment#getPropertySource()`
+
+11、Spring内建的配置属性源
+内建PropertySource
+|PropertySource类型|说明|
+|--|--|
+|org.springframework.core.env.CommandLinePropertySource|命令行配置属性源|
+|org.springframework.jndi.JndiPropertySource|JNDI配置属性源|
+|org.springframework.core.env.PropertiesPropertySource|Properties配置属性源|
+|org.springframework.web.context.support.ServletConfigPropertySource|Servlet配置属性源|
+|org.springframework.web.context.support.ServletContext.PropertySource|ServletContext配置属性源|
+|org.springframework.core.env.SystemEnvironmentPropertySource|环境变量配置属性源|
+...等等，关键点：PropertySource的名称，来源
+
+
+12、基于注解扩展Spring配置属性源
+`@org.springframework.context.annotation.PropertySource`实现原理
+- 入口：`org.springframework.context.annotation.ConfigurationClassParser#doProcessConfigurationClas`
+    `org.springframework.context.annotation.ConfigurationClassParser#processPropertySource`
+  
+- 4.3新增语义：
+ - 配置属性字符编码：encoding
+ - `org.springframework.core.io.support.PropertySourceFactory`
+
+- 适配对象：`org.springframework.core.env.CompositePropertySource`
+
+13、基于Api扩张spring配置属性
+- Spring应用上下文启动前装载PropertySource
+- Spring应用上下文启动后装载PropertySource
+默认PropertySource不具备动态更新的能力，因此在Spring上下文启动后修改的数据，能在数据中体现，但是已经注入到bean的数据无法更新到
+  
+14、课外资料
+Spring 4.1测试配置属性源：`@TestPropertySource`
+
+15、简单介绍Spring Environment接口
+- 核心接口：`org.springframework.core.env.Environment`
+- 父接口：`org.springframework.core.env.PropertyResolver`
+- 可配置接口：`org.springframework.core.env.ConfigurableEnvironment`
+- 职责：管理Spring配置属性源、管理Profiles
