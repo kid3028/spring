@@ -188,6 +188,7 @@ final class PostProcessorRegistrationDelegate {
 	public static void registerBeanPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, AbstractApplicationContext applicationContext) {
 
+		// 全部processor
 		String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class, true, false);
 
 		/**
@@ -207,6 +208,9 @@ final class PostProcessorRegistrationDelegate {
 		List<String> orderedPostProcessorNames = new ArrayList<>();
 		List<String> nonOrderedPostProcessorNames = new ArrayList<>();
 		for (String ppName : postProcessorNames) {
+			// PriorityOrdered标记的Bean会提前初始化。
+			// 提前初始化有代价，涉及到Bean的优先级处理的顺序，可能处理的时候，其所依赖的资源或者对象不是很充分，
+			// 所以在实现BeanPostProcessor的时候，且标记为PriorityOrdered时需要非常注意。
 			if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
 				BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
 				priorityOrderedPostProcessors.add(pp);

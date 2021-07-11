@@ -56,6 +56,91 @@
 - 调用`BeanFactoryPostProcessor`或者`BeanDefinitionRegistry`后置处理方法
 - 注册`LoadTimeWeaverAwareProcessor`对象
 
+5、BeanFactory注册BeanPostProcessor
+`AbstractApplicationContext#registerBeanPostProcessors(ConfigurableListableBeanFactory)`
+- 注册`PriorityOrdered`类型的BeanPostProcessor Beans
+- 注册`Ordered`类型的BeanPostProcessor Beans
+- 注册普通BeanPostProcessor Beans
+- 注册MergedBeanDefinitionPostProcessor Beans
+- 注册ApplicationListenerDetector对象
+
+6、初始化内建Bean：MessageSource
+`AbstractApplicationContext#initMessageSource()`
+
+7、初始化内建Bean：Spring事件广播器
+`AbstractApplicationContext#initApplicationEventMulticaster()`
+
+8、Spring应用上下文刷新阶段
+`AbstractApplicationContext#onRefresh()`
+非web环境下没有实现，web环境下大多实现也都为国际化ui，子类覆盖该方法
+- `org.springframework.web.context.support.AbstractRefreshableWebApplication#onRefresh()`
+- `org.springframework.web.context.support.GenericWebApplicationContext#onRefresh()`
+- `org.springframework.boot.web.reactive.context.ReactiveWebServerApplicationContext#onRefresh()`
+- `org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext#onRefresh()`
+- `org.springframework.web.context.support.StaticWebApplicationContext#onRefresh()`
+
+9、Spring事件监听器注册阶段
+`AbstractApplicationContext#registeListeners()`
+- 添加当前应用上下文所关联的ApplicationListener对象集合
+- 添加BeanFactory所注册的ApplicationListener Beans
+- 广播早期Spring事件
+
+10、BeanFactory初始化完成阶段
+`AbstractApplicationContext#finishBeanFactoryInitialization(ConfigurableListableBeanFactory)`
+- BeanFactory关联ConversionService Bean，如果存在
+- 添加StringValueResolver对象(占位符处理)
+- 依赖查找LoadTimeWeaverAware Bean(aop)
+- BeanFactory临时ClassLoader置为null(主要用在aop，整个BeanFactory中存在主classloader、bean classloader、临时classloader)
+- BeanFactory冻结配置(freezeConfiguration())
+- BeanFactory初始化非延迟单例Beans
+
+
+11、Spring应用上下文刷新完成阶段
+`AbstractApplicationContext#finishRefresh()`
+- 清除ResourceLoader缓存——`clearResourceCaches` @since 5.0
+- 初始化LifecycleProcessor对象 + `initLifecycleProcessor()`
+- 调用`LifecycleProcessor#onRefresh()`方法
+- 发布Spring应用上下文已刷新事件——`ContextRefreshedEvent`
+- 向MBeanServer托管Live Beans(JMX中的MBean管理器托管存活或者活跃的Spring上下文Bean)
+
+
+12、Spring应用上下文启动阶段
+`AbstractApplicationContext#start()`
+- 启动LifecycleProcessor
+ - 依赖查找Lifecycle Beans
+ - 启动Lifecycle Beans
+- 发布spring应用上下文启动事件——ContextStartedEvent
+
+13、Spring应用上下文停止阶段
+`AbstractApplicationContext#stop()`
+- 停止LifecycleProcessor
+ - 依赖查找Lifecycle Beans
+ - 停止Lifecycle Beans
+- 发布Spring应用上下文已停止事件——ContextStoppedEvent
+
+14、Spring应用上下文关闭阶段
+`AbstractApplicationContext#close()`
+- 状态标识: active(false) 、 closed(true)
+- Live Beans JMX撤销：`LiveBeansView.unregisterApplicationContext(ConfigurableApplicationContext)`
+- 发布spring应用上下文关闭事件——`ContextClosedEvent`
+- 关闭LifecycleProcessor
+ - 依赖查找Lifecycle Beans
+ - 停止Lifecycle Beans
+- 销毁Spring Beans
+- 关闭BeanFactory
+- 回调onClose()
+- 注册Shutdown Hook线程(如果曾经注册过)
+
+14、Environment完整生命周期
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,5 +1,6 @@
 package org.springframework.learn.ioc.domain;
 
+import javax.annotation.PostConstruct;
 import java.util.Properties;
 
 public class User {
@@ -58,6 +59,11 @@ public class User {
 		user.setId(11);
 		user.setName("create by static factory method");
 		return user;
+	}
+
+	@PostConstruct
+	public void init() {
+		System.out.println("user init invoked");
 	}
 
 }
