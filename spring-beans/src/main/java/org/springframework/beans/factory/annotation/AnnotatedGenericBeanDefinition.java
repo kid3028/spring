@@ -24,6 +24,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * 扩展GenericBeanDefinition支持注解
+ * 主要用于测试代码中，实际主要使用ScannedGenericBeanDefinition
+ *
  * Extension of the {@link org.springframework.beans.factory.support.GenericBeanDefinition}
  * class, adding support for annotation metadata exposed through the
  * {@link AnnotatedBeanDefinition} interface.
@@ -59,6 +62,8 @@ public class AnnotatedGenericBeanDefinition extends GenericBeanDefinition implem
 	}
 
 	/**
+	 * 通过注解元信息构造BeanDefinition，可以使用asm来处理，并且避免beanClass的提前加载
+	 * 功能上与ScannedGenericBeanDefinition等价，ScannedGenericBeanDefinition在语义偏向于数据扫描
 	 * Create a new AnnotatedGenericBeanDefinition for the given annotation metadata,
 	 * allowing for ASM-based processing and avoidance of early loading of the bean class.
 	 * Note that this constructor is functionally equivalent to

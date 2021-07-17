@@ -34,12 +34,16 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * rootBeanDefinition是一个被merge后BeanDefinition
+ * 通常是将多个beanDefinition合并为一个RootBeanDefinition
  * A root bean definition represents the merged bean definition that backs
  * a specific bean in a Spring BeanFactory at runtime. It might have been created
  * from multiple original bean definitions that inherit from each other,
  * typically registered as {@link GenericBeanDefinition GenericBeanDefinitions}.
  * A root bean definition is essentially the 'unified' bean definition view at runtime.
  *
+ * RootBeanDefinition也可以用来注册自定义的BeanDefinition。但是从2.5开始，更加推荐通过GenericBeanDefinition来进行注册。
+ * 使用GenericBeanDefinition可以动态定义parent，而不必再硬编码
  * <p>Root bean definitions may also be used for registering individual bean definitions
  * in the configuration phase. However, since Spring 2.5, the preferred way to register
  * bean definitions programmatically is the {@link GenericBeanDefinition} class.
@@ -140,6 +144,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
+	 * 创建一个单例类型的RootBeanDefinition，并且通过传入的supplier进行未来的实例化
 	 * Create a new RootBeanDefinition for a singleton bean, constructing each instance
 	 * through calling the given supplier (possibly a lambda or method reference).
 	 * @param beanClass the class of the bean to instantiate
@@ -262,6 +267,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
+	 * 使用当前bean包装传入的参数Bean
 	 * Register a target definition that is being decorated by this bean definition.
 	 */
 	public void setDecoratedDefinition(@Nullable BeanDefinitionHolder decoratedDefinition) {
@@ -298,6 +304,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
+	 * 设置bean的类型
 	 * Specify a generics-containing target type of this bean definition, if known in advance.
 	 * @since 4.3.3
 	 */
@@ -341,6 +348,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
+	 * 找出合适的构造器
 	 * Determine preferred constructors to use for default construction, if any.
 	 * Constructor arguments will be autowired if necessary.
 	 * @return one or more preferred constructors, or {@code null} if none

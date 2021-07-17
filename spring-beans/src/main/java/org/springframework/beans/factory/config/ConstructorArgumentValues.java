@@ -32,6 +32,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
+ * 构造器参数包装
  * Holder for constructor argument values, typically as part of a bean definition.
  *
  * <p>Supports values for a specific index in the constructor argument list
@@ -430,6 +431,8 @@ public class ConstructorArgumentValues {
 
 
 	/**
+	 * 构造器参数值的封装
+	 * type可选，真实构造器参数的类型
 	 * Holder for a constructor argument value, with an optional type
 	 * attribute indicating the target type of the actual constructor argument.
 	 */
@@ -449,6 +452,12 @@ public class ConstructorArgumentValues {
 
 		private boolean converted = false;
 
+		/**
+		 * value
+		 * source
+		 * ConvertedValue
+		 * 什么关系？？？
+		 */
 		@Nullable
 		private Object convertedValue;
 
@@ -543,6 +552,7 @@ public class ConstructorArgumentValues {
 		}
 
 		/**
+		 * 属性值是否已经被转换过了
 		 * Return whether this holder contains a converted value already ({@code true}),
 		 * or whether the value still needs to be converted ({@code false}).
 		 */

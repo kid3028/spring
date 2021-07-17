@@ -141,7 +141,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/** List of bean definition names, in registration order. */
 	private volatile List<String> beanDefinitionNames = new ArrayList<>(256);
 
-	/** List of names of manually registered singletons, in registration order. */
+	/** 手动注册的单例bean集合 List of names of manually registered singletons, in registration order. */
 	private volatile Set<String> manualSingletonNames = new LinkedHashSet<>(16);
 
 	/** Cached array of bean definition names in case of frozen configuration. */
@@ -881,10 +881,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		 * 校验methodOverrides是否与工厂方法并存或者methodOverrides对应的方法根本不存在
 		 */
 		BeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);
+		// bd已经注册
 		if (existingDefinition != null) {
+			// 如果beanName已经存在，且设置了不允许覆盖，那么抛出异常
 			if (!isAllowBeanDefinitionOverriding()) {
 				throw new BeanDefinitionOverrideException(beanName, beanDefinition, existingDefinition);
 			}
+			// 提升bean的角色 application--> support --> infras
 			else if (existingDefinition.getRole() < beanDefinition.getRole()) {
 				// e.g. was ROLE_APPLICATION, now overriding with ROLE_SUPPORT or ROLE_INFRASTRUCTURE
 				if (logger.isInfoEnabled()) {
@@ -909,7 +912,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			this.beanDefinitionMap.put(beanName, beanDefinition);
 		}
+		// 新的bd
 		else {
+			// 如果已经进入bean创建阶段，那么需要同步操作
 			if (hasBeanCreationStarted()) {
 				// beanDefinitionMap是全局变量，这里会存在并发访问
 				// Cannot modify startup-time collection elements anymore (for stable iteration)
@@ -922,6 +927,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					removeManualSingletonName(beanName);
 				}
 			}
+			// 还在bd注册阶段
 			else {
 				// Still in startup registration phase
 				this.beanDefinitionMap.put(beanName, beanDefinition);
@@ -970,6 +976,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
+	 * 重置beanName相关的bd缓存
+	 * 1、移除bd
+	 * 2、销毁bean
+	 * 3、beanPostProcessor重置bd
+	 * 4、递归：该bd的子bd触发reset
 	 * Reset all bean definition caches for the given bean,
 	 * including the caches of beans that are derived from it.
 	 * <p>Called after an existing bean definition has been replaced or removed,

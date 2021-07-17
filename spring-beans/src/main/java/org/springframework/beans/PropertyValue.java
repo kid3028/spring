@@ -23,6 +23,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
+ * 封装bean属性的信息和值。
+ * 使用对象封装信息，而不是使用在map中以属性名存储所有的属性，是为了获得更好的灵活性，
+ * 可以方便通过属性下标处理数据，等方面的优化
  * Object to hold information and value for an individual bean property.
  * Using an object here, rather than just storing all properties in
  * a map keyed by property name, allows for more flexibility, and the

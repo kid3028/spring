@@ -26,6 +26,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * 基于asm解析扫描到的注解元信息构建BeanDefinition
+ * 这个方式不会加载class，而是通过asm去解析class文件
+ *
  * Extension of the {@link org.springframework.beans.factory.support.GenericBeanDefinition}
  * class, based on an ASM ClassReader, with support for annotation metadata exposed
  * through the {@link AnnotatedBeanDefinition} interface.
@@ -52,6 +55,7 @@ public class ScannedGenericBeanDefinition extends GenericBeanDefinition implemen
 
 
 	/**
+	 * 利用metadataReader解析注解元信息
 	 * Create a new ScannedGenericBeanDefinition for the class that the
 	 * given MetadataReader describes.
 	 * @param metadataReader the MetadataReader for the scanned target class

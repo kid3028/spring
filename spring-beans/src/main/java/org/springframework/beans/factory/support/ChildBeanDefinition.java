@@ -22,9 +22,20 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
+ * 具有父类的BeanDefinition
+ * 子BeanDefinition拥有一个父类的依赖
+ *
+ *
+ * 子BeanDefinition将会继承父类的构造器参数、属性、方法复写，并且可以有自己额外的属性
+ * 如果在子BeanDefinition中有init、destroy、静态工厂方法，那么将会覆盖父类的。
+ * depends on, autowire mode, dependency check, singleton, lazy init 等也会覆盖父类
+ *
+ * spring 2.5开始，更好的api式注册BeanDefinition是使用GenericBeanDefinition，它允许动态的设置parent，
+ * 实现更加高效
+ *
  * Bean definition for beans which inherit settings from their parent.
  * Child bean definitions have a fixed dependency on a parent bean definition.
- *
+
  * <p>A child bean definition will inherit constructor argument values,
  * property values and method overrides from the parent, with the option
  * to add new values. If init method, destroy method and/or static factory
