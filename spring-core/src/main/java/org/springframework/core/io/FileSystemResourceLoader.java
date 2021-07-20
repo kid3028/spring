@@ -17,10 +17,14 @@
 package org.springframework.core.io;
 
 /**
+ * 基于文件系统的ResourceLoader实现
  * {@link ResourceLoader} implementation that resolves plain paths as
  * file system resources rather than as class path resources
  * (the latter is {@link DefaultResourceLoader}'s default strategy).
  *
+ * 原始路径将会被转换为相对于当前VM工作目录的相对路径，即使原始路径是绝对路径
+ * 这是为了与Servlet容器的语义保持一致。
+ * 也可以使用 “file:” 前缀来强制使用绝对路径
  * <p><b>NOTE:</b> Plain paths will always be interpreted as relative
  * to the current VM working directory, even if they start with a slash.
  * (This is consistent with the semantics in a Servlet container.)

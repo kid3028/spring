@@ -28,6 +28,9 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
+ * ClassPath版的Resource实现
+ * 使用给定的ClassLoader或者Class来加载资源
+ * 支持对文件的解析，如果classpath资源指向了文件系统，但是不支持jar包中的资源
  * {@link Resource} implementation for class path resources. Uses either a
  * given {@link ClassLoader} or a given {@link Class} for loading resources.
  *
@@ -53,6 +56,9 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 
 
 	/**
+	 * 未指定路径创建ClassPathResource。线程上下文的classLoader将会被使用
+	 * 由于ClassLoader的资源访问方法不能以 / 开头，所以开头的 / 将会被删除
+	 *
 	 * Create a new {@code ClassPathResource} for {@code ClassLoader} usage.
 	 * A leading slash will be removed, as the ClassLoader resource access
 	 * methods will not accept it.
@@ -78,10 +84,12 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	public ClassPathResource(String path, @Nullable ClassLoader classLoader) {
 		Assert.notNull(path, "Path must not be null");
 		String pathToUse = StringUtils.cleanPath(path);
+		// 【注意】开头的斜杆将会被删除
 		if (pathToUse.startsWith("/")) {
 			pathToUse = pathToUse.substring(1);
 		}
 		this.path = pathToUse;
+		// 如果ClassLoader没有指定，将会使用当前线程上下文中的ClassLoader
 		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
 	}
 

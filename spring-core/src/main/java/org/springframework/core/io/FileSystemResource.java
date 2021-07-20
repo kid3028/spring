@@ -37,6 +37,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
+ * FileSystem版的Resource
+ * Spring 5开始文件操作将以Nio进行
  * {@link Resource} implementation for {@code java.io.File} and
  * {@code java.nio.file.Path} handles with a file system target.
  * Supports resolution as a {@code File} and also as a {@code URL}.
@@ -66,6 +68,11 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 
 
 	/**
+	 * 以特定路径创建FileSystemResource
+	 * 【注意】使用{@link #createRelative(String)}获取相对路径时，如果绝对路径不是以 / 结尾，相对路径会有差异。
+	 * eg.
+	 *  C:/dir1/  --> 相对路径下的 dir2  --> C:/dir1/dir2
+	 *  C:/dir1   --> 相对路径下的 dir2  --> C:/dir2
 	 * Create a new {@code FileSystemResource} from a file path.
 	 * <p>Note: When building relative resources via {@link #createRelative},
 	 * it makes a difference whether the specified resource base path here
