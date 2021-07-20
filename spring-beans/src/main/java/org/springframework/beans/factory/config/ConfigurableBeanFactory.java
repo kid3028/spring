@@ -78,6 +78,9 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	void setParentBeanFactory(BeanFactory parentBeanFactory) throws IllegalStateException;
 
 	/**
+	 * 设置加载class的classLoader，该ClassLoader只应用于BeanDefinition
+	 * 默认是当前线程上下文的classLoader
+	 *
 	 * Set the class loader to use for loading bean classes.
 	 * Default is the thread context class loader.
 	 * <p>Note that this class loader will only apply to bean definitions
@@ -98,6 +101,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	ClassLoader getBeanClassLoader();
 
 	/**
+	 * 指定临时ClassLoader，用于类型匹配，仅在aop中使用，一旦BeanFactory启动完成，临时ClassLoader就会被移除
 	 * Specify a temporary ClassLoader to use for type matching purposes.
 	 * Default is none, simply using the standard bean ClassLoader.
 	 * <p>A temporary ClassLoader is usually just specified if
@@ -117,6 +121,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	ClassLoader getTempClassLoader();
 
 	/**
+	 * 是否缓存Bean的元数据——BeanDefinition、beanClass等。默认缓存、
+	 * 如果设置为不缓存，那么每一次创建bean的操作都会重新解析class，可以实现BeanDefinition、class的热更新
 	 * Set whether to cache bean metadata such as given bean definitions
 	 * (in merged fashion) and resolved bean classes. Default is on.
 	 * <p>Turn this flag off to enable hot-refreshing of bean definition objects
@@ -132,6 +138,9 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	boolean isCacheBeanMetadata();
 
 	/**
+	 * 设置表达解析器解析一个定义值
+	 * BeanFactory默认是没有设置解析器的
+	 * ApplicationContext找会设置标准的解析器，解析EL表达式
 	 * Specify the resolution strategy for expressions in bean definition values.
 	 * <p>There is no expression support active in a BeanFactory by default.
 	 * An ApplicationContext will typically set a standard expression strategy
@@ -148,6 +157,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	BeanExpressionResolver getBeanExpressionResolver();
 
 	/**
+	 * 设置属性转换器
 	 * Specify a Spring 3.0 ConversionService to use for converting
 	 * property values, as an alternative to JavaBeans PropertyEditors.
 	 * @since 3.0
@@ -162,6 +172,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	ConversionService getConversionService();
 
 	/**
+	 * 属性编辑器注册
+	 * 线程安全
 	 * Add a PropertyEditorRegistrar to be applied to all bean creation processes.
 	 * <p>Such a registrar creates new PropertyEditor instances and registers them
 	 * on the given registry, fresh for each bean creation attempt. This avoids
@@ -172,6 +184,9 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	void addPropertyEditorRegistrar(PropertyEditorRegistrar registrar);
 
 	/**
+	 * 注册属性编辑器
+	 * 这个方法注册的编辑器是共享的，需要进行同步保证线程安全
+	 * 建议使用{@link #addPropertyEditorRegistrar(PropertyEditorRegistrar)} 方法，这个方法不需要进行同步操作
 	 * Register the given custom property editor for all properties of the
 	 * given type. To be invoked during factory configuration.
 	 * <p>Note that this method will register a shared custom editor instance;
@@ -191,6 +206,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	void copyRegisteredEditorsTo(PropertyEditorRegistry registry);
 
 	/**
+	 * 设置自定义的类型转换器，BeanFactory将使用它进行属性值、构造器参数的转换。
+	 * 类型转换器将会替换掉默认的属性编辑器、自定义的属性编辑器和editor registrars
 	 * Set a custom type converter that this BeanFactory should use for converting
 	 * bean property values, constructor argument values, etc.
 	 * <p>This will override the default PropertyEditor mechanism and hence make
@@ -211,6 +228,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	TypeConverter getTypeConverter();
 
 	/**
+	 * 添加字符串值解析器
 	 * Add a String resolver for embedded values such as annotation attributes.
 	 * @param valueResolver the String resolver to apply to embedded values
 	 * @since 3.0
@@ -225,6 +243,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	boolean hasEmbeddedValueResolver();
 
 	/**
+	 * 使用解析器解析字符串值
 	 * Resolve the given embedded value, e.g. an annotation attribute.
 	 * @param value the value to resolve
 	 * @return the resolved value (may be the original value as-is)
@@ -234,6 +253,9 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	String resolveEmbeddedValue(String value);
 
 	/**
+	 * 添加BeanPostProcessor，将在bean创建时使用。
+	 * PostProcessor按照注册的顺序进行调用，任何排序标记都不能改变执行顺序，包括{@link org.springframework.core.Ordered}
+	 * 如果BeanPostProcessor以bean的形式注册到了ioc容器中，将会被自动探测到，并在自动注册进来
 	 * Add a new BeanPostProcessor that will get applied to beans created
 	 * by this factory. To be invoked during factory configuration.
 	 * <p>Note: Post-processors submitted here will be applied in the order of
@@ -246,6 +268,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	void addBeanPostProcessor(BeanPostProcessor beanPostProcessor);
 
 	/**
+	 *
 	 * Return the current number of registered BeanPostProcessors, if any.
 	 */
 	int getBeanPostProcessorCount();

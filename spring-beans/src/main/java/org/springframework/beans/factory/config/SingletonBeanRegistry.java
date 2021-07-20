@@ -16,6 +16,9 @@
 
 package org.springframework.beans.factory.config;
 
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.lang.Nullable;
 
 /**
@@ -38,6 +41,10 @@ import org.springframework.lang.Nullable;
 public interface SingletonBeanRegistry {
 
 	/**
+	 * 注册已经创建完成的bean作为单例
+	 * 实例应该已经彻底完成初始化，registry不会执行任何初始化回调，包括{@link InitializingBean#afterPropertiesSet()}
+	 * 也不会执行任何的销毁回调，例如{@link DisposableBean#destroy()}
+	 *
 	 * Register the given existing object as singleton in the bean registry,
 	 * under the given bean name.
 	 * <p>The given instance is supposed to be fully initialized; the registry
@@ -61,6 +68,9 @@ public interface SingletonBeanRegistry {
 	void registerSingleton(String beanName, Object singletonObject);
 
 	/**
+	 * 获取单例bean
+	 * 如果bean还没有实例化完，那么也不会返回
+	 * 这个方法主要是在手动注册bean的场景下使用
 	 * Return the (raw) singleton object registered under the given name.
 	 * <p>Only checks already instantiated singletons; does not return an Object
 	 * for singleton bean definitions which have not been instantiated yet.
@@ -77,6 +87,11 @@ public interface SingletonBeanRegistry {
 	Object getSingleton(String beanName);
 
 	/**
+	 * 检查BeanFactory中是否包含单例bean
+	 * 仅已经完成初始化的bean会被检查到，没有初始化完成的bean将返回false
+	 * 主要用来检查手动注册的bean，也可以用来判断一个bean是否已经实例化完成
+	 *
+	 * 类似地，如果需要检查是否有某个BeanDefinition，可以使用{@link ListableBeanFactory#containsBeanDefinition(String)}
 	 * Check if this registry contains a singleton instance with the given name.
 	 * <p>Only checks already instantiated singletons; does not return {@code true}
 	 * for singleton bean definitions which have not been instantiated yet.
@@ -101,6 +116,7 @@ public interface SingletonBeanRegistry {
 	boolean containsSingleton(String beanName);
 
 	/**
+	 * 返回所有注册的单例bean的名称。
 	 * Return the names of singleton beans registered in this registry.
 	 * <p>Only checks already instantiated singletons; does not return names
 	 * for singleton bean definitions which have not been instantiated yet.
@@ -115,6 +131,7 @@ public interface SingletonBeanRegistry {
 	String[] getSingletonNames();
 
 	/**
+	 * 注册的单例数量
 	 * Return the number of singleton beans registered in this registry.
 	 * <p>Only checks already instantiated singletons; does not count
 	 * singleton bean definitions which have not been instantiated yet.

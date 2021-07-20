@@ -28,6 +28,16 @@ import org.springframework.lang.Nullable;
  *  xml加载
  *    BeanFactory factory = new XmlBeanFactory(new ClassPathResource("beanFactory.xml"))
  *    ApplicationContext ctx = new ClassPathXmlApplicationContext("applicationContext.xml")
+ *
+ * 应用配置的通用接口。当应用启动后ctx是只读的，但是如果实现支持的情况下也可以重新加载
+ *
+ * ApplicationContext提供了如下能力：
+ * 1、通过实现ListableBeanFactory拥有访问应用组件的工厂方法。
+ * 2、通过实现ResourceLoader可以以通用的方式加载文件
+ * 3、通过实现ApplicationEventPublisher实现事件监听
+ * 4、通过实现MessageSource实现国际化
+ * 5、继承父上下文。子上下文中定义优先于父上下文。例如在web环境下，父上下文被整个web应用程序使用，
+ * 但每一个servlet可以有自己的子上下文，并且互相独立。
  * Central interface to provide configuration for an application.
  * This is read-only while the application is running, but may be
  * reloaded if the implementation supports this.

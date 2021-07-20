@@ -68,46 +68,53 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	private static final int SUPPRESSED_EXCEPTIONS_LIMIT = 100;
 
 
-	/** Cache of singleton objects: bean name to bean instance. */
+	/** 单例bean的缓存集合：beanName -> singleton实例。Cache of singleton objects: bean name to bean instance. */
 	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
-	/** Cache of singleton factories: bean name to ObjectFactory. */
+	/** 工厂bean集合。Cache of singleton factories: bean name to ObjectFactory. */
 	private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
 
-	/** Cache of early singleton objects: bean name to bean instance. */
+	/** 早期bean集合。Cache of early singleton objects: bean name to bean instance. */
 	private final Map<String, Object> earlySingletonObjects = new ConcurrentHashMap<>(16);
 
 	/** Set of registered singletons, containing the bean names in registration order. */
 	private final Set<String> registeredSingletons = new LinkedHashSet<>(256);
 
-	/** Names of beans that are currently in creation. */
+	/** 正在创建中的bean的名称集合。Names of beans that are currently in creation. */
 	private final Set<String> singletonsCurrentlyInCreation =
 			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
-	/** Names of beans currently excluded from in creation checks. */
+	/** 创建检查中排出的bean集合。Names of beans currently excluded from in creation checks. */
 	private final Set<String> inCreationCheckExclusions =
 			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
-	/** Collection of suppressed Exceptions, available for associating related causes. */
+	/** 抑制掉的异常集合。Collection of suppressed Exceptions, available for associating related causes. */
 	@Nullable
 	private Set<Exception> suppressedExceptions;
 
-	/** Flag that indicates whether we're currently within destroySingletons. */
+	/** 单例bean进入销毁中。Flag that indicates whether we're currently within destroySingletons. */
 	private boolean singletonsCurrentlyInDestruction = false;
 
-	/** Disposable bean instances: bean name to disposable instance. */
+	/** DisposableBean集合  Disposable bean instances: bean name to disposable instance. */
 	private final Map<String, Object> disposableBeans = new LinkedHashMap<>();
 
-	/** Map between containing bean names: bean name to Set of bean names that the bean contains. */
+	/** 嵌套bean集合。外层beanName --> 内层beanName集合。 Map between containing bean names: bean name to Set of bean names that the bean contains. */
 	private final Map<String, Set<String>> containedBeanMap = new ConcurrentHashMap<>(16);
 
-	/** Map between dependent bean names: bean name to Set of dependent bean names. */
+	/** 依赖bean集合。beanName --> 依赖beanName集合。Map between dependent bean names: bean name to Set of dependent bean names. */
 	private final Map<String, Set<String>> dependentBeanMap = new ConcurrentHashMap<>(64);
 
 	/** Map between depending bean names: bean name to Set of bean names for the bean's dependencies. */
 	private final Map<String, Set<String>> dependenciesForBeanMap = new ConcurrentHashMap<>(64);
 
 
+	/**
+	 * 注册已经初始化完成的单例bean
+	 * beanName不能重复
+	 * @param beanName the name of the bean
+	 * @param singletonObject the existing singleton object
+	 * @throws IllegalStateException
+	 */
 	@Override
 	public void registerSingleton(String beanName, Object singletonObject) throws IllegalStateException {
 		Assert.notNull(beanName, "Bean name must not be null");
@@ -123,6 +130,12 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	/**
+	 * 缓存已初始化完成的bean
+	 *  add singletonObjects
+	 *  add registeredSingleton
+	 *  del singletonFactories
+	 *  del earlySingletonObjects
+	 *
 	 * Add the given singleton object to the singleton cache of this factory.
 	 * <p>To be called for eager registration of singletons.
 	 * @param beanName the name of the bean
@@ -138,6 +151,8 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	/**
+	 * 注册工厂bean用于构建单例bean
+	 * 仅早期bean创建会被调用，例如解决循环依赖
 	 * Add the given singleton factory for building the specified singleton
 	 * if necessary.
 	 * <p>To be called for eager registration of singletons, e.g. to be able to
