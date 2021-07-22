@@ -55,10 +55,24 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
+ * ApplicationContext的抽象实现。
+ * 不要把他当做存储来使用
+ * 实现了ApplicationContext一些通用的方法，使用率模板设计模式，需要具体的子类来实现抽象方法
  * Abstract implementation of the {@link org.springframework.context.ApplicationContext}
  * interface. Doesn't mandate the type of storage used for configuration; simply
  * implements common context functionality. Uses the Template Method design pattern,
  * requiring concrete subclasses to implement abstract methods.
+ *
+ * 与普通的BeanFactory不同，ApplicationContext应该能检测其内部持有的BeanFactory的中一些特殊Bean，
+ * eg.
+ *   BeanFactoryPostProcessor
+ *   BeanPostProcessor
+ *   ApplicationListener
+ *
+ *   MessageSource --> beanName = messageSource
+ *   ApplicationEventMulticaster --> beanName = applicationEventMulticaster 默认实现为SimpleApplicationEventMulticaster
+ *
+ *   通过继承DefaultResourceLoader来实现资源加载，
  *
  * <p>In contrast to a plain BeanFactory, an ApplicationContext is supposed
  * to detect special beans defined in its internal bean factory:
@@ -100,6 +114,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		implements ConfigurableApplicationContext {
 
 	/**
+	 * 指定MessageSource在IoC容器中名称
+	 * 如果没有可以使用的MessageSource，那么国际化处理将会委派给父容器
 	 * Name of the MessageSource bean in the factory.
 	 * If none is supplied, message resolution is delegated to the parent.
 	 * @see MessageSource
@@ -107,6 +123,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public static final String MESSAGE_SOURCE_BEAN_NAME = "messageSource";
 
 	/**
+	 * 指定LifecycleProcessor在IoC容器中的名称
+	 * 如果没有指定，将使用DefaultLifecycleProcessor
 	 * Name of the LifecycleProcessor bean in the factory.
 	 * If none is supplied, a DefaultLifecycleProcessor is used.
 	 * @see org.springframework.context.LifecycleProcessor
@@ -115,6 +133,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public static final String LIFECYCLE_PROCESSOR_BEAN_NAME = "lifecycleProcessor";
 
 	/**
+	 * 指定ApplicationEventMulticaster在IoC容器中的名称。
+	 * 如果没有指定，将使用SimpleApplicationEventMulticaster
 	 * Name of the ApplicationEventMulticaster bean in the factory.
 	 * If none is supplied, a default SimpleApplicationEventMulticaster is used.
 	 * @see org.springframework.context.event.ApplicationEventMulticaster
