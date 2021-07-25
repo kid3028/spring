@@ -16,11 +16,6 @@
 
 package org.springframework.context.support;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -33,13 +28,21 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
+
 /**
+ * ApplicationContext的通用实现，内部持有一个DefaultListableBeanFactory，并且没有限制BeanDefinition的格式。
+ * 实现了BeanDefinitionRegistry接口
  * Generic ApplicationContext implementation that holds a single internal
  * {@link org.springframework.beans.factory.support.DefaultListableBeanFactory}
  * instance and does not assume a specific bean definition format. Implements
@@ -182,6 +185,10 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	}
 
 	/**
+	 * 指定ResourceLoader
+	 * 如果指定了ResourceLoader，上下文所有的{@link #getResource(String)}操作将委托给ResourceLoader
+	 * 如果没有指定，默认的ResourceLoader {@link DefaultResourceLoader}将会被使用。
+	 * 指定ResourceLoader是为了以指定的方法解析资源路径
 	 * Set a ResourceLoader to use for this context. If set, the context will
 	 * delegate all {@code getResource} calls to the given ResourceLoader.
 	 * If not set, default resource loading will apply.

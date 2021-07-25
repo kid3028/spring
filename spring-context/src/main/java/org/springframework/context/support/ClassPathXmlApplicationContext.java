@@ -24,11 +24,14 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * 标准的xml应用上下文，从classpath下加载应用上下文定义，解析原始路径作为classpath资源名称。
  * Standalone XML application context, taking the context definition files
  * from the class path, interpreting plain paths as class path resource names
  * that include the package path (e.g. "mypackage/myresource.txt"). Useful for
  * test harnesses as well as for application contexts embedded within JARs.
  *
+ * 配置路径可以通过{@link #getConfigLocations()}进行覆盖
+ * 路径可以使用一个具体的完整路径，也可以是ant风格的，
  * <p>The config location defaults can be overridden via {@link #getConfigLocations},
  * Config locations can either denote concrete files like "/myfiles/context.xml"
  * or Ant-style patterns like "/myfiles/*-context.xml" (see the

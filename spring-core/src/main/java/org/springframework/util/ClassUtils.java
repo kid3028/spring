@@ -16,30 +16,14 @@
 
 package org.springframework.util;
 
+import org.springframework.lang.Nullable;
+
 import java.beans.Introspector;
 import java.io.Closeable;
 import java.io.Externalizable;
 import java.io.Serializable;
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Proxy;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
-import org.springframework.lang.Nullable;
+import java.lang.reflect.*;
+import java.util.*;
 
 /**
  * Miscellaneous {@code java.lang.Class} utility methods.
@@ -332,6 +316,8 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * class是否存在且可以被加载。
+	 * 如果class或者它依赖的class不存在，或者不能被加载，将返回false
 	 * Determine whether the {@link Class} identified by the supplied name is present
 	 * and can be loaded. Will return {@code false} if either the class or
 	 * one of its dependencies is not present or cannot be loaded.

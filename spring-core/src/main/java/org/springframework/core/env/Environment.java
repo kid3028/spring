@@ -17,6 +17,20 @@
 package org.springframework.core.env;
 
 /**
+ * 当前应用上下环境变量接口。
+ * 应用环境变量主要有两个方面：profiles、properties
+ * 与属性访问相关的方法通过PropertyResolver实现
+ *
+ * profile是对BeanDefinition的一个命名和逻辑分组，仅当给定的profile被激活，这个profile下的BeanDefinition才会向容器注册。
+ * 可以通过xml或者注解将一个bean标记到某个profile下。
+ * 可以通过{@link #getActiveProfiles()} {@link #getDefaultProfiles()} 来判断哪些profile是激活的、默认的
+ *
+ * properties在所有应用中扮演着非常重要的角色，可能来源于properties配置文件、Jvm系统配置、系统环境变量、JNDI、servlet上下文参数、特殊属性对象、map等。
+ * Environment相对于Properties，提供了一个便利的接口来解析、访问配置属性源
+ *
+ * IoC容器管理的bean可以通过实现EnvironmentAware接口或者依赖注入Environment的方式来获取profile的状态、解析property
+ *
+ * 在正常情况下，应用不应该直接与Environment对象交互，而应该通过${...}占位符形式注入环境变量信息
  * Interface representing the environment in which the current application is running.
  * Models two key aspects of the application environment: <em>profiles</em> and
  * <em>properties</em>. Methods related to property access are exposed via the
@@ -71,6 +85,11 @@ package org.springframework.core.env;
 public interface Environment extends PropertyResolver {
 
 	/**
+	 * 返回被显式激活的profile
+	 * 通过显式将 {@linkplain AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME "spring.profiles.active"}设置系统环境变量
+	 * 或者通过显式调用{@link ConfigurableEnvironment#setActiveProfiles(String...)}
+	 *
+	 * 如果profile没有配置显式指定，将通过{@link #getDefaultProfiles()} 来激活默认的profile
 	 * Return the set of profiles explicitly made active for this environment. Profiles
 	 * are used for creating logical groupings of bean definitions to be registered
 	 * conditionally, for example based on deployment environment. Profiles can be
@@ -86,6 +105,7 @@ public interface Environment extends PropertyResolver {
 	String[] getActiveProfiles();
 
 	/**
+	 * 返回默认的profile
 	 * Return the set of profiles to be active by default when no active profiles have
 	 * been set explicitly.
 	 * @see #getActiveProfiles
@@ -95,6 +115,9 @@ public interface Environment extends PropertyResolver {
 	String[] getDefaultProfiles();
 
 	/**
+	 * 返回一个或者多个给定的profiles是否被激活。
+	 *
+	 * 支持 ! 逻辑操作符，  !xx 表示 xx profile没有激活
 	 * Return whether one or more of the given profiles is active or, in the case of no
 	 * explicit active profiles, whether one or more of the given profiles is included in
 	 * the set of default profiles. If a profile begins with '!' the logic is inverted,

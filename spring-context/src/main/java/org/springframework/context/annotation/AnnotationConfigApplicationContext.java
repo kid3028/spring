@@ -16,8 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import java.util.function.Supplier;
-
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -26,7 +24,13 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import java.util.function.Supplier;
+
 /**
+ * 独立的应用上下文，将组件类作为输入（通常是@Configuration、@Component、@Inject）
+ *
+ * 可以通过{@link #register(Class[])}方法一个一个地注册，也可以使用{@link #scan(String...)}扫描classpath
+ *
  * Standalone application context, accepting <em>component classes</em> as input &mdash;
  * in particular {@link Configuration @Configuration}-annotated classes, but also plain
  * {@link org.springframework.stereotype.Component @Component} types and JSR-330 compliant

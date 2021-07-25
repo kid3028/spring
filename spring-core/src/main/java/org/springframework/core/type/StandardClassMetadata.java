@@ -16,14 +16,15 @@
 
 package org.springframework.core.type;
 
-import java.lang.reflect.Modifier;
-import java.util.LinkedHashSet;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import java.lang.reflect.Modifier;
+import java.util.LinkedHashSet;
+
 /**
+ * 通过自省方式获取class元信息
  * {@link ClassMetadata} implementation that uses standard reflection
  * to introspect a given {@code Class}.
  *
@@ -36,6 +37,7 @@ public class StandardClassMetadata implements ClassMetadata {
 
 
 	/**
+	 * 创建class的元信息
 	 * Create a new StandardClassMetadata wrapper for the given Class.
 	 * @param introspectedClass the Class to introspect
 	 */

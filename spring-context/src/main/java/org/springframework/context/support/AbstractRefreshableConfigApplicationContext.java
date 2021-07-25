@@ -24,6 +24,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
+ * AbstractRefreshableApplicationContext的子类，添加量对特定配置路径的处理。
+ * 是{@link ClassPathXmlApplicationContext} {@link FileSystemXmlApplicationContext}
+ * {@link XmlWebApplicationContext}的基类
  * {@link AbstractRefreshableApplicationContext} subclass that adds common handling
  * of specified config locations. Serves as base class for XML-based application
  * context implementations such as {@link ClassPathXmlApplicationContext} and
@@ -116,6 +119,8 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	}
 
 	/**
+	 * 解析给定的路径。
+	 * 会使用Environment中的属性来替换路径上存在的占位符。
 	 * Resolve the given path, replacing placeholders with corresponding
 	 * environment property values if necessary. Applied to config locations.
 	 * @param path the original file path
@@ -146,6 +151,7 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	}
 
 	/**
+	 * 如果应用上下文还没有刷新，则触发refresh
 	 * Triggers {@link #refresh()} if not refreshed in the concrete context's
 	 * constructor already.
 	 */

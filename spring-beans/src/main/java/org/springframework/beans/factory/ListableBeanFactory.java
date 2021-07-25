@@ -17,6 +17,7 @@
 package org.springframework.beans.factory;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 
@@ -25,6 +26,9 @@ import java.util.Map;
 
 /**
  * 根据各种条件获取bean的配置清单
+ * 扩展BeanFactory接口，可以实现所有bean实例的枚举，而不是通过beanName一个一个地查找。
+ *
+ *
  * Extension of the {@link BeanFactory} interface to be implemented by bean factories
  * that can enumerate all their bean instances, rather than attempting bean lookup
  * by name one by one as requested by clients. BeanFactory implementations that
@@ -36,6 +40,9 @@ import java.util.Map;
  * defined in the current factory. Use the {@link BeanFactoryUtils} helper class
  * to consider beans in ancestor factories too.
  *
+ * 这个接口下的方法将会检查BeanFactory中的BeanDefinition。
+ * 它将忽略任何手动注册的单例bean，例如{@link ConfigurableBeanFactory#registerSingleton(String, Object)}
+ * 除{@link #getBeansOfType(Class)}会包含手动注册的bean。
  * <p>The methods in this interface will just respect bean definitions of this factory.
  * They will ignore any singleton beans that have been registered by other means like
  * {@link org.springframework.beans.factory.config.ConfigurableBeanFactory}'s
@@ -46,6 +53,8 @@ import java.util.Map;
  * scenarios, all beans will be defined by external bean definitions anyway, so most
  * applications don't need to worry about this differentiation.
  *
+ * 除{@link #getBeanDefinitionCount()} {@link #containsBeanDefinition(String)} 外，
+ * 其他方法很少被调用
  * <p><b>NOTE:</b> With the exception of {@code getBeanDefinitionCount}
  * and {@code containsBeanDefinition}, the methods in this interface
  * are not designed for frequent invocation. Implementations may be slow.
@@ -59,6 +68,8 @@ import java.util.Map;
 public interface ListableBeanFactory extends BeanFactory {
 
 	/**
+	 * 检查是否包含某个BeanDefinition
+	 * 不包含父上下文中的、手动注册的bean
 	 * Check if this bean factory contains a bean definition with the given name.
 	 * <p>Does not consider any hierarchy this factory may participate in,
 	 * and ignores any singleton beans that have been registered by
@@ -70,6 +81,8 @@ public interface ListableBeanFactory extends BeanFactory {
 	boolean containsBeanDefinition(String beanName);
 
 	/**
+	 * BeanFactory中注册的BeanDefinition的数量，
+	 * 不包含父上下文中的、手动注册的
 	 * Return the number of beans defined in the factory.
 	 * <p>Does not consider any hierarchy this factory may participate in,
 	 * and ignores any singleton beans that have been registered by
@@ -79,6 +92,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	int getBeanDefinitionCount();
 
 	/**
+	 * 所有BeanDefinition的名称
 	 * Return the names of all beans defined in this factory.
 	 * <p>Does not consider any hierarchy this factory may participate in,
 	 * and ignores any singleton beans that have been registered by
@@ -89,6 +103,8 @@ public interface ListableBeanFactory extends BeanFactory {
 	String[] getBeanDefinitionNames();
 
 	/**
+	 * 返回给定类型下beanNames
+	 * 包含子类，BeanDefinition定义的类型，FactoryBean#getObjectType方法返回的类型。
 	 * Return the names of beans matching the given type (including subclasses),
 	 * judging from either bean definitions or the value of {@code getObjectType}
 	 * in the case of FactoryBeans.

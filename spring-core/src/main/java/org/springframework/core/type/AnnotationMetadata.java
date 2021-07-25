@@ -19,6 +19,7 @@ package org.springframework.core.type;
 import java.util.Set;
 
 /**
+ * 对指定类注解信息的抽象访问，不需要加载class
  * Interface that defines abstract access to the annotations of a specific
  * class, in a form that does not require that class to be loaded yet.
  *
@@ -34,6 +35,7 @@ import java.util.Set;
 public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata {
 
 	/**
+	 * 获取类上所有注解所属的类全限定名
 	 * Get the fully qualified class names of all annotation types that
 	 * are <em>present</em> on the underlying class.
 	 * @return the annotation type names
@@ -41,6 +43,7 @@ public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata
 	Set<String> getAnnotationTypes();
 
 	/**
+	 * 获取给定注解上元注解的类全限定名
 	 * Get the fully qualified class names of all meta-annotation types that
 	 * are <em>present</em> on the given annotation type on the underlying class.
 	 * @param annotationName the fully qualified class name of the meta-annotation
@@ -50,6 +53,7 @@ public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata
 	Set<String> getMetaAnnotationTypes(String annotationName);
 
 	/**
+	 * 底层类是否存在指定注解
 	 * Determine whether an annotation of the given type is <em>present</em> on
 	 * the underlying class.
 	 * @param annotationName the fully qualified class name of the annotation
@@ -59,6 +63,7 @@ public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata
 	boolean hasAnnotation(String annotationName);
 
 	/**
+	 * 底层类是否被指定元注解注解
 	 * Determine whether the underlying class has an annotation that is itself
 	 * annotated with the meta-annotation of the given type.
 	 * @param metaAnnotationName the fully qualified class name of the
@@ -68,6 +73,7 @@ public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata
 	boolean hasMetaAnnotation(String metaAnnotationName);
 
 	/**
+	 * 底层类的方法中是否存在被指定注解标记的
 	 * Determine whether the underlying class has any methods that are
 	 * annotated (or meta-annotated) with the given annotation type.
 	 * @param annotationName the fully qualified class name of the annotation
@@ -76,6 +82,8 @@ public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata
 	boolean hasAnnotatedMethods(String annotationName);
 
 	/**
+	 * 获取所有被注解、元注解标记的方法
+	 *
 	 * Retrieve the method metadata for all methods that are annotated
 	 * (or meta-annotated) with the given annotation type.
 	 * <p>For any returned method, {@link MethodMetadata#isAnnotated} will

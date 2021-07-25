@@ -16,9 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import java.lang.annotation.Annotation;
-import java.util.function.Supplier;
-
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
@@ -32,6 +29,9 @@ import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.lang.annotation.Annotation;
+import java.util.function.Supplier;
 
 /**
  * Convenient adapter for programmatic registration of bean classes.
@@ -97,6 +97,8 @@ public class AnnotatedBeanDefinitionReader {
 	}
 
 	/**
+	 * 设置Environment，将在@Conditional组件中被使用，来判断是否否应该注册
+	 * 默认StandardEnvironment
 	 * Set the {@code Environment} to use when evaluating whether
 	 * {@link Conditional @Conditional}-annotated component classes should be registered.
 	 * <p>The default is a {@link StandardEnvironment}.
@@ -107,6 +109,8 @@ public class AnnotatedBeanDefinitionReader {
 	}
 
 	/**
+	 * 设置beanName生成器
+	 * 默认 AnnotationBeanNameGenerator
 	 * Set the {@code BeanNameGenerator} to use for detected bean classes.
 	 * <p>The default is a {@link AnnotationBeanNameGenerator}.
 	 */
@@ -115,6 +119,8 @@ public class AnnotatedBeanDefinitionReader {
 	}
 
 	/**
+	 * bean作用域解析器
+	 * 默认AnnotationScopeMetadataResolver
 	 * Set the {@code ScopeMetadataResolver} to use for registered component classes.
 	 * <p>The default is an {@link AnnotationScopeMetadataResolver}.
 	 */
@@ -125,6 +131,8 @@ public class AnnotatedBeanDefinitionReader {
 
 
 	/**
+	 * 注册一个或者多个组件
+	 * 对register方法的调用应该是幂等的，重复注册相同的组件类不应该有任何副作用
 	 * Register one or more component classes to be processed.
 	 * <p>Calls to {@code register} are idempotent; adding the same
 	 * component class more than once has no additional effect.
@@ -138,6 +146,7 @@ public class AnnotatedBeanDefinitionReader {
 	}
 
 	/**
+	 * 将指定class注册为一个bean
 	 * Register a bean from the given bean class, deriving its metadata from
 	 * class-declared annotations.
 	 * @param beanClass the class of the bean
@@ -199,12 +208,14 @@ public class AnnotatedBeanDefinitionReader {
 	}
 
 	/**
+	 * 将指定的class注册为一个bean，从class中声明的注解获取元信息
 	 * Register a bean from the given bean class, deriving its metadata from
 	 * class-declared annotations.
-	 * @param beanClass the class of the bean
+	 *
+	 * @param beanClass the class of the bean  注册的class
 	 * @param instanceSupplier a callback for creating an instance of the bean
-	 * (may be {@code null})
-	 * @param name an explicit name for the bean
+	 * (may be {@code null})   instanceSupplier非空时，将会作为回调来进行bean的创建
+	 * @param name an explicit name for the bean  显式指定的bean的名称
 	 * @param qualifiers specific qualifier annotations to consider, if any,
 	 * in addition to qualifiers at the bean class level
 	 * @param definitionCustomizers one or more callbacks for customizing the
@@ -224,6 +235,7 @@ public class AnnotatedBeanDefinitionReader {
 		abd.setScope(scopeMetadata.getScopeName());
 		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
 
+		// 处理普通BeanDefinition注解 @Lazy @Primary @Dependson @Role @Description
 		AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);
 		if (qualifiers != null) {
 			for (Class<? extends Annotation> qualifier : qualifiers) {

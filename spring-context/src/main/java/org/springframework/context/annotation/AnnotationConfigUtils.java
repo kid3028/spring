@@ -16,15 +16,13 @@
 
 package org.springframework.context.annotation;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.support.AutowireCandidateResolver;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -38,12 +36,22 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+
 /**
+ * 工具类，可以方便地注册
+ * {@link BeanPostProcessor}
+ * {@link BeanFactoryPostProcessor}
+ * {@link AutowireCandidateResolver}
+ *
  * Utility class that allows for convenient registration of common
- * {@link org.springframework.beans.factory.config.BeanPostProcessor} and
- * {@link org.springframework.beans.factory.config.BeanFactoryPostProcessor}
+ * {@link BeanPostProcessor} and
+ * {@link BeanFactoryPostProcessor}
  * definitions for annotation-based configuration. Also registers a common
- * {@link org.springframework.beans.factory.support.AutowireCandidateResolver}.
+ * {@link AutowireCandidateResolver}.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
@@ -59,13 +67,16 @@ import org.springframework.util.ClassUtils;
  */
 public abstract class AnnotationConfigUtils {
 
+	// ===================指定特定bean的名称，如果要覆盖，需要使用同名====================
 	/**
+	 * ConfigurationClassPostProcessor
 	 * The bean name of the internally managed Configuration annotation processor.
 	 */
 	public static final String CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME =
 			"org.springframework.context.annotation.internalConfigurationAnnotationProcessor";
 
 	/**
+	 * BeanNameGenerator的名称
 	 * The bean name of the internally managed BeanNameGenerator for use when processing
 	 * {@link Configuration} classes. Set by {@link AnnotationConfigApplicationContext}
 	 * and {@code AnnotationConfigWebApplicationContext} during bootstrap in order to make
@@ -77,6 +88,7 @@ public abstract class AnnotationConfigUtils {
 			"org.springframework.context.annotation.internalConfigurationBeanNameGenerator";
 
 	/**
+	 * AutowiredAnnotationBeanPostProcessor
 	 * The bean name of the internally managed Autowired annotation processor.
 	 */
 	public static final String AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME =
@@ -91,12 +103,14 @@ public abstract class AnnotationConfigUtils {
 			"org.springframework.context.annotation.internalRequiredAnnotationProcessor";
 
 	/**
+	 * COMMON_ANNOTATION_PROCESSOR_BEAN_NAME
 	 * The bean name of the internally managed JSR-250 annotation processor.
 	 */
 	public static final String COMMON_ANNOTATION_PROCESSOR_BEAN_NAME =
 			"org.springframework.context.annotation.internalCommonAnnotationProcessor";
 
 	/**
+	 * PersistenceAnnotationBeanPostProcessor
 	 * The bean name of the internally managed JPA annotation processor.
 	 */
 	public static final String PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME =
@@ -106,12 +120,14 @@ public abstract class AnnotationConfigUtils {
 			"org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor";
 
 	/**
+	 * EventListenerMethodProcessor
 	 * The bean name of the internally managed @EventListener annotation processor.
 	 */
 	public static final String EVENT_LISTENER_PROCESSOR_BEAN_NAME =
 			"org.springframework.context.event.internalEventListenerProcessor";
 
 	/**
+	 * DefaultEventListenerFactory
 	 * The bean name of the internally managed EventListenerFactory.
 	 */
 	public static final String EVENT_LISTENER_FACTORY_BEAN_NAME =
@@ -130,6 +146,7 @@ public abstract class AnnotationConfigUtils {
 
 
 	/**
+	 * 向registry中注册所有相关的后置处理
 	 * Register all relevant annotation post processors in the given registry.
 	 * @param registry the registry to operate on
 	 */
@@ -138,6 +155,16 @@ public abstract class AnnotationConfigUtils {
 	}
 
 	/**
+	 * 如果底层相关的一些bean不存在，那么注册他们
+	 * AnnotationAwareOrderComparator
+	 * ContextAnnotationAutowireCandidateResolver
+	 * ConfigurationClassPostProcessor
+	 * AutowiredAnnotationBeanPostProcessor
+	 * CommonAnnotationBeanPostProcessor
+	 * PersistenceAnnotationBeanPostProcessor
+	 * EventListenerMethodProcessor
+	 * internalEventListenerFactory --> DefaultEventListenerFactory
+	 *
 	 * Register all relevant annotation post processors in the given registry.
 	 * @param registry the registry to operate on
 	 * @param source the configuration source element (already extracted)
@@ -234,7 +261,19 @@ public abstract class AnnotationConfigUtils {
 		processCommonDefinitionAnnotations(abd, abd.getMetadata());
 	}
 
+	/**
+	 * 对普通注解的处理
+	 * @Lazy
+	 * @Primary
+	 * @DependsOn
+	 * @Role
+	 * @Description
+	 *
+	 * @param abd
+	 * @param metadata
+	 */
 	static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd, AnnotatedTypeMetadata metadata) {
+		// 延迟加载属性
 		AnnotationAttributes lazy = attributesFor(metadata, Lazy.class);
 		if (lazy != null) {
 			abd.setLazyInit(lazy.getBoolean("value"));

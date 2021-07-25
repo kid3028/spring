@@ -167,10 +167,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	@Nullable
 	private ConfigurableEnvironment environment;
 
-	/** BeanFactoryPostProcessors to apply on refresh. */
+	/** BeanFactoryPostProcessor集合 BeanFactoryPostProcessors to apply on refresh. */
 	private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
 
-	/** System time in milliseconds when this context started. */
+	/** 上下文启动时间 System time in milliseconds when this context started. */
 	private long startupDate;
 
 	/** Flag that indicates whether this context is currently active. */
@@ -179,14 +179,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/** Flag that indicates whether this context has been closed already. */
 	private final AtomicBoolean closed = new AtomicBoolean();
 
-	/** Synchronization monitor for the "refresh" and "destroy". */
+	/** refresh、destroy的监视锁 Synchronization monitor for the "refresh" and "destroy". */
 	private final Object startupShutdownMonitor = new Object();
 
 	/** Reference to the JVM shutdown hook, if registered. */
 	@Nullable
 	private Thread shutdownHook;
 
-	/** ResourcePatternResolver used by this context. */
+	/** 资源路径解析器，默认PathMatchingResourcePatternResolver ResourcePatternResolver used by this context. */
 	private ResourcePatternResolver resourcePatternResolver;
 
 	/** LifecycleProcessor for managing the lifecycle of beans within this context. */
@@ -201,14 +201,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	@Nullable
 	private ApplicationEventMulticaster applicationEventMulticaster;
 
-	/** Statically specified listeners. */
+	/** 事件监听器 Statically specified listeners. */
 	private final Set<ApplicationListener<?>> applicationListeners = new LinkedHashSet<>();
 
-	/** Local listeners registered before refresh. */
+	/** refresh前注册的事件监听器 Local listeners registered before refresh. */
 	@Nullable
 	private Set<ApplicationListener<?>> earlyApplicationListeners;
 
-	/** ApplicationEvents published before the multicaster setup. */
+	/** 事件广播器启动前产生的事件 ApplicationEvents published before the multicaster setup. */
 	@Nullable
 	private Set<ApplicationEvent> earlyApplicationEvents;
 
@@ -285,6 +285,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 * 设置上下文环境变量。
+	 * 环境变量默认值由{@link #createEnvironment()}设置。
+	 * 可以通过调用这个方法来配置环境变量，但是更加建议通过{@link #getEnvironment()}来进行修改。
+	 * 对环境变量的修改必须发生在{@link #refresh()}操作之前。
 	 * Set the {@code Environment} for this application context.
 	 * <p>Default value is determined by {@link #createEnvironment()}. Replacing the
 	 * default with this method is one option but configuration through {@link
@@ -298,6 +302,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 * 获取Environment对象。
+	 * 用户可以进行修改
+	 * 如果没有设置Environment将使用{@link #getEnvironment()}初始化一个返回
 	 * Return the {@code Environment} for this application context in configurable
 	 * form, allowing for further customization.
 	 * <p>If none specified, a default environment will be initialized via
@@ -312,6 +319,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 * 返回一个{@link StandardEnvironment}作为默认的Environment，
+	 * 子类可以覆盖该方法返回自定义的{@link ConfigurableEnvironment}
 	 * Create and return a new {@link StandardEnvironment}.
 	 * <p>Subclasses may override this method in order to supply
 	 * a custom {@link ConfigurableEnvironment} implementation.
@@ -321,6 +330,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 * 返回上下文持有的BeanFactory -- {@link AutowireCapableBeanFactory}
 	 * Return this context's internal bean factory as AutowireCapableBeanFactory,
 	 * if already available.
 	 * @see #getBeanFactory()
@@ -339,6 +349,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 * 向所有的事件监听器发送事件
+	 * 为了在事件监听器中使用messageSource，事件监听器在MessageSource后初始化。
+	 * 因此在MessageSource的实现中不要发布事件
 	 * Publish the given event to all listeners.
 	 * <p>Note: Listeners get initialized after the MessageSource, to be able
 	 * to access it within listener implementations. Thus, MessageSource
@@ -365,6 +378,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 * event = ApplicationEvent --> ApplicationEvent
+	 * event != ApplicationEvent --> new PayloadApplicationEvent(event, null)
+	 * 如果发现 earlyApplicationEvents != null 说明是早期事件，Multicaster还没有准备就绪，先缓存事件
+	 * earlyApplicationEvents == null，Multicaster已经可用，直接使用Multicaster发布事件
+	 * 同时向父容器传播事件
+	 *
 	 * Publish the given event to all listeners.
 	 * @param event the event to publish (may be an {@link ApplicationEvent}
 	 * or a payload object to be turned into a {@link PayloadApplicationEvent})
@@ -387,6 +406,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Multicast right now if possible - or lazily once the multicaster is initialized
+		// 如果发现 earlyApplicationEvents != null 说明是早期事件，Multicaster还没有准备就绪，先缓存事件
+		// earlyApplicationEvents == null，Multicaster已经可用，直接使用Multicaster发布事件
 		if (this.earlyApplicationEvents != null) {
 			this.earlyApplicationEvents.add(applicationEvent);
 		}
@@ -394,6 +415,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			getApplicationEventMulticaster().multicastEvent(applicationEvent, eventType);
 		}
 
+		// 也向父容器传播事件
 		// Publish event via parent context as well...
 		if (this.parent != null) {
 			if (this.parent instanceof AbstractApplicationContext) {
@@ -432,6 +454,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 * 返回资源路劲解析器来解析资源。
+	 * 默认实现为{@link PathMatchingResourcePatternResolver}，支持Ant风格的路径解析
+	 * 子类可以重写该方法，来扩展解析策略
+	 *
+	 * 但解析资源时，不要直接调用该方法，而应该调用{@link #getResources(String)}，将委派ResourcePatternResolver
 	 * Return the ResourcePatternResolver to use for resolving location patterns
 	 * into Resource instances. Default is a
 	 * {@link org.springframework.core.io.support.PathMatchingResourcePatternResolver},
@@ -1543,6 +1570,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	//---------------------------------------------------------------------
 
 	/**
+	 * 子类实现这个方法，进行真正的配置加载
+	 * refresh调用该方法，这个方法应该在所有初始化工作进行之前被调用
+	 * 子类应该创建一个新的BeanFactory，并且内部持有，或者返回一个本身持有的BeanFactory。
+	 * 在后一种方法中重复调用refresh方法应该抛出 {@link IllegalStateException}
 	 * Subclasses must implement this method to perform the actual configuration load.
 	 * The method is invoked by {@link #refresh()} before any other initialization work.
 	 * <p>A subclass will either create a new bean factory and hold a reference to it,
@@ -1555,6 +1586,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	protected abstract void refreshBeanFactory() throws BeansException, IllegalStateException;
 
 	/**
+	 * 子类调用该方法释放其内部持有的BeanFactory
+	 * 该方法应该在所有shutdown工作执行后被{@link #close()}方法调用
 	 * Subclasses must implement this method to release their internal bean factory.
 	 * This method gets invoked by {@link #close()} after all other shutdown work.
 	 * <p>Should never throw an exception but rather log shutdown failures.
@@ -1562,6 +1595,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	protected abstract void closeBeanFactory();
 
 	/**
+	 * 子类重写方法，返回内部持有的BeanFactory
+	 * 支持重复调用，且不能有副作用。
+	 * 子类在返回BeanFactory前应该检查应用上下文是否还是active状态。一旦上下文关闭，内部持有的BeanFactory将被认为是不可用的
+	 *
+	 * 返回的BeanFactory永远不为null
+	 * 如果上下文还没有refresh或者上下文已经被关闭，应该立即抛出{@link IllegalStateException}
+	 *
 	 * Subclasses must return their internal bean factory here. They should implement the
 	 * lookup efficiently, so that it can be called repeatedly without a performance penalty.
 	 * <p>Note: Subclasses should check whether the context is still active before

@@ -27,10 +27,13 @@ import org.springframework.lang.Nullable;
 import java.io.IOException;
 
 /**
+ * 基于{@link XmlBeanDefinitionReader} 读取xml配置文件来配置应用上下文
  * Convenient base class for {@link org.springframework.context.ApplicationContext}
  * implementations, drawing configuration from XML documents containing bean definitions
  * understood by an {@link org.springframework.beans.factory.xml.XmlBeanDefinitionReader}.
  *
+ * 子类仅需要实现{@link #getConfigResources()} {@link #getConfigLocations()}方法。
+ * 为了更多扩展，也可以复写{@link #getResourceByPath(String)}
  * <p>Subclasses just have to implement the {@link #getConfigResources} and/or
  * the {@link #getConfigLocations} method. Furthermore, they might override
  * the {@link #getResourceByPath} hook to interpret relative paths in an
@@ -64,6 +67,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableC
 
 
 	/**
+	 * 是否对xml进行校验，默认是true
 	 * Set whether to use XML validation. Default is {@code true}.
 	 */
 	public void setValidating(boolean validating) {
@@ -72,6 +76,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableC
 
 
 	/**
+	 * 通过XmlBeanDefinitionReader加载BeanDefinition
 	 * Loads the bean definitions via an XmlBeanDefinitionReader.
 	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
 	 * @see #initBeanDefinitionReader

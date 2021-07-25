@@ -26,6 +26,13 @@ import org.springframework.lang.Nullable;
 import java.io.IOException;
 
 /**
+ * ApplicationContext子类，该类的目的是为了支持可以多次调用{@link #refresh()},
+ * 每次调用都会创建一个新的BeanFactory。
+ * 通过一系列的配置路径加载BeanDefinition来驱动上下文
+ *
+ * 子类唯一需要实现的方法是{@link #loadBeanDefinitions(DefaultListableBeanFactory)}
+ * 该方法在每次refresh时被调用，具体实现为加载BeanDefinition到{@link DefaultListableBeanFactory}
+ * 典型实现为委托给一个或者多个BeanDefinitionReader来读取配置生成BeanDefinition。
  * Base class for {@link org.springframework.context.ApplicationContext}
  * implementations which are supposed to support multiple calls to {@link #refresh()},
  * creating a new internal bean factory instance every time.
@@ -91,6 +98,8 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 
 
 	/**
+	 * 是否允许同名的BeanDefinition注册，默认是允许的
+	 * 如果不允许将会抛出异常
 	 * Set whether it should be allowed to override bean definitions by registering
 	 * a different definition with the same name, automatically replacing the former.
 	 * If not, an exception will be thrown. Default is "true".
@@ -101,6 +110,8 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	}
 
 	/**
+	 * 是否允许bean之间循环引用，默认允许的
+	 * 如果不允许将抛出异常
 	 * Set whether to allow circular references between beans - and automatically
 	 * try to resolve them.
 	 * <p>Default is "true". Turn this off to throw an exception when encountering
@@ -113,6 +124,8 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 
 
 	/**
+	 * 对底层的BeanFactory执行refresh
+	 * 如果已经存在BeanFactory将其关闭，然后初始化一个新的BeanFactory
 	 * This implementation performs an actual refresh of this context's underlying
 	 * bean factory, shutting down the previous bean factory (if any) and
 	 * initializing a fresh bean factory for the next phase of the context's lifecycle.
@@ -184,6 +197,10 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	}
 
 	/**
+	 * 为上下文创建BeanFactory——DefaultListableBeanFactory
+	 * 每次{@link #refresh()}都会尝试调用该方法。
+	 * 子类可以覆盖该方法，实现对DefaultListableBeanFactory的配置
+	 *
 	 * Create an internal bean factory for this context.
 	 * Called for each {@link #refresh()} attempt.
 	 * <p>The default implementation creates a
@@ -234,6 +251,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	}
 
 	/**
+	 * 加载BeanDefinition待BeanFactory中，通常委托给一个或者多个BeanDefinitionReader来实现。
 	 * Load bean definitions into the given bean factory, typically through
 	 * delegating to one or more bean definition readers.
 	 * @param beanFactory the bean factory to load bean definitions into

@@ -17,6 +17,7 @@
 package org.springframework.core.env;
 
 /**
+ * 非web环境的标准Environment
  * {@link Environment} implementation suitable for use in 'standard' (i.e. non-web)
  * applications.
  *
