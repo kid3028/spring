@@ -18,6 +18,13 @@ package org.springframework.core.env;
 
 /**
  * 非web环境的标准Environment
+ * 主要实现了属性解析和profiles操作，配置了两个默认属性源 系统属性、系统环境变量
+ * 系统属性--> 系统环境变量
+ * 也就是说，如果键“xyz”既存在于JVM系统属性中，也存在于当前进程的环境变量集中，
+ * 那么来自系统属性的键“xyz”的值将从对environment.getProperty（“xyz”）的调用返回。
+ * 默认情况下选择此顺序是因为系统属性是每个JVM的，而环境变量在给定系统上的许多JVM中可能是相同的。
+ * 赋予系统属性优先级允许在每个JVM的基础上重写环境变量。
+ *
  * {@link Environment} implementation suitable for use in 'standard' (i.e. non-web)
  * applications.
  *

@@ -33,6 +33,7 @@ import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.SystemPropertyUtils;
 
 /**
+ * 属性源解析器
  * Abstract base class for resolving properties against any underlying source.
  *
  * @author Chris Beams
@@ -43,6 +44,9 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * 类型转换器
+	 */
 	@Nullable
 	private volatile ConfigurableConversionService conversionService;
 
@@ -52,18 +56,37 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	@Nullable
 	private PropertyPlaceholderHelper strictHelper;
 
+	/**
+	 * 是否忽略无法解析的占位符
+	 */
 	private boolean ignoreUnresolvableNestedPlaceholders = false;
 
+	/**
+	 * 占位符前缀 —— ${
+	 */
 	private String placeholderPrefix = SystemPropertyUtils.PLACEHOLDER_PREFIX;
 
+	/**
+	 * 占位符后缀 —— }
+	 */
 	private String placeholderSuffix = SystemPropertyUtils.PLACEHOLDER_SUFFIX;
 
+	/**
+	 * 占位符、默认值分隔符 —— :
+	 */
 	@Nullable
 	private String valueSeparator = SystemPropertyUtils.VALUE_SEPARATOR;
 
+	/**
+	 * 必须存在的属性
+	 */
 	private final Set<String> requiredProperties = new LinkedHashSet<>();
 
-
+	/**
+	 * 获取类型转换器
+	 * 如果不存在，使用  {@link DefaultConversionService}
+	 * @return
+	 */
 	@Override
 	public ConfigurableConversionService getConversionService() {
 		// Need to provide an independent DefaultConversionService, not the
@@ -122,6 +145,9 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	}
 
 	/**
+	 * 是否忽略无法解析的占位符，默认不忽略，无法解析就抛出异常
+	 * false： 不忽略，将会抛出异常
+	 * true： 忽略，原值返回
 	 * Set whether to throw an exception when encountering an unresolvable placeholder
 	 * nested within the value of a given property. A {@code false} value indicates strict
 	 * resolution, i.e. that an exception will be thrown. A {@code true} value indicates
@@ -211,6 +237,8 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	}
 
 	/**
+	 * 解析给定字符串中的占位符
+	 * 被{@link #getProperty}及其变体显示调用，
 	 * Resolve placeholders within the given string, deferring to the value of
 	 * {@link #setIgnoreUnresolvableNestedPlaceholders} to determine whether any
 	 * unresolvable placeholders should raise an exception or be ignored.
@@ -236,6 +264,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	}
 
 	private String doResolvePlaceholders(String text, PropertyPlaceholderHelper helper) {
+		// PropertySourcesPropertyResolver
 		return helper.replacePlaceholders(text, this::getPropertyAsRawString);
 	}
 
@@ -267,6 +296,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 
 	/**
+	 *
 	 * Retrieve the specified property as a raw String,
 	 * i.e. without resolution of nested placeholders.
 	 * @param key the property name to resolve

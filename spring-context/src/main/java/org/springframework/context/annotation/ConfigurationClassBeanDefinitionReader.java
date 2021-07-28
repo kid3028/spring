@@ -146,6 +146,7 @@ class ConfigurationClassBeanDefinitionReader {
 	}
 
 	/**
+	 * 注册 ConfigurationClass作为BeanDefinition
 	 * Register the {@link Configuration} class itself as a bean definition.
 	 */
 	private void registerBeanDefinitionForImportedConfigurationClass(ConfigurationClass configClass) {

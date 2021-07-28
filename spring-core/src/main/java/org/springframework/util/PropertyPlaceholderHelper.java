@@ -54,6 +54,10 @@ public class PropertyPlaceholderHelper {
 
 	private final String placeholderSuffix;
 
+	/**
+	 * 如果 placeholderSuffix 存在于 {@link #wellKnownSimplePrefixes} 中，那么取对应的值作为 simplePrefix
+	 * 如果不存在simplePrefix = placeholderPrefix
+ 	 */
 	private final String simplePrefix;
 
 	@Nullable
@@ -73,6 +77,8 @@ public class PropertyPlaceholderHelper {
 	}
 
 	/**
+	 * 如果 placeholderSuffix 存在于 {@link #wellKnownSimplePrefixes} 中，那么取对应的值作为 simplePrefix
+	 * 如果不存在simplePrefix = placeholderPrefix
 	 * Creates a new {@code PropertyPlaceholderHelper} that uses the supplied prefix and suffix.
 	 * @param placeholderPrefix the prefix that denotes the start of a placeholder
 	 * @param placeholderSuffix the suffix that denotes the end of a placeholder
@@ -113,6 +119,7 @@ public class PropertyPlaceholderHelper {
 	}
 
 	/**
+	 * 使用提供的placeholderResolver解析占位符
 	 * Replaces all placeholders of format {@code ${name}} with the value returned
 	 * from the supplied {@link PlaceholderResolver}.
 	 * @param value the value containing the placeholders to be replaced
@@ -126,7 +133,7 @@ public class PropertyPlaceholderHelper {
 
 	protected String parseStringValue(
 			String value, PlaceholderResolver placeholderResolver, @Nullable Set<String> visitedPlaceholders) {
-
+		// 占位符前缀是否正确
 		int startIndex = value.indexOf(this.placeholderPrefix);
 		if (startIndex == -1) {
 			return value;
@@ -134,8 +141,13 @@ public class PropertyPlaceholderHelper {
 
 		StringBuilder result = new StringBuilder(value);
 		while (startIndex != -1) {
+			// 查找占位符后缀
+			// placeholder可能还嵌套placeholder
+			// 嵌套的placeholder规则取决于 {@link #wellKnownSimplePrefixes}
+	        //  如 ${AA{BB}}
 			int endIndex = findPlaceholderEndIndex(result, startIndex);
 			if (endIndex != -1) {
+				// 截取出整个placeholder
 				String placeholder = result.substring(startIndex + this.placeholderPrefix.length(), endIndex);
 				String originalPlaceholder = placeholder;
 				if (visitedPlaceholders == null) {
@@ -145,15 +157,24 @@ public class PropertyPlaceholderHelper {
 					throw new IllegalArgumentException(
 							"Circular placeholder reference '" + originalPlaceholder + "' in property definitions");
 				}
+				// placeholder中可能还包含着其他placeholder
+				// placeholder可能还嵌套placeholder
+				// 嵌套的placeholder规则取决于 {@link #wellKnownSimplePrefixes}
+				//  如 ${AA{BB}}
 				// Recursive invocation, parsing placeholders contained in the placeholder key.
 				placeholder = parseStringValue(placeholder, placeholderResolver, visitedPlaceholders);
+
+				// 通过递归将所有placeholder都解析出来了,但是还包含默认值
+				// placeholderResolver - PropertySourcesPropertyResolver
 				// Now obtain the value for the fully resolved key...
 				String propVal = placeholderResolver.resolvePlaceholder(placeholder);
+				// 如果获取属性值失败，看看默认值
 				if (propVal == null && this.valueSeparator != null) {
 					int separatorIndex = placeholder.indexOf(this.valueSeparator);
 					if (separatorIndex != -1) {
 						String actualPlaceholder = placeholder.substring(0, separatorIndex);
 						String defaultValue = placeholder.substring(separatorIndex + this.valueSeparator.length());
+						// 抽离默认值后再使用placeholder解析一次
 						propVal = placeholderResolver.resolvePlaceholder(actualPlaceholder);
 						if (propVal == null) {
 							propVal = defaultValue;
@@ -161,6 +182,7 @@ public class PropertyPlaceholderHelper {
 					}
 				}
 				if (propVal != null) {
+					// 递归完成嵌套placeholder的全部替换
 					// Recursive invocation, parsing placeholders contained in the
 					// previously resolved placeholder value.
 					propVal = parseStringValue(propVal, placeholderResolver, visitedPlaceholders);
@@ -187,10 +209,26 @@ public class PropertyPlaceholderHelper {
 		return result.toString();
 	}
 
+	/**
+	 * placeholder可能还嵌套placeholder
+	 * 嵌套的placeholder规则取决于 {@link #wellKnownSimplePrefixes}
+	 * 如 ${AA{BB}}
+	 * @param buf
+	 * @param startIndex
+	 * @return
+	 */
 	private int findPlaceholderEndIndex(CharSequence buf, int startIndex) {
+		// 从前缀开始向后
+		// buf = ${AA{BB}} startIndex = 0
+		// index = 2
 		int index = startIndex + this.placeholderPrefix.length();
 		int withinNestedPlaceholder = 0;
+		// 2 < 9 √
 		while (index < buf.length()) {
+			// 第一次匹配失败
+			// ...
+			// 第 i + x 次后匹配， 但是由于存在嵌套的placeholder，放弃
+			// 第 n 次匹配，得到完成placeholder
 			if (StringUtils.substringMatch(buf, index, this.placeholderSuffix)) {
 				if (withinNestedPlaceholder > 0) {
 					withinNestedPlaceholder--;
@@ -200,6 +238,9 @@ public class PropertyPlaceholderHelper {
 					return index;
 				}
 			}
+			// 第一次失败
+			// ...
+			// 第 i 次 匹配到simplePrefix
 			else if (StringUtils.substringMatch(buf, index, this.simplePrefix)) {
 				withinNestedPlaceholder++;
 				index = index + this.simplePrefix.length();

@@ -34,10 +34,18 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
+ * {@link Environment}的抽象实现。
+ * 可以通过{@link #ACTIVE_PROFILES_PROPERTY_NAME} {@link #DEFAULT_PROFILES_PROPERTY_NAME}来设置激活profile 或者 默认profile
+ *
+ *
  * Abstract base class for {@link Environment} implementations. Supports the notion of
  * reserved default profile names and enables specifying active and default profiles
  * through the {@link #ACTIVE_PROFILES_PROPERTY_NAME} and
  * {@link #DEFAULT_PROFILES_PROPERTY_NAME} properties.
+ *
+ * 具体的子类间主要的不同在于{@link PropertySource}对象
+ * 子类应该通过{@link #customizePropertySources(MutablePropertySources)}来自定义属性源，
+ * 客户端通过{@link ConfigurableEnvironment#getPropertySources()} {@link MutablePropertySources}来使用属性源
  *
  * <p>Concrete subclasses differ primarily on which {@link PropertySource} objects they
  * add by default. {@code AbstractEnvironment} adds none. Subclasses should contribute
@@ -55,6 +63,8 @@ import org.springframework.util.StringUtils;
 public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	/**
+	 * 忽略系统环境变量中的系统属性，即不能通过{@link System#getenv()}检索变量
+	 * 默认是false，如果spring环境属性无法解析将降级到系统属性。
 	 * System property that instructs Spring to ignore system environment variables,
 	 * i.e. to never attempt to retrieve such a variable via {@link System#getenv()}.
 	 * <p>The default is "false", falling back to system environment variable checks if a
@@ -67,6 +77,10 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	public static final String IGNORE_GETENV_PROPERTY_NAME = "spring.getenv.ignore";
 
 	/**
+	 * 指定激活的profiles。多个profiles可以使用逗号分隔
+	 * 【注意】在某些shell环境中(如bash)不允许在变量中使用标点符号
+	 * 如果spring {@link SystemEnvironmentPropertySource}是可用的，
+	 * {@link #ACTIVE_PROFILES_PROPERTY_NAME}这个属性通常通过环境变量来指定
 	 * Name of property to set to specify active profiles: {@value}. Value may be comma
 	 * delimited.
 	 * <p>Note that certain shell environments such as Bash disallow the use of the period
@@ -78,6 +92,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	public static final String ACTIVE_PROFILES_PROPERTY_NAME = "spring.profiles.active";
 
 	/**
+	 * 指定默认的profiles
 	 * Name of property to set to specify profiles active by default: {@value}. Value may
 	 * be comma delimited.
 	 * <p>Note that certain shell environments such as Bash disallow the use of the period
@@ -89,6 +104,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	public static final String DEFAULT_PROFILES_PROPERTY_NAME = "spring.profiles.default";
 
 	/**
+	 * 确认的profiles
+	 * 如果没有指定active profiles、default profiles，那么将使用缺省的  default profiles
 	 * Name of reserved default profile name: {@value}. If no default profile names are
 	 * explicitly and no active profile names are explicitly set, this profile will
 	 * automatically be activated by default.
@@ -114,6 +131,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 
 	/**
+	 * 创建Environment实例，底层将会调用{@link #customizePropertySources(MutablePropertySources)}
+	 * 子类可以覆盖{@link #customizePropertySources(MutablePropertySources)}来操作{@link PropertySource}
 	 * Create a new {@code Environment} instance, calling back to
 	 * {@link #customizePropertySources(MutablePropertySources)} during construction to
 	 * allow subclasses to contribute or manipulate {@link PropertySource} instances as
@@ -126,9 +145,12 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 
 	/**
+	 * 自定义{@link PropertySource}的处理
 	 * Customize the set of {@link PropertySource} objects to be searched by this
 	 * {@code Environment} during calls to {@link #getProperty(String)} and related
 	 * methods.
+	 *
+	 * 推荐子类来覆盖该方法来增加自定义的PropertySource
 	 *
 	 * <p>Subclasses that override this method are encouraged to add property
 	 * sources using {@link MutablePropertySources#addLast(PropertySource)} such that
@@ -185,6 +207,17 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * env.getPropertySources().addLast(new PropertySourceX(...));
 	 * </pre>
 	 *
+	 * 实例变量的访问
+	 * 该方法禁止访问子类中声明的有初始化值的对象属性。
+	 * 由于Java对象创建机制的限制，AbstractEnvironment构造器中调用该方法时，子类的中的对象属性还没有完成初始化，
+	 * 所以访问对象属性将会造成NPE或者其他问题。
+	 * 如果确实需要访问实例变量，那么该方法应该做空实现，并且在子类的构造器中完成对属性源的操作，和实例变量的访问。
+	 *
+	 * 执行父类的静态代码块，并初始化父类静态成员变量
+	 * 执行子类的静态代码块，并初始化子类静态成员变量
+	 * 执行父类的构造代码块，执行父类的构造函数，并初始化父类普通成员变量
+	 * 执行子类的构造代码块， 执行子类的构造函数，并初始化子类普通成员变量
+	 *
 	 * <h2>A warning about instance variable access</h2>
 	 * Instance variables declared in subclasses and having default initial values should
 	 * <em>not</em> be accessed from within this method. Due to Java object creation
@@ -204,6 +237,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	/**
+	 * 返回缺省profile
+	 * 子类可以覆盖该方法，自定义缺省的profile
 	 * Return the set of reserved default profile names. This implementation returns
 	 * {@value #RESERVED_DEFAULT_PROFILE_NAME}. Subclasses may override in order to
 	 * customize the set of reserved names.
@@ -225,6 +260,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	/**
+	 * 返回active profiles
 	 * Return the set of active profiles as explicitly set through
 	 * {@link #setActiveProfiles} or if the current set of active profiles
 	 * is empty, check for the presence of the {@value #ACTIVE_PROFILES_PROPERTY_NAME}
@@ -279,6 +315,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	/**
+	 * 默认的profiles
 	 * Return the set of default profiles explicitly set via
 	 * {@link #setDefaultProfiles(String...)} or if the current set of default profiles
 	 * consists only of {@linkplain #getReservedDefaultProfiles() reserved default
