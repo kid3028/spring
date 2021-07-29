@@ -38,6 +38,10 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
+ * 依赖注入的描述符
+ * 可以是构造器参数、方法参数、属性
+ * 这里提供了统一的访问元数据的接口
+ *
  * Descriptor for a specific dependency that is about to be injected.
  * Wraps a constructor parameter, a method parameter or a field,
  * allowing unified access to their metadata.
@@ -48,36 +52,70 @@ import java.util.Optional;
 @SuppressWarnings("serial")
 public class DependencyDescriptor extends InjectionPoint implements Serializable {
 
+	/**
+	 * 属性 or 方法参数、构造器参数所属类
+	 */
 	private final Class<?> declaringClass;
 
+	/**
+	 * 方法名称、构造器名称
+	 */
 	@Nullable
 	private String methodName;
 
+	/**
+	 * 参数类型
+	 */
 	@Nullable
 	private Class<?>[] parameterTypes;
 
+	/**
+	 * 参数下标
+	 */
 	private int parameterIndex;
 
+	/**
+	 * 属性名
+	 */
 	@Nullable
 	private String fieldName;
 
+	/**
+	 * 是否是必须的
+	 */
 	private final boolean required;
 
+	/**
+	 * 要早期加载
+	 */
 	private final boolean eager;
 
+	/**
+	 * 嵌套层级？？
+	 */
 	private int nestingLevel = 1;
 
+	/**
+	 * 内嵌类？？
+	 */
 	@Nullable
 	private Class<?> containingClass;
 
+	/**
+	 *
+	 */
 	@Nullable
 	private transient volatile ResolvableType resolvableType;
 
+	/**
+	 *
+	 */
 	@Nullable
 	private transient volatile TypeDescriptor typeDescriptor;
 
 
 	/**
+	 * 为方法参数、构造器参数创建一个依赖描述符
 	 * Create a new descriptor for a method or constructor parameter.
 	 * Considers the dependency as 'eager'.
 	 * @param methodParameter the MethodParameter to wrap
@@ -109,6 +147,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	}
 
 	/**
+	 * 为属性创建一个依赖描述符
 	 * Create a new descriptor for a field.
 	 * Considers the dependency as 'eager'.
 	 * @param field the field to wrap
@@ -154,6 +193,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 
 	/**
+	 * 依赖是否是必须的
 	 * Return whether this dependency is required.
 	 * <p>Optional semantics are derived from Java 8's {@link java.util.Optional},
 	 * any variant of a parameter-level {@code Nullable} annotation (such as from
@@ -177,6 +217,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	}
 
 	/**
+	 * 检查是否有标记 Nullable
 	 * Check whether the underlying field is annotated with any variant of a
 	 * {@code Nullable} annotation, e.g. {@code javax.annotation.Nullable} or
 	 * {@code edu.umd.cs.findbugs.annotations.Nullable}.

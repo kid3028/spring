@@ -24,6 +24,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
+ * 根据order value升序、priority降序
+ * PriorityOrdered --> Order --> Non-ordered
+ *
  * {@link Comparator} implementation for {@link Ordered} objects, sorting
  * by order value ascending, respectively by priority descending.
  *

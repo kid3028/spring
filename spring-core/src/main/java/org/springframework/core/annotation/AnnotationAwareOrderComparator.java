@@ -26,6 +26,11 @@ import org.springframework.core.OrderComparator;
 import org.springframework.lang.Nullable;
 
 /**
+ * {@link OrderComparator} 的扩展，用于支持
+ *    {@link org.springframework.core.Ordered}接口
+ *    {@link Order @Order}注解
+ *    {@link javax.annotation.Priority @Priority} 注解
+ *
  * {@code AnnotationAwareOrderComparator} is an extension of
  * {@link OrderComparator} that supports Spring's
  * {@link org.springframework.core.Ordered} interface as well as the

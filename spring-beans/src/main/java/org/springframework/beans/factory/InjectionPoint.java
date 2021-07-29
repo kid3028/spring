@@ -27,6 +27,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
+ *
+ * 注入点的简单描述符，指向方法/构造函数参数或字段。还可以作为工厂方法的参数，对请求的注入点作出反应，以构建定制的bean实例。
  * A simple descriptor for an injection point, pointing to a method/constructor
  * parameter or a field. Exposed by {@link UnsatisfiedDependencyException}.
  * Also available as an argument for factory methods, reacting to the
@@ -50,6 +52,7 @@ public class InjectionPoint {
 
 
 	/**
+	 * 为方法参数或者构造器器参数创建一个注入点
 	 * Create an injection point descriptor for a method or constructor parameter.
 	 * @param methodParameter the MethodParameter to wrap
 	 */
@@ -59,6 +62,7 @@ public class InjectionPoint {
 	}
 
 	/**
+	 * 为实例字段创建一个注入点
 	 * Create an injection point descriptor for a field.
 	 * @param field the field to wrap
 	 */
@@ -117,6 +121,7 @@ public class InjectionPoint {
 	}
 
 	/**
+	 * 获取属性 or 方法参数、构造器参数上的注解信息
 	 * Obtain the annotations associated with the wrapped field or method/constructor parameter.
 	 */
 	public Annotation[] getAnnotations() {
@@ -134,6 +139,7 @@ public class InjectionPoint {
 	}
 
 	/**
+	 * 获取属性or 方法参数、构造器参数上指定类型的注解
 	 * Retrieve a field/parameter annotation of the given type, if any.
 	 * @param annotationType the annotation type to retrieve
 	 * @return the annotation instance, or {@code null} if none found
@@ -146,6 +152,7 @@ public class InjectionPoint {
 	}
 
 	/**
+	 * 获取属性 or 方法参数、构造器参数的类型
 	 * Return the type declared by the underlying field or method/constructor parameter,
 	 * indicating the injection type.
 	 */
@@ -154,6 +161,7 @@ public class InjectionPoint {
 	}
 
 	/**
+	 * 将属性、方法、构造器作为Member对象返回
 	 * Returns the wrapped member, containing the injection point.
 	 * @return the Field / Method / Constructor as Member
 	 */
@@ -162,6 +170,9 @@ public class InjectionPoint {
 	}
 
 	/**
+	 * 获取属性 or 方法、构造器上的注解
+	 * 【注意】不是方法参数、构造器参数上的注解
+	 *        如果要获取参数级别的使用{@link #getAnnotations()}
 	 * Return the wrapped annotated element.
 	 * <p>Note: In case of a method/constructor parameter, this exposes
 	 * the annotations declared on the method or constructor itself

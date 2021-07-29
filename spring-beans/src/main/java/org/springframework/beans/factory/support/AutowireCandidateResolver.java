@@ -16,11 +16,14 @@
 
 package org.springframework.beans.factory.support;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.lang.Nullable;
 
 /**
+ * 策略接口
+ * 一个BeanDefinition是否是某个bean依赖注入的候选
  * Strategy interface for determining whether a specific bean definition
  * qualifies as an autowire candidate for a specific dependency.
  *
@@ -31,12 +34,15 @@ import org.springframework.lang.Nullable;
 public interface AutowireCandidateResolver {
 
 	/**
+	 * 决定BeanDefinition能否作为给定依赖的自动注入候选
+	 *  简单调用{@link BeanDefinition#isAutowireCandidate()}
+	 *
 	 * Determine whether the given bean definition qualifies as an
 	 * autowire candidate for the given dependency.
 	 * <p>The default implementation checks
 	 * {@link org.springframework.beans.factory.config.BeanDefinition#isAutowireCandidate()}.
 	 * @param bdHolder the bean definition including bean name and aliases
-	 * @param descriptor the descriptor for the target method parameter or field
+	 * @param descriptor the descriptor for the target method parameter or field  对目标方法参数or属性的抽象描述
 	 * @return whether the bean definition qualifies as autowire candidate
 	 * @see org.springframework.beans.factory.config.BeanDefinition#isAutowireCandidate()
 	 */
@@ -45,6 +51,9 @@ public interface AutowireCandidateResolver {
 	}
 
 	/**
+	 * 检查依赖是否是必须的
+	 * 默认实现是}{@link DependencyDescriptor#isRequired()}
+	 *
 	 * Determine whether the given descriptor is effectively required.
 	 * <p>The default implementation checks {@link DependencyDescriptor#isRequired()}.
 	 * @param descriptor the descriptor for the target method parameter or field
