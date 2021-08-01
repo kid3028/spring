@@ -17,9 +17,15 @@
 package org.springframework.beans.factory.config;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.lang.Nullable;
 
 /**
+ * 回调钩子，允许自定义修改bean实例
+ * 例如检查标记接口 or 使用代理包装
+ *
+ * ApplicationContext可以从BeanDefinition中自动探测出BeanPostProcessor，并在bean创建过程中作用。
  * Factory hook that allows for custom modification of new bean instances,
  * e.g. checking for marker interfaces or wrapping them with proxies.
  *
@@ -43,6 +49,15 @@ import org.springframework.lang.Nullable;
 public interface BeanPostProcessor {
 
 	/**
+	 * 在初始化函数调用前作用postProcessor，例如在 {@link InitializingBean#afterPropertiesSet()} or 自定义init-method
+	 * 在postProcessor执行之前，propertyValues已经完成填充。
+	 * 该方法可以对original bean做一些包装处理后进行返回
+	 * 默认实现是直接返回original bean
+	 * 如果返回一个null，那么后续的所有postProcessor都不会再执行
+	 *
+	 * eg:
+	 * {@link org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#initializeBean(String, Object, RootBeanDefinition)}
+	 *
 	 * Apply this BeanPostProcessor to the given new bean instance <i>before</i> any bean
 	 * initialization callbacks (like InitializingBean's {@code afterPropertiesSet}
 	 * or a custom init-method). The bean will already be populated with property values.
@@ -61,6 +76,11 @@ public interface BeanPostProcessor {
 	}
 
 	/**
+	 * 在初始化函数调用后作用postProcessor
+	 * 如果返回一个null，那么后续的所有postProcessor都不会再执行
+	 * eg:
+	 * {@link org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#initializeBean(String, Object, RootBeanDefinition)}
+	 *
 	 * Apply this BeanPostProcessor to the given new bean instance <i>after</i> any bean
 	 * initialization callbacks (like InitializingBean's {@code afterPropertiesSet}
 	 * or a custom init-method). The bean will already be populated with property values.

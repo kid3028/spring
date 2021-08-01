@@ -16,14 +16,15 @@
 
 package org.springframework.beans.factory.config;
 
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Constructor;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.lang.Nullable;
 
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Constructor;
+
 /**
+ * 适配器，什么也没做，返回空实现
  * Adapter that implements all methods on {@link SmartInstantiationAwareBeanPostProcessor}
  * as no-ops, which will not change normal processing of each bean instantiated
  * by the container. Subclasses may override merely those methods that they are

@@ -16,26 +16,12 @@
 
 package org.springframework.beans.factory.annotation;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -45,18 +31,35 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
+ * BeanPostProcessor
+ * 对init or destroy 方法调用的支持
+ * 也支持{@link InitializingBean}  {@link DisposableBean} 接口的回调
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
  * that invokes annotated init and destroy methods. Allows for an annotation
- * alternative to Spring's {@link org.springframework.beans.factory.InitializingBean}
- * and {@link org.springframework.beans.factory.DisposableBean} callback interfaces.
+ * alternative to Spring's {@link InitializingBean}
+ * and {@link DisposableBean} callback interfaces.
  *
+ * 可以通过{@link #setInitAnnotationType(Class)} {@link #setDestroyAnnotationType(Class)}方法
+ * 配置检查的注解类型。
+ * 任何自定义的注解都可以，因为没有对注解的属性做要求
  * <p>The actual annotation types that this post-processor checks for can be
  * configured through the {@link #setInitAnnotationType "initAnnotationType"}
  * and {@link #setDestroyAnnotationType "destroyAnnotationType"} properties.
  * Any custom annotation can be used, since there are no required annotation
  * attributes.
  *
+ * Init、Destroy注解可以标记在任何可见性的方法上。同时在多个方法上标记也是可行的，但是我们更加推荐只标注在一个方法
  * <p>Init and destroy annotations may be applied to methods of any visibility:
  * public, package-protected, protected, or private. Multiple such methods
  * may be annotated, but it is recommended to only annotate one single
@@ -92,6 +95,8 @@ public class InitDestroyAnnotationBeanPostProcessor
 
 
 	/**
+	 * 指定init注解类型，此后标记了该注解的方法将被识别为init方法
+	 * 可以使用任何自定义的注解，它是没有设置默认值的，通常我们设置其为{@link javax.annotation.PostConstruct}
 	 * Specify the init annotation to check for, indicating initialization
 	 * methods to call after configuration of a bean.
 	 * <p>Any custom annotation can be used, since there are no required
@@ -103,6 +108,8 @@ public class InitDestroyAnnotationBeanPostProcessor
 	}
 
 	/**
+	 * 指定destory注解类型，当应用上下文关闭时将会调用标记有该注解的方法。
+	 *
 	 * Specify the destroy annotation to check for, indicating destruction
 	 * methods to call when the context is shutting down.
 	 * <p>Any custom annotation can be used, since there are no required
@@ -133,6 +140,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		LifecycleMetadata metadata = findLifecycleMetadata(bean.getClass());
 		try {
+			// 反射调用对应的init方法集合
 			metadata.invokeInitMethods(bean, beanName);
 		}
 		catch (InvocationTargetException ex) {
@@ -153,6 +161,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
 		LifecycleMetadata metadata = findLifecycleMetadata(bean.getClass());
 		try {
+			// 反射调用对应的destroy方法集合
 			metadata.invokeDestroyMethods(bean, beanName);
 		}
 		catch (InvocationTargetException ex) {
@@ -175,6 +184,11 @@ public class InitDestroyAnnotationBeanPostProcessor
 	}
 
 
+	/**
+	 * 返回一个类中的init destroy方法集合的包装
+	 * @param clazz
+	 * @return
+	 */
 	private LifecycleMetadata findLifecycleMetadata(Class<?> clazz) {
 		if (this.lifecycleMetadataCache == null) {
 			// Happens after deserialization, during destruction...
@@ -195,11 +209,17 @@ public class InitDestroyAnnotationBeanPostProcessor
 		return metadata;
 	}
 
+	/**
+	 * 探测class中的init 、destroy方法
+	 * @param clazz
+	 * @return
+	 */
 	private LifecycleMetadata buildLifecycleMetadata(final Class<?> clazz) {
 		List<LifecycleElement> initMethods = new ArrayList<>();
 		List<LifecycleElement> destroyMethods = new ArrayList<>();
 		Class<?> targetClass = clazz;
 
+		// 会递归检查父类
 		do {
 			final List<LifecycleElement> currInitMethods = new ArrayList<>();
 			final List<LifecycleElement> currDestroyMethods = new ArrayList<>();
@@ -244,6 +264,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 
 
 	/**
+	 * 记录class中的被init / destroy 注解标记方法集合
 	 * Class representing information about annotated init and destroy methods.
 	 */
 	private class LifecycleMetadata {
@@ -333,6 +354,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 
 
 	/**
+	 * 记录init destroy 方法信息，方法调用入口
 	 * Class representing injection information about an annotated method.
 	 */
 	private static class LifecycleElement {

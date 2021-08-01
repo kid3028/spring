@@ -16,13 +16,21 @@
 
 package org.springframework.beans.factory.config;
 
-import java.beans.PropertyDescriptor;
-
+import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.lang.Nullable;
 
+import java.beans.PropertyDescriptor;
+
 /**
+ * BeanPostProcessor的子接口，添加了bean实例化前后的回调（在属性显式设置或者自动注入之前）
+ *
+ * 典型地使用方式是改变目标bean的默认实例化过程，例如为目标bean创建一个代理或者实现额外的注入策略如字段注入
+ * 这个接口是为了特殊使用而创建的，主要用于框架内部。
+ * 我们比较推荐直接实现{@link BeanPostProcessor}
+ *
  * Subinterface of {@link BeanPostProcessor} that adds a before-instantiation callback,
  * and a callback after instantiation but before explicit properties are set or
  * autowiring occurs.
@@ -47,11 +55,17 @@ import org.springframework.lang.Nullable;
 public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 
 	/**
+	 * 在目标bean被实例化前作用此函数
+	 * 如果返回值非null，那么bean实例化结束，否则继续执行实例化过程
+	 *
+	 * 返回的bean可以是一个proxy来替代目标bean，从而实现对默认bean实例化过程的修改。
+	 * eg:
+	 *  {@link org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#resolveBeforeInstantiation(String, RootBeanDefinition)}
 	 * Apply this BeanPostProcessor <i>before the target bean gets instantiated</i>.
 	 * The returned bean object may be a proxy to use instead of the target bean,
 	 * effectively suppressing default instantiation of the target bean.
 	 * <p>If a non-null object is returned by this method, the bean creation process
-	 * will be short-circuited. The only further processing applied is the
+	 * will be short-circuited（中断）. The only further processing applied is the
 	 * {@link #postProcessAfterInitialization} callback from the configured
 	 * {@link BeanPostProcessor BeanPostProcessors}.
 	 * <p>This callback will be applied to bean definitions with their bean class,
@@ -76,6 +90,12 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	}
 
 	/**
+	 * 在bean实例化完成后、但属性填充前被回调，
+	 * 最佳实践：执行字段注入
+	 * 返回true则继续执行属性注入；返回false则跳过属性注入，后续的postProcessor也将停止调用
+	 * 默认返回true。
+	 * eg:
+	 *  {@link org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#populateBean(String, RootBeanDefinition, BeanWrapper)}
 	 * Perform operations after the bean has been instantiated, via a constructor or factory method,
 	 * but before Spring property population (from explicit properties or autowiring) occurs.
 	 * <p>This is the ideal callback for performing custom field injection on the given bean
@@ -95,6 +115,13 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	}
 
 	/**
+	 * 对bean propertyValues 的后置处理，在propertyValues应用到bean之前调用该方法
+	 *
+	 * 返回null则继续调用 {@link #postProcessPropertyValues(PropertyValues, PropertyDescriptor[], Object, String)}
+	 * 非null，则应用pvs
+	 * eg:
+	 *  {@link org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#populateBean(String, RootBeanDefinition, BeanWrapper)}
+
 	 * Post-process the given property values before the factory applies them
 	 * to the given bean, without any need for property descriptors.
 	 * <p>Implementations should return {@code null} (the default) if they provide a custom

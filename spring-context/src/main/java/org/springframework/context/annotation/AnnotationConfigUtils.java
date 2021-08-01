@@ -47,6 +47,15 @@ import java.util.Set;
  * {@link BeanFactoryPostProcessor}
  * {@link AutowireCandidateResolver}
  *
+ * AnnotationAwareOrderComparator
+ * ContextAnnotationAutowireCandidateResolver
+ * ConfigurationClassPostProcessor
+ * AutowiredAnnotationBeanPostProcessor
+ * CommonAnnotationBeanPostProcessor
+ * PersistenceAnnotationBeanPostProcessor
+ * EventListenerMethodProcessor
+ * internalEventListenerFactory --> DefaultEventListenerFactory
+ *
  * Utility class that allows for convenient registration of common
  * {@link BeanPostProcessor} and
  * {@link BeanFactoryPostProcessor}

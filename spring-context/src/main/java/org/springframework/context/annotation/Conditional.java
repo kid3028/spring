@@ -23,6 +23,18 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * 当一个组件的所有条件都满足时才进行注册
+ *
+ * 条件需要是在bean注册前就能通过编程确定的
+ *
+ * @Conditional 使用范围
+ *  - 类级别：标记了 @Component 及其 子注解的组件类
+ *  - 作为元注解
+ *  - 被标记了 @Bean 的方法
+ *
+ * 如果@Configuration类被标记了@Conditional，那么@Configuration类上所有的 @Bean @Import @ComponentScan 都会受到条件约束
+ *
+ * 【注意】@Conditional 注解不支持继承，不考虑父类或者复写的条件
  * Indicates that a component is only eligible for registration when all
  * {@linkplain #value specified conditions} match.
  *
@@ -62,6 +74,7 @@ import java.lang.annotation.Target;
 public @interface Conditional {
 
 	/**
+	 * 所有的条件类必须匹配
 	 * All {@link Condition} classes that must {@linkplain Condition#matches match}
 	 * in order for the component to be registered.
 	 */

@@ -20,6 +20,11 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
 /**
+ * 通过 {@link #matches(ConditionContext, AnnotatedTypeMetadata)} 方法判断一个组件能否被注册
+ * 在BeanDefinition注册前进行调用
+ * 应该与BeanFactoryPostProcessor一样限制，且不和任何bean实例直接交互
+ * 对标记了{@link Configuration @Configuration}的bean可以通过实现{@link ConfigurationCondition @ConfigurationCondition} 来实现更加细粒度的控制
+ *
  * A single {@code condition} that must be {@linkplain #matches matched} in order
  * for a component to be registered.
  *
@@ -42,10 +47,13 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 public interface Condition {
 
 	/**
+	 * 判断条件是否匹配
+	 *
 	 * Determine if the condition matches.
-	 * @param context the condition context
+	 * @param context the condition context 条件上下文
 	 * @param metadata the metadata of the {@link org.springframework.core.type.AnnotationMetadata class}
-	 * or {@link org.springframework.core.type.MethodMetadata method} being checked
+	 * or {@link org.springframework.core.type.MethodMetadata method} being
+	 *        class or method的元数据
 	 * @return {@code true} if the condition matches and the component can be registered,
 	 * or {@code false} to veto the annotated component's registration
 	 */

@@ -533,19 +533,29 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	@Override
 	public void refresh() throws BeansException, IllegalStateException {
 		synchronized (this.startupShutdownMonitor) {
-			// 准备刷新的上下文环境，例如对系统属性或者环境变量进行准备验证
-			// 在某些情况下项目需要读取某些系统变量，而这个变量可能会影响系统的正确性，在spring启动的时候提前对必须的变量进行存在性验证比较重要
+			/**
+			 * 1、记录启动数据 启动事件、标记状态已是active
+			 * 2、如果子类复写了initPropertySources，那么完成初始化
+			 * 3、初始化Environment、创建一个StandardEnvironment对象
+			 * 4、早期事件、监听器的处理
+			 */
 			// Prepare this context for refreshing.
 			prepareRefresh();
 
-			// 初始化BeanFactory，并对xml进行读取
+			// 初始化BeanFactory，并对xml进行读取，加载xml中定义的BeanDefinition
 			// 复用BeanFactory中配置文件读取解析及其他功能，使applicationContext拥有了BeanFactory全部功能
 			// Tell the subclass to refresh the internal bean factory.
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// ===========xml配置已经解析完毕=============
 
-			// 对beanFactory进行各种功能填充，  @Qualifier @Autowired 注册的支持
+			/**
+			 * 1、设置BeanClassLoader
+			 * 2、spel
+			 * 3、aware
+			 * 3、resolvableDependency
+			 * 4、放入System.properties system.env 等bean
+			 */
 			// Prepare the bean factory for use in this context.
 			prepareBeanFactory(beanFactory);
 
@@ -621,6 +631,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 * 1、记录启动数据 启动事件、标记状态已是active
+	 * 2、如果子类复写了initPropertySources，那么完成初始化
+	 * 3、初始化Environment、创建一个StandardEnvironment对象
+	 * 4、早期事件、监听器的处理
 	 * Prepare this context for refreshing, setting its startup date and
 	 * active flag as well as performing any initialization of property sources.
 	 */
@@ -658,6 +672,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Initialize any placeholder property sources in the context environment.
 		initPropertySources();
 
+		// getEnvironment 默认会创建一个StandardEnvironment，注入System.getProperties() System.getEnv()作为Properties
 		// 验证需要的属性是否已经放入环境中
 		// Validate that all properties marked as required are resolvable:
 		// see ConfigurablePropertyResolver#setRequiredProperties

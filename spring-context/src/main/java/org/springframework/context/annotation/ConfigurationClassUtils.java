@@ -16,14 +16,8 @@
 
 package org.springframework.context.annotation;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -37,6 +31,11 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Utilities for identifying {@link Configuration} classes.
@@ -62,6 +61,9 @@ abstract class ConfigurationClassUtils {
 
 	private static final Set<String> candidateIndicators = new HashSet<>(8);
 
+	/*
+	  轻量级配置类标记
+	 */
 	static {
 		candidateIndicators.add(Component.class.getName());
 		candidateIndicators.add(ComponentScan.class.getName());
@@ -71,6 +73,7 @@ abstract class ConfigurationClassUtils {
 
 
 	/**
+	 * 检车BeanDefinition是否是ConfigurationClass —— 全职ConfigurationClass / 轻量级ConfigurationClass
 	 * Check whether the given bean definition is a candidate for a configuration class
 	 * (or a nested component class declared within a configuration/component class,
 	 * to be auto-registered as well), and mark it accordingly.
@@ -143,6 +146,8 @@ abstract class ConfigurationClassUtils {
 	}
 
 	/**
+	 * 检查给定的class是否是一个全配置类
+	 * 如标记有@Configuration注解
 	 * Check the given metadata for a full configuration class candidate
 	 * (i.e. a class annotated with {@code @Configuration}).
 	 * @param metadata the metadata of the annotated class
@@ -154,6 +159,9 @@ abstract class ConfigurationClassUtils {
 	}
 
 	/**
+	 * 是否是一个轻量级的ConfigurationClass
+	 * 标记有@Component、@Import、@Bean
+	 *
 	 * Check the given metadata for a lite configuration class candidate
 	 * (e.g. a class annotated with {@code @Component} or just having
 	 * {@code @Import} declarations or {@code @Bean methods}).
