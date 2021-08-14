@@ -24,6 +24,15 @@ import java.io.Writer;
 import java.util.Properties;
 
 /**
+ * {@link PropertiesPersister}接口的默认实现
+ *
+ * 允许从任意的reader中读取数据到properties，写properties数据到任意的writer。
+ * 这个本来是{@link Properties}应该具有的能力，但是在jdk5之前都没有提供，
+ * 只允许使用 ISO-8859-1 加载properties
+ *
+ * api的load 、 store 操作现在都委托给了{@link Properties}
+ *
+ *
  * Default implementation of the {@link PropertiesPersister} interface.
  * Follows the native parsing of {@code java.util.Properties}.
  *

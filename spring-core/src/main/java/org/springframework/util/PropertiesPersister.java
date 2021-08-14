@@ -24,6 +24,10 @@ import java.io.Writer;
 import java.util.Properties;
 
 /**
+ * 读取数据存入{@link Properties}的策略接口
+ *
+ * 默认实现是{@link DefaultPropertiesPersister}
+ * 可以实现将数据读入properties 将properties数据写入到writer
  * Strategy interface for persisting {@code java.util.Properties},
  * allowing for pluggable parsing strategies.
  *

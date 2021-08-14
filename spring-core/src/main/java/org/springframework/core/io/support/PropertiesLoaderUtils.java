@@ -33,6 +33,8 @@ import org.springframework.util.PropertiesPersister;
 import org.springframework.util.ResourceUtils;
 
 /**
+ * 以输入流的方式加载properties
+ * 如果想要对properties加载做更多的自定义，可以考虑使用{@link PropertiesLoaderSupport}
  * Convenient utility methods for loading of {@code java.util.Properties},
  * performing standard handling of input streams.
  *
@@ -50,6 +52,7 @@ public abstract class PropertiesLoaderUtils {
 
 
 	/**
+	 * 从给定的 {@link EncodedResource} 使用指定的编码加载properties
 	 * Load properties from the given EncodedResource,
 	 * potentially defining a specific encoding for the properties file.
 	 * @see #fillProperties(java.util.Properties, EncodedResource)
@@ -61,6 +64,7 @@ public abstract class PropertiesLoaderUtils {
 	}
 
 	/**
+	 * 使用{@link EncodedResource}填充 {@link Properties}对象
 	 * Fill the given properties from the given EncodedResource,
 	 * potentially defining a specific encoding for the properties file.
 	 * @param props the Properties instance to load into
@@ -87,14 +91,17 @@ public abstract class PropertiesLoaderUtils {
 		Reader reader = null;
 		try {
 			String filename = resource.getResource().getFilename();
+			// 资源对象是一个xml
 			if (filename != null && filename.endsWith(XML_FILE_EXTENSION)) {
 				stream = resource.getInputStream();
 				persister.loadFromXml(props, stream);
 			}
+			// 使用reader读取 —— 指定了encoding or charset
 			else if (resource.requiresReader()) {
 				reader = resource.getReader();
 				persister.load(props, reader);
 			}
+			// 获取资源对象的流进行资源读取
 			else {
 				stream = resource.getInputStream();
 				persister.load(props, stream);

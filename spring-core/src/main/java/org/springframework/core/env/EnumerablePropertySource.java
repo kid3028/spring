@@ -19,6 +19,16 @@ package org.springframework.core.env;
 import org.springframework.util.ObjectUtils;
 
 /**
+ *
+ * 一个PropertySource实现，能够查询其底层源对象以枚举所有可能的属性名称/值对。公开getPropertyNames（）方法，
+ * 以允许调用方内省可用属性，而无需访问底层源对象。这也有助于更高效地实现containsProperty（String），因为它可以调用getPropertyNames（）
+ * 并遍历返回的数组，而不是尝试调用可能更昂贵的getProperty（String）。实现可以考虑缓存GePrimeTyNeScript（）的结果，以充分利用此性能机会。
+ *
+ * {@link PropertySource}实现，通过查询底层元数据来枚举所有可能的 propertyName-value。
+ * 提供了{@link #getProperty(String)}方法允许调用方内省可用的属性，而无需访问底层元数据。
+ * {@link #containsProperty(String)}方法提供了更加便捷的方式，内部调用{@link #getPropertyNames()}
+ * 方法，然后遍历返回的数组对象，相比较而言{@link #getProperty(String)}就显得比较昂贵.
+ *
  * A {@link PropertySource} implementation capable of interrogating its
  * underlying source object to enumerate all possible property name/value
  * pairs. Exposes the {@link #getPropertyNames()} method to allow callers

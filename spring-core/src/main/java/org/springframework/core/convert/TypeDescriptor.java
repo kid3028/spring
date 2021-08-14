@@ -36,6 +36,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
+ * 要转换类型的上下文信息，能够表示数组和泛型集合
  * Contextual descriptor about a type to convert from or to.
  * Capable of representing arrays and generic collection types.
  *
@@ -76,6 +77,7 @@ public class TypeDescriptor implements Serializable {
 
 
 	/**
+	 * 为方法参数创建一个描述符
 	 * Create a new type descriptor from a {@link MethodParameter}.
 	 * <p>Use this constructor when a source or target conversion point is a
 	 * constructor parameter, method parameter, or method return value.

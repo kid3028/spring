@@ -19,6 +19,9 @@ package org.springframework.core.convert.converter;
 import org.springframework.lang.Nullable;
 
 /**
+ * 完成S类型对象到T类型对象的转换
+ * 实现应该是线程安全的，并且是可以共享的
+ * 建议使用{@link ConditionalConverter}来获取更多特性
  * A converter converts a source object of type {@code S} to a target of type {@code T}.
  *
  * <p>Implementations of this interface are thread-safe and can be shared.
@@ -34,6 +37,10 @@ import org.springframework.lang.Nullable;
 public interface Converter<S, T> {
 
 	/**
+	 * 完成S类型对象到T类型对象的转换
+	 * S不能为null
+	 * 返回的T可能是null
+	 * 如果S无法转为T将会抛出异常{@link IllegalArgumentException}
 	 * Convert the source object of type {@code S} to target type {@code T}.
 	 * @param source the source object to convert, which must be an instance of {@code S} (never {@code null})
 	 * @return the converted object, which must be an instance of {@code T} (potentially {@code null})

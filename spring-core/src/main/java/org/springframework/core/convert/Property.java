@@ -32,6 +32,11 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
+ * JavaBean属性的抽象描述。使用{@link Property}开发者不再需要依赖 {@link java.beans.PropertyDescriptor}
+ * {@code java.beans}包在Android等一些环境下是不可用的，所以，它们对于spring的类型转换能力极其迫切。
+ *
+ * Property被用来构建{@link TypeDescriptor}对象，实现类型转换
+ *
  * A description of a JavaBeans Property that allows us to avoid a dependency on
  * {@code java.beans.PropertyDescriptor}. The {@code java.beans} package
  * is not available in a number of environments (e.g. Android, Java ME), so this is
@@ -48,20 +53,42 @@ import org.springframework.util.StringUtils;
  */
 public final class Property {
 
+	/**
+	 * 静态变量
+	 * 全局缓存
+	 */
 	private static Map<Property, Annotation[]> annotationCache = new ConcurrentReferenceHashMap<>();
 
+	/**
+	 * 属性所属的类
+	 */
 	private final Class<?> objectType;
 
+	/**
+	 * 属性对应的读方法
+	 */
 	@Nullable
 	private final Method readMethod;
 
+	/**
+	 * 属性对应的写方法
+	 */
 	@Nullable
 	private final Method writeMethod;
 
+	/**
+	 * 属性的名称
+	 */
 	private final String name;
 
+	/**
+	 * 属性类型
+	 */
 	private final MethodParameter methodParameter;
 
+	/**
+	 * 属性上标记的注解？？
+	 */
 	@Nullable
 	private Annotation[] annotations;
 
@@ -82,6 +109,8 @@ public final class Property {
 
 
 	/**
+	 * 声明该属性的class
+	 * 可能来自于父类
 	 * The object declaring this property, either directly or in a superclass the object extends.
 	 */
 	public Class<?> getObjectType() {
@@ -89,6 +118,7 @@ public final class Property {
 	}
 
 	/**
+	 * 属性的名称
 	 * The name of the property: e.g. 'foo'
 	 */
 	public String getName() {
@@ -96,6 +126,7 @@ public final class Property {
 	}
 
 	/**
+	 * 属性类型
 	 * The property type: e.g. {@code java.lang.String}
 	 */
 	public Class<?> getType() {
@@ -103,6 +134,7 @@ public final class Property {
 	}
 
 	/**
+	 * 属性读方法
 	 * The property getter method: e.g. {@code getFoo()}
 	 */
 	@Nullable
@@ -111,6 +143,7 @@ public final class Property {
 	}
 
 	/**
+	 * 属性写方法
 	 * The property setter method: e.g. {@code setFoo(String)}
 	 */
 	@Nullable

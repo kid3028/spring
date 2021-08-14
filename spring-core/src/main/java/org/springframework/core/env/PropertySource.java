@@ -23,10 +23,26 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
+import java.util.Map;
+import java.util.Properties;
+
 /**
+ * name=value 这一类属性对数据源的代表
+ * {@link #getSource()}方法可能返回任何类型的属性集合对象，
+ *   或许是{@link Properties} {@link Map}
+ *        {@code ServletContext} {@code ServletConfig}
+ *
+ * {@link PropertySource} 一般不会单独使用，而是通过{@link PropertySources}聚合多个属性源，
+ * 并且与{@link PropertyResolver}结合使用，实现跨属性源集执行优先级搜索
+ *
+ * {@link PropertySource}标识不是基于属性源的内容而是基于数据源的名称{@link #getName()}
+ * 这对于在集合上下文中操作属性源是非常实用的
+ *
+ * 在{@code @Configuration} 标记的配置类中，使用 {@code @PropertySource} 声明式地来导入 属性源是非常便利的
+ *
  * Abstract base class representing a source of name/value property pairs. The underlying
  * {@linkplain #getSource() source object} may be of any type {@code T} that encapsulates
- * properties. Examples include {@link java.util.Properties} objects, {@link java.util.Map}
+ * properties. Examples include {@link Properties} objects, {@link Map}
  * objects, {@code ServletContext} and {@code ServletConfig} objects (for access to init
  * parameters). Explore the {@code PropertySource} type hierarchy to see provided
  * implementations.
@@ -67,6 +83,7 @@ public abstract class PropertySource<T> {
 
 
 	/**
+	 * 为source创建一个PropertySource属性源
 	 * Create a new {@code PropertySource} with the given name and source object.
 	 * @param name the associated name
 	 * @param source the source object
@@ -105,6 +122,9 @@ public abstract class PropertySource<T> {
 	}
 
 	/**
+	 * 属性源中是否存在指定的属性
+	 * 默认实现是判断{@link #getProperty(String)}返回的对象是否为空，
+	 * 子类可以通过更高效的算法来重写该方法
 	 * Return whether this {@code PropertySource} contains the given name.
 	 * <p>This implementation simply checks for a {@code null} return value
 	 * from {@link #getProperty(String)}. Subclasses may wish to implement

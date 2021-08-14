@@ -26,6 +26,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.IdentityHashMap;
@@ -42,6 +43,18 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
+ * 对{@link Type}的封装
+ * 提供
+ *   getSuperType() —— superType
+ *   getInterfaces() —— interfaces
+ *   getGeneric(int...) —— generic parameters
+ *   resolve()  等方法
+ *
+ *   forField(Field) —— fields
+ *   forMethodParameter(Method, int) —— method parameters
+ *   forMethodReturnType(Method) —— method return
+ *   forClass(Class) —— classes
+ *
  * Encapsulates a Java {@link java.lang.reflect.Type}, providing access to
  * {@link #getSuperType() supertypes}, {@link #getInterfaces() interfaces}, and
  * {@link #getGeneric(int...) generic parameters} along with the ability to ultimately
@@ -83,6 +96,7 @@ import org.springframework.util.StringUtils;
 public class ResolvableType implements Serializable {
 
 	/**
+	 * 创建一个ResolvableType的 零值，
 	 * {@code ResolvableType} returned when no value is available. {@code NONE} is used
 	 * in preference to {@code null} so that multiple method calls can be safely chained.
 	 */
@@ -95,6 +109,7 @@ public class ResolvableType implements Serializable {
 
 
 	/**
+	 *
 	 * The underlying Java type being managed.
 	 */
 	private final Type type;
@@ -242,6 +257,7 @@ public class ResolvableType implements Serializable {
 	}
 
 	/**
+	 * obj 是否是当前ResolvableType的实例
 	 * Determine whether the given object is an instance of this {@code ResolvableType}.
 	 * @param obj the object to check
 	 * @since 4.2
@@ -280,11 +296,13 @@ public class ResolvableType implements Serializable {
 	private boolean isAssignableFrom(ResolvableType other, @Nullable Map<Type, Type> matchedBefore) {
 		Assert.notNull(other, "ResolvableType must not be null");
 
+		// false —— 无法解析
 		// If we cannot resolve types, we are not assignable
 		if (this == NONE || other == NONE) {
 			return false;
 		}
 
+		// 数组 委派给component type
 		// Deal with array by delegating to the component type
 		if (isArray()) {
 			return (other.isArray() && getComponentType().isAssignableFrom(other.getComponentType()));
@@ -294,6 +312,7 @@ public class ResolvableType implements Serializable {
 			return true;
 		}
 
+		// 通配符边界  <? extends E> <? super K>...
 		// Deal with wildcard bounds
 		WildcardBounds ourBounds = WildcardBounds.get(this);
 		WildcardBounds typeBounds = WildcardBounds.get(other);
@@ -1272,6 +1291,7 @@ public class ResolvableType implements Serializable {
 	}
 
 	/**
+	 * get(List<String> list) --> List<String>
 	 * Return a {@link ResolvableType} for the specified {@link MethodParameter}.
 	 * @param methodParameter the source method parameter (must not be {@code null})
 	 * @return a {@link ResolvableType} for the specified method parameter
@@ -1577,6 +1597,7 @@ public class ResolvableType implements Serializable {
 
 
 	/**
+	 * 泛型边界处理工具类
 	 * Internal helper to handle bounds from {@link WildcardType WildcardTypes}.
 	 */
 	private static class WildcardBounds {
@@ -1631,6 +1652,11 @@ public class ResolvableType implements Serializable {
 		}
 
 		/**
+		 * 返回ResovableType的通配符边界 Kind.LOWER/Kind.UPPER --> ResolvableType[]
+		 * 如果ResolvableType不能被解析为WildcardType那么将会返回null
+		 *
+		 * {@link WildcardType} 是一个通配符表示,如<?> <? extends Number> <? super Integer>
+		 *
 		 * Get a {@link WildcardBounds} instance for the specified type, returning
 		 * {@code null} if the specified type cannot be resolved to a {@link WildcardType}.
 		 * @param type the source type
@@ -1656,6 +1682,7 @@ public class ResolvableType implements Serializable {
 		}
 
 		/**
+		 * 边界
 		 * The various kinds of bounds.
 		 */
 		enum Kind {UPPER, LOWER}

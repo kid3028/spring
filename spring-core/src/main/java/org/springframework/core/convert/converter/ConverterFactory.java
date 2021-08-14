@@ -17,6 +17,8 @@
 package org.springframework.core.convert.converter;
 
 /**
+ * 遍历查找能将S转换为T的converter
+ * 实现者可以实现{@link ConditionalConverter}来获得更强的特性
  * A factory for "ranged" converters that can convert objects from S to subtypes of R.
  *
  * <p>Implementations may additionally implement {@link ConditionalConverter}.

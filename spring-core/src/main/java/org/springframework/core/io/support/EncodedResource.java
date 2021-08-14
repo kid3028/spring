@@ -118,6 +118,7 @@ public class EncodedResource implements InputStreamSource {
 	}
 
 	/**
+	 * 是否需要使用reader来读取资源对象
 	 * Determine whether a {@link Reader} is required as opposed to an {@link InputStream},
 	 * i.e. whether an {@linkplain #getEncoding() encoding} or a {@link #getCharset() Charset}
 	 * has been specified.

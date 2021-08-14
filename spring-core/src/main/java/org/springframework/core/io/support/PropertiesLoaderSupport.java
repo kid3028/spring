@@ -32,6 +32,7 @@ import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
 
 /**
+ * 从资源对象中加载properties，或者加载本地的properties文件，支持配置覆盖
  * Base class for JavaBean-style components that need to load properties
  * from one or more resources. Supports local properties as well, with
  * configurable overriding.

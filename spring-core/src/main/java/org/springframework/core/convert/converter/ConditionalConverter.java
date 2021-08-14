@@ -19,6 +19,14 @@ package org.springframework.core.convert.converter;
 import org.springframework.core.convert.TypeDescriptor;
 
 /**
+ * 为{@link Converter} {@link GenericConverter} {@link ConverterFactory}添加有条件的执行类型转换.
+ *
+ * 根据字段or类的注释、方法等特征来判断是否执行自定义的类型转换。
+ * 例如，将一个字符串转换为日期字段，如果该字段上标记了{@code @DateTimeFormat}那么conditional条件满足
+ *
+ * 再比如，将字段串转换为 {@code Account} 类型，如果在 {@code Account}类中存在 {@code public static findAccount(String)}
+ * 方法，那么条件也就满足
+ *
  * Allows a {@link Converter}, {@link GenericConverter} or {@link ConverterFactory} to
  * conditionally execute based on attributes of the {@code source} and {@code target}
  * {@link TypeDescriptor}.
@@ -43,6 +51,7 @@ import org.springframework.core.convert.TypeDescriptor;
 public interface ConditionalConverter {
 
 	/**
+	 * {code sourceType} 能否转换为 {@code targetType}
 	 * Should the conversion from {@code sourceType} to {@code targetType} currently under
 	 * consideration be selected?
 	 * @param sourceType the type descriptor of the field we are converting from

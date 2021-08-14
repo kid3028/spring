@@ -19,6 +19,7 @@ package org.springframework.util;
 import org.springframework.lang.Nullable;
 
 /**
+ * 硬伤上下文解析一个字符串值的策略接口
  * Simple strategy interface for resolving a String value.
  * Used by {@link org.springframework.beans.factory.config.ConfigurableBeanFactory}.
  *
@@ -32,6 +33,7 @@ import org.springframework.lang.Nullable;
 public interface StringValueResolver {
 
 	/**
+	 * 解析给定的value值，例如处理占位符
 	 * Resolve the given String value, for example parsing placeholders.
 	 * @param strVal the original String value (never {@code null})
 	 * @return the resolved String value (may be {@code null} when resolved to a null

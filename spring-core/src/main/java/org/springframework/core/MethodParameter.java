@@ -36,17 +36,24 @@ import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
+ * 对方法参数规范的封装
+ * 方法或者构造器加上已声明泛型类型的参数索引和嵌套类型索引
+ * 作为要传递的规范对象很有用
+ *
+ * 从4.2开始，新增了{@link SynthesizingMethodParameter}子类，他使用属性别名来合成注释，
+ * 该类在web和消息端点处理中被广泛使用
  * Helper class that encapsulates the specification of a method parameter, i.e. a {@link Method}
  * or {@link Constructor} plus a parameter index and a nested type index for a declared generic
  * type. Useful as a specification object to pass along.
  *
- * <p>As of 4.2, there is a {@link org.springframework.core.annotation.SynthesizingMethodParameter}
+ * <p>As of 4.2, there is a {@link SynthesizingMethodParameter}
  * subclass available which synthesizes annotations with attribute aliases. That subclass is used
  * for web and message endpoint processing, in particular.
  *
@@ -56,7 +63,7 @@ import org.springframework.util.ObjectUtils;
  * @author Sam Brannen
  * @author Sebastien Deleuze
  * @since 2.0
- * @see org.springframework.core.annotation.SynthesizingMethodParameter
+ * @see SynthesizingMethodParameter
  */
 public class MethodParameter {
 
@@ -100,6 +107,10 @@ public class MethodParameter {
 
 
 	/**
+	 * 为指定index位置的方法参数创建MethodParameter实例
+	 * -1 ： 方法返回值
+	 * 0 ：第一个参数
+	 *
 	 * Create a new {@code MethodParameter} for the given method, with nesting level 1.
 	 * @param method the Method to specify a parameter for
 	 * @param parameterIndex the index of the parameter: -1 for the method
@@ -403,6 +414,8 @@ public class MethodParameter {
 	}
 
 	/**
+	 * 获取参数类型
+	 * 如果parameter = null，index < 0 ? returnType or (void.class) : parameterTypes[index]
 	 * Return the type of the method/constructor parameter.
 	 * @return the parameter type (never {@code null})
 	 */
@@ -537,6 +550,7 @@ public class MethodParameter {
 	}
 
 	/**
+	 * 先通过方法获取到每个参数对应的注解类型（二维数组），然后根据parameterIndex找到对应的
 	 * Return the annotations associated with the specific method/constructor parameter.
 	 */
 	public Annotation[] getParameterAnnotations() {
@@ -568,6 +582,7 @@ public class MethodParameter {
 	}
 
 	/**
+	 * 遍历parameterIndex位置上的注解，判断是否是annotationType的实例
 	 * Return the parameter annotation of the given type, if available.
 	 * @param annotationType the annotation type to look for
 	 * @return the annotation object, or {@code null} if not found
@@ -604,6 +619,7 @@ public class MethodParameter {
 	}
 
 	/**
+	 * 返回参数名称
 	 * Return the name of the method/constructor parameter.
 	 * @return the parameter name (may be {@code null} if no
 	 * parameter name metadata is contained in the class file or no

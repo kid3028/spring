@@ -22,6 +22,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ *
  * Specialization of {@link MapPropertySource} designed for use with
  * {@linkplain AbstractEnvironment#getSystemEnvironment() system environment variables}.
  * Compensates for constraints in Bash and other shells that do not allow for variables

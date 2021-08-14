@@ -31,6 +31,11 @@ import org.springframework.lang.Nullable;
 public interface ConversionService {
 
 	/**
+	 * 如果sourceType能被转为targetType则返回true
+	 * 如果该方法返回true，那么 {@link #convert(Object, Class)} 也是可以成功执行
+	 * 【注意】对于集合、数组、map类型，需要注意：
+	 * 对于集合、数组、map类型，如果底层元素无法转换，将会产生 {@link ConversionException}
+	 * 调用需要处理这个异常
 	 * Return {@code true} if objects of {@code sourceType} can be converted to the {@code targetType}.
 	 * <p>If this method returns {@code true}, it means {@link #convert(Object, Class)} is capable
 	 * of converting an instance of {@code sourceType} to {@code targetType}.
@@ -47,6 +52,8 @@ public interface ConversionService {
 	boolean canConvert(@Nullable Class<?> sourceType, Class<?> targetType);
 
 	/**
+	 * 如果sourceType能被转为targetType则返回true
+	 * {@link TypeDescriptor}提供了sourceType 、 targetType的上下文信息
 	 * Return {@code true} if objects of {@code sourceType} can be converted to the {@code targetType}.
 	 * The TypeDescriptors provide additional context about the source and target locations
 	 * where conversion would occur, often object fields or property locations.
