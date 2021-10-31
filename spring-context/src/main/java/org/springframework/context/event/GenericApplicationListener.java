@@ -23,6 +23,9 @@ import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 
 /**
+ * {@link ApplicationListener}的变体，暴露对eventType / sourceType 的支持
+ *
+ * 从4.2开始，这个接口将取代基于类的{@link SmartApplicationListener}，完全处理通用的事件类型
  * Extended variant of the standard {@link ApplicationListener} interface,
  * exposing further metadata such as the supported event and source type.
  *

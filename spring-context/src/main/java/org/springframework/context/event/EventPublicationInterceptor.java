@@ -25,10 +25,15 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.ApplicationListener;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * 拦截器的作用：
+ * 在每次方法调用成功后向所有在{@link ApplicationEventPublisher}注册的{@link ApplicationListener} 发布 {@link ApplicationEvent}事件
+ *
+ * 【注意】这个拦截仅能发送通过 {@link #setApplicationEventClass(Class)}配置的无状态事件
  * {@link MethodInterceptor Interceptor} that publishes an
  * {@code ApplicationEvent} to all {@code ApplicationListeners}
  * registered with an {@code ApplicationEventPublisher} after each
@@ -43,7 +48,7 @@ import org.springframework.util.Assert;
  * @author Rick Evans
  * @see #setApplicationEventClass
  * @see org.springframework.context.ApplicationEvent
- * @see org.springframework.context.ApplicationListener
+ * @see ApplicationListener
  * @see org.springframework.context.ApplicationEventPublisher
  * @see org.springframework.context.ApplicationContext
  */
@@ -58,6 +63,10 @@ public class EventPublicationInterceptor
 
 
 	/**
+	 * 设置要发送的事件类
+	 * 事件类需要有一个只有一个object类型参数的构造器，拦截器将会调用他
+	 *
+	 * 如果事件类为null，或者不是{@link ApplicationEvent}子类，或者没有单个参数的构造器，那么将会抛出异常{@link IllegalArgumentException}
 	 * Set the application event class to publish.
 	 * <p>The event class <b>must</b> have a constructor with a single
 	 * {@code Object} argument for the event source. The interceptor

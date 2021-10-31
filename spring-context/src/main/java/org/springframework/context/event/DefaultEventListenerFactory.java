@@ -18,10 +18,15 @@ package org.springframework.context.event;
 
 import java.lang.reflect.Method;
 
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.core.Ordered;
 
 /**
+ * {@link AnnotationConfigUtils#registerAnnotationConfigProcessors(BeanDefinitionRegistry, Object)} 中被注册进IoC容器
+ * 用于支持{@link EventListener}注解
+ *
  * Default {@link EventListenerFactory} implementation that supports the
  * regular {@link EventListener} annotation.
  *

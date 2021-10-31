@@ -19,6 +19,9 @@ package org.springframework.aop;
 import org.aopalliance.aop.Advice;
 
 /**
+ * AfterAdvice
+ *   AfterReturningAdvice
+ *   ThrowsAdvice
  * Common marker interface for after advice,
  * such as {@link AfterReturningAdvice} and {@link ThrowsAdvice}.
  *

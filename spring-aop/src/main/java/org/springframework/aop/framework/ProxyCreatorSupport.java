@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
+ * proxy factory的基类
  * Base class for proxy factories.
  * Provides convenient access to a configurable AopProxyFactory.
  *

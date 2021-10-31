@@ -20,6 +20,7 @@ import org.springframework.beans.factory.Aware;
 import org.springframework.util.StringValueResolver;
 
 /**
+ * 注入StringValueResolver
  * Interface to be implemented by any object that wishes to be notified of a
  * {@code StringValueResolver} for the resolution of embedded definition values.
  *

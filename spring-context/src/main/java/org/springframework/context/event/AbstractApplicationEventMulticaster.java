@@ -40,6 +40,14 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
+ * {@link ApplicationEventMulticaster}的抽象实现，提供了listener注册的基本能力
+ *
+ * 默认情况下同一个listener不允许有多个实例，因为底层使用一个linkHashSet存储
+ *
+ * 子类需要实现{@link ApplicationEventMulticaster#multicastEvent}方法
+ * {@link SimpleApplicationEventMulticaster}做了一个简单的实现，将所有事件广播给所有注册的
+ * listener，在当前事件发布线程中完成调用
+ *
  * Abstract implementation of the {@link ApplicationEventMulticaster} interface,
  * providing the basic listener registration facility.
  *
@@ -161,6 +169,8 @@ public abstract class AbstractApplicationEventMulticaster
 	}
 
 	/**
+	 * 惰性缓存
+	 * 先从缓存中获取，如果没有，遍历所有注册的listener，查找符合条件的，并缓存返回
 	 * Return a Collection of ApplicationListeners matching the given
 	 * event type. Non-matching listeners get excluded early.
 	 * @param event the event to be propagated. Allows for excluding
@@ -205,6 +215,7 @@ public abstract class AbstractApplicationEventMulticaster
 	}
 
 	/**
+	 * 现场组装event对应的listener
 	 * Actually retrieve the application listeners for the given event and source type.
 	 * @param eventType the event type
 	 * @param sourceType the event source type
@@ -285,6 +296,7 @@ public abstract class AbstractApplicationEventMulticaster
 	}
 
 	/**
+	 * 判断listener是否支持给定是event事件
 	 * Determine whether the given listener supports the given event.
 	 * <p>The default implementation detects the {@link SmartApplicationListener}
 	 * and {@link GenericApplicationListener} interfaces. In case of a standard
@@ -306,6 +318,7 @@ public abstract class AbstractApplicationEventMulticaster
 
 
 	/**
+	 * eventType与sourceType的组成的一个联合key，缓存listener与event之间的映射关系
 	 * Cache key for ListenerRetrievers, based on event type and source type.
 	 */
 	private static final class ListenerCacheKey implements Comparable<ListenerCacheKey> {
@@ -359,6 +372,8 @@ public abstract class AbstractApplicationEventMulticaster
 
 
 	/**
+	 * 辅助类。
+	 * 封装了一组listener，可以更高效地筛选出listener
 	 * Helper class that encapsulates a specific set of target listeners,
 	 * allowing for efficient retrieval of pre-filtered listeners.
 	 * <p>An instance of this helper gets cached per event type and source type.

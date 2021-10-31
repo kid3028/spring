@@ -19,6 +19,9 @@ package org.aopalliance.intercept;
 import org.aopalliance.aop.Advice;
 
 /**
+ * 通用的拦截器
+ * 通用拦截器可以拦截基础程序中出现的的运行时事件，
+ * 这个接口通常不会被直接使用，在子类实现为拦截特定的事件，
  * This interface represents a generic interceptor.
  *
  * <p>A generic interceptor can intercept runtime events that occur

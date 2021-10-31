@@ -17,6 +17,9 @@
 package org.springframework.aop;
 
 /**
+ * 描述Introduction的信息
+ *
+ * IntroductionAdvisors 必须实现这个接口
  * Interface supplying the information necessary to describe an introduction.
  *
  * <p>{@link IntroductionAdvisor IntroductionAdvisors} must implement this

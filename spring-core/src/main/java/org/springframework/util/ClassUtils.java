@@ -869,6 +869,8 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * 返回clazz对应的真实class
+	 * 主要针对cglib处理，cglib处理后clazz的父类才是真实的class
 	 * Return the user-defined class for the given class: usually simply the given
 	 * class, but the original class in case of a CGLIB-generated subclass.
 	 * @param clazz the class to check

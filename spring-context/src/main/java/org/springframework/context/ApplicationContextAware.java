@@ -20,6 +20,15 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.Aware;
 
 /**
+ * 实现该接口对象将会在{@link ApplicationContext}运行起来时得到通知
+ *
+ * 实现这个接口后，便可以访问上下文注册的所有Bean，但如果仅仅是为了bean查找，更加推荐使用对象属性属性引用的方式。
+ * 同时，子类可以访问文件资源、发布事件、访问国际化信息等，
+ * 但更期望去实现对应的Aware接口
+ *
+ *
+ *{@link org.springframework.context.support.ApplicationObjectSupport} 是一个本接口的一个简单实现，更加方便
+ *
  * Interface to be implemented by any object that wishes to be notified
  * of the {@link ApplicationContext} that it runs in.
  *

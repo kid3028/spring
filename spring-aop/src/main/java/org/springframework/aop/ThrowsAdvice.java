@@ -17,6 +17,15 @@
 package org.springframework.aop;
 
 /**
+ * ThrowsAdvice 标记接口
+ * 这个接口中没有定义任何的方法，因为方法将会通过反射的方式进行调用。
+ * 实现类需要实现形如下面的方法：
+ *    void afterThrowing([Method, args, target], ThrowableSubclass)
+ *
+ * 前三个参数是可选的，仅当我们需要关于joinPoint的信息时需要，如 AspectJ after-throwing-advice
+ * 如果throws-advice方法执行产生异常，它将会覆盖原始的异常
+ *
+ *
  * Tag interface for throws advice.
  *
  * <p>There are not any methods on this interface, as methods are invoked by

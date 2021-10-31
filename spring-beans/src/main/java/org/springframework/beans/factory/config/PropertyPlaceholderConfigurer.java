@@ -58,6 +58,11 @@ import org.springframework.util.StringValueResolver;
  */
 public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport {
 
+	/**
+	 * SYSTEM_PROPERTIES_MODE_NEVER  只检查给定的属性源，不会从系统属性中查找
+	 * SYSTEM_PROPERTIES_MODE_FALLBACK（默认） 优先检查给定的属性源，不存在，则继续从系统属性中查找
+	 * SYSTEM_PROPERTIES_MODE_OVERRIDE  优先检查系统属性，不存在，则继续从给定的属性源中查找
+	 */
 	/** Never check system properties. */
 	public static final int SYSTEM_PROPERTIES_MODE_NEVER = 0;
 
@@ -74,6 +79,10 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 	public static final int SYSTEM_PROPERTIES_MODE_OVERRIDE = 2;
 
 
+	/**
+	 * 缓存所有有public字段
+	 * filedName -> value
+	 */
 	private static final Constants constants = new Constants(PropertyPlaceholderConfigurer.class);
 
 	private int systemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;

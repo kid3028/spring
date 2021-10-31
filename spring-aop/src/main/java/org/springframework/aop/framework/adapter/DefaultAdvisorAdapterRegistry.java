@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * AdvisorAdapterRegistry的默认实现
+ *
  * Default implementation of the {@link AdvisorAdapterRegistry} interface.
  * Supports {@link org.aopalliance.intercept.MethodInterceptor},
  * {@link org.springframework.aop.MethodBeforeAdvice},

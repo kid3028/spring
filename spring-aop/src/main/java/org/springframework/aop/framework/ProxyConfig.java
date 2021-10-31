@@ -21,6 +21,7 @@ import java.io.Serializable;
 import org.springframework.util.Assert;
 
 /**
+ * 管理proxy配置
  * Convenience superclass for configuration used in creating proxies,
  * to ensure that all proxy creators have consistent properties.
  *
@@ -46,6 +47,8 @@ public class ProxyConfig implements Serializable {
 
 
 	/**
+	 * 是否直接代理class
+	 * true：则从class生成代理，当如果targetSource是interface，那么还是使用jdk代理
 	 * Set whether to proxy the target class directly, instead of just proxying
 	 * specific interfaces. Default is "false".
 	 * <p>Set this to "true" to force proxying for the TargetSource's exposed
@@ -69,6 +72,11 @@ public class ProxyConfig implements Serializable {
 	}
 
 	/**
+	 * 代理是否积极优化。积极优化在不同代理中略有差别，但通常是一个折中
+	 *
+	 * 例如，开启优化后advice的改变将不会影响到已经创建的Proxy。由于这个原因，一般情况下优化是被关闭的。
+	 * 一些设置可能造成优化被禁用，即使optimize=true，例如exposeProxy=true将阻止优化，二者不兼容
+	 *
 	 * Set whether proxies should perform aggressive optimizations.
 	 * The exact meaning of "aggressive optimizations" will differ
 	 * between proxies, but there is usually some tradeoff.
@@ -91,6 +99,7 @@ public class ProxyConfig implements Serializable {
 	}
 
 	/**
+	 * 是否禁止配置创建的代理被转化为Advised
 	 * Set whether proxies created by this configuration should be prevented
 	 * from being cast to {@link Advised} to query proxy status.
 	 * <p>Default is "false", meaning that any AOP proxy can be cast to
@@ -109,6 +118,10 @@ public class ProxyConfig implements Serializable {
 	}
 
 	/**
+	 * aop框架是否将proxy暴露在ThreadLocal中(可以通过AopContext取)
+	 * 当一个advised对象需要调用自身的其他advised方法时（如果使用this调用，advice并不会生效）
+	 * 默认情况下是false的，为了避免不必要的拦截。
+	 *
 	 * Set whether the proxy should be exposed by the AOP framework as a
 	 * ThreadLocal for retrieval via the AopContext class. This is useful
 	 * if an advised object needs to call another advised method on itself.

@@ -26,6 +26,8 @@ import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.util.Assert;
 
 /**
+ * 组合了 AfterReturningAdvice
+ * 框架内部使用
  * Interceptor to wrap an {@link org.springframework.aop.AfterReturningAdvice}.
  * Used internally by the AOP framework; application developers should not need
  * to use this class directly.

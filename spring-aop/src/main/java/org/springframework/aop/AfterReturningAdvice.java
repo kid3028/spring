@@ -21,6 +21,8 @@ import java.lang.reflect.Method;
 import org.springframework.lang.Nullable;
 
 /**
+ * AfterReturningAdvice 在方法调用返回后执行。如果方法调用发生了异常，那么afterReturning将不能得到执行
+ * afterReturning中可以查看返回值信息，但是不能修改返回值
  * After returning advice is invoked only on normal method return, not if an
  * exception is thrown. Such advice can see the return value, but cannot change it.
  *

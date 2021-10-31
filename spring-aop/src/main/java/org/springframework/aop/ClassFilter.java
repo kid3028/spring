@@ -17,6 +17,7 @@
 package org.springframework.aop;
 
 /**
+ * 评估targetClass是否匹配pointcut、introduction
  * Filter that restricts matching of a pointcut or introduction to
  * a given set of target classes.
  *

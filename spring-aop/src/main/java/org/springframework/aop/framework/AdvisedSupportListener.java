@@ -17,6 +17,8 @@
 package org.springframework.aop.framework;
 
 /**
+ * 在{@link ProxyCreatorSupport}中使用的listener，在createAopProxy发生调用
+ * 激活 和 advice发生变化时被回调
  * Listener to be registered on {@link ProxyCreatorSupport} objects
  * Allows for receiving callbacks on activation and change of advice.
  *
@@ -27,12 +29,14 @@ package org.springframework.aop.framework;
 public interface AdvisedSupportListener {
 
 	/**
+	 * activated 在proxy第一次被创建时调用
 	 * Invoked when the first proxy is created.
 	 * @param advised the AdvisedSupport object
 	 */
 	void activated(AdvisedSupport advised);
 
 	/**
+	 * proxy创建后，advice发生变化时调用
 	 * Invoked when advice is changed after a proxy is created.
 	 * @param advised the AdvisedSupport object
 	 */

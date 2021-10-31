@@ -17,6 +17,21 @@
 package org.springframework.context;
 
 /**
+ * {@link Lifecycle}的扩展接口
+ *
+ * {@link #isAutoStartup()}对象是否应该在应用上下文刷新的同时进行启动
+ * {@link #stop(Runnable)}对于有异步关闭的对象是非常实用的
+ * 该接口的任何实现都必须在关闭完成时调用{@code run()}方法，以避免在整个{@link ApplicationContext}关闭过程中出现不必要的延迟。
+ *
+ * 该接口继承了{@link Phased},{@link #getPhase()}方法返回当前的{@link Lifecycle}出于那个阶段（started/stopped）
+ * start是最小阶段（{@code Integer.MIN_VALUE}） stop是最高阶段({@code Integer.MAX_VALUE})
+ * 启动时(lowest --> highest)  关闭时(highest --> lowest)  相同阶段，则任意启动
+ *
+ * 任何没有实现{@link SmartLifecycle}的都会被认为phase=0，晚于phase < 0 的组件启动，早于phase > 0 的组件
+ *
+ * 由于autoStartup的影响，{@link SmartLifecycle}将在应用上下文启动上完成初始化，因此lazy-init对{@link SmartLifecycle}影响很小
+ *
+ *
  * An extension of the {@link Lifecycle} interface for those objects that require
  * to be started upon {@code ApplicationContext} refresh and/or shutdown in a
  * particular order.
@@ -80,6 +95,8 @@ public interface SmartLifecycle extends Lifecycle, Phased {
 
 
 	/**
+	 * {@code true}表明{@link Lifecycle}应该在应用上下文刷新时被IoC容器自动启动
+	 * {@code false}表明需要显式调用{@link #start()}来启动
 	 * Returns {@code true} if this {@code Lifecycle} component should get
 	 * started automatically by the container at the time that the containing
 	 * {@link ApplicationContext} gets refreshed.
@@ -97,6 +114,15 @@ public interface SmartLifecycle extends Lifecycle, Phased {
 	}
 
 	/**
+	 * {@link Lifecycle}如果还运行着，那么应该停止它
+	 *
+	 * 回调函数必须在stop方法执行之后
+	 * {@link LifecycleProcessor}仅会调用{@link SmartLifecycle#stop(Runnable)}方法，不会调用{@link Lifecycle#stop()}
+	 * 除非{@link SmartLifecycle}的实现中显式地调用了{@link Lifecycle#stop()}
+	 *
+	 * 默认实现是委派给{@link Lifecycle#stop()}。并且在当前线程中立即出发回调函数执行。
+	 * 需要注意的是，这两步操作是没有进行同步的，
+	 *
 	 * Indicates that a Lifecycle component must stop if it is currently running.
 	 * <p>The provided callback is used by the {@link LifecycleProcessor} to support
 	 * an ordered, and potentially concurrent, shutdown of all components having a
@@ -119,6 +145,7 @@ public interface SmartLifecycle extends Lifecycle, Phased {
 	}
 
 	/**
+	 * 返回{@link Lifecycle}的phase
 	 * Return the phase that this lifecycle object is supposed to run in.
 	 * <p>The default implementation returns {@link #DEFAULT_PHASE} in order to
 	 * let {@code stop()} callbacks execute after regular {@code Lifecycle}

@@ -19,6 +19,7 @@ package org.aopalliance.intercept;
 import java.lang.reflect.Method;
 
 /**
+ * 方法调用的一个描述
  * Description of an invocation to a method, given to an interceptor
  * upon method-call.
  *

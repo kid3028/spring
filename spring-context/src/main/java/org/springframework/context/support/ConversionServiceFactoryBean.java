@@ -20,6 +20,8 @@ import java.util.Set;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.ConversionServiceFactory;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -27,6 +29,11 @@ import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.lang.Nullable;
 
 /**
+ * 提供了便捷的方式访问 ConversionService，可以通过{@link #setConverters(Set)}设置默认的converter
+ * 默认实现是使用了{@link DefaultConversionService}
+ *
+ * 像所有的{@link FactoryBean}一样，这个类也是可以使用spring xml的形式进行配置的
+ * 也可以在 {@link Configuration @Configuration}中通过{@link Bean @Bean}进行简单的初始化、配置，然后返回{@link ConversionService}
  * A factory providing convenient access to a ConversionService configured with
  * converters appropriate for most environments. Set the
  * {@link #setConverters "converters"} property to supplement the default converters.
@@ -38,10 +45,10 @@ import org.springframework.lang.Nullable;
  * <p>Like all {@code FactoryBean} implementations, this class is suitable for
  * use when configuring a Spring application context using Spring {@code <beans>}
  * XML. When configuring the container with
- * {@link org.springframework.context.annotation.Configuration @Configuration}
+ * {@link Configuration @Configuration}
  * classes, simply instantiate, configure and return the appropriate
  * {@code ConversionService} object from a {@link
- * org.springframework.context.annotation.Bean @Bean} method.
+ * Bean @Bean} method.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -58,6 +65,7 @@ public class ConversionServiceFactoryBean implements FactoryBean<ConversionServi
 
 
 	/**
+	 * 添加一系列自定义的Converter
 	 * Configure the set of custom converter objects that should be added:
 	 * implementing {@link org.springframework.core.convert.converter.Converter},
 	 * {@link org.springframework.core.convert.converter.ConverterFactory},

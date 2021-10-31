@@ -19,6 +19,8 @@ package org.springframework.aop;
 import org.aopalliance.aop.Advice;
 
 /**
+ * 通用的beforeAdvice接口。
+ * 当前spring仅支持方法级别的advice，但是接口设计上是支持到字段级
  * Common marker interface for before advice, such as {@link MethodBeforeAdvice}.
  *
  * <p>Spring supports only method before advice. Although this is unlikely to change,

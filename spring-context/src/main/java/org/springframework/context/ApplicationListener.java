@@ -19,6 +19,10 @@ package org.springframework.context;
 import java.util.EventListener;
 
 /**
+ * java标准{@link EventListener}接口的实现
+ *
+ * 从spring3.0开始，{@link ApplicationListener}可以声明自己感兴趣的事件，
+ * 当事件发生时，只有关联的listener会得到调用
  * Interface to be implemented by application event listeners.
  * Based on the standard {@code java.util.EventListener} interface
  * for the Observer design pattern.

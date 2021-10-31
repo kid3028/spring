@@ -44,6 +44,9 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
+ * {@link GenericApplicationListener}适配器
+ * 处理{@link EventListener @EventListener}注解的放
+ *
  * {@link GenericApplicationListener} adapter that delegates the processing of
  * an event to an {@link EventListener} annotated method.
  *
@@ -187,6 +190,8 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	}
 
 	/**
+	 * 解析方法参数用于特定的ApplicationEvent
+	 *
 	 * Resolve the method arguments to use for the specified {@link ApplicationEvent}.
 	 * <p>These arguments will be used to invoke the method handled by this instance.
 	 * Can return {@code null} to indicate that no suitable arguments could be resolved

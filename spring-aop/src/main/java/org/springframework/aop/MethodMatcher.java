@@ -19,6 +19,11 @@ package org.springframework.aop;
 import java.lang.reflect.Method;
 
 /**
+ * pointcut的一部分，评价方法是否匹配pointcut
+ * MethodMatcher支持静态和动态的运行时评估。静态评估方法的属性，动态评估将匹配方法调用时的参数，上一次advice运行的结果。
+ *
+ * 如果{@link #isRuntime()}方法返回false，那么评估将是一个静态的，无论方法调用时使用什么样的参数，所有的结果都一样。
+ *
  * Part of a {@link Pointcut}: Checks whether the target method is eligible for advice.
  *
  * <p>A MethodMatcher may be evaluated <b>statically</b> or at <b>runtime</b> (dynamically).

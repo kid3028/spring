@@ -23,9 +23,28 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.core.annotation.Order;
 
 /**
+ * 标记一个方法作为{@link ApplicationListener}
+ *
+ * 如果被标记的方法只支持单个事件类型，方法声明一个与eventType对应的的参数即可
+ * 如果方法支持多个事件类型，在 {@code EventListener{classes={xxx, xxx...}}}列出支持的event类型即可
+ *
+ * Event可以是ApplicationEvent也可以是任意类型
+ *
+ * {@code @EventListener}注解是通过{@link EventListenerMethodProcessor}进行处理，
+ * 并完成自动注册
+ * 被注解的方法可能有一个非空返回值，这样的情况下，方法调用的返回值将作为一个新的时间发布出去；
+ * 如果返回值是一个数组或者集合，那么每一个元素都将被作为自定义事件发布出去。
+ *
+ * listener调用的顺序是可以指定的，将{@link Order @Order} {@link EventListener @EventListener} 一起使用即可
+ *
+ * listener可以抛出任意类型的异常，受检查异常将会被包装成{@link java.lang.reflect.UndeclaredThrowableException}
+ * 因为事件发布器只能处理运行时异常
+ *
  * Annotation that marks a method as a listener for application events.
  *
  * <p>If an annotated method supports a single event type, the method may
@@ -50,7 +69,7 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <p>It is also possible to define the order in which listeners for a
  * certain event are to be invoked. To do so, add Spring's common
- * {@link org.springframework.core.annotation.Order @Order} annotation
+ * {@link Order @Order} annotation
  * alongside this event listener annotation.
  *
  * <p>While it is possible for an event listener to declare that it

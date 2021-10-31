@@ -16,12 +16,17 @@
 
 package org.springframework.aop;
 
+import org.springframework.aop.support.ComposablePointcut;
+
 /**
+ * pointcut用于过滤哪些方法需要拦截
+ *  由 {@link ClassFilter} {@link MethodMatcher} 两部分组成
+ *  可以通过组合形式创建Pointcut，如 {@link ComposablePointcut}
  * Core Spring pointcut abstraction.
  *
  * <p>A pointcut is composed of a {@link ClassFilter} and a {@link MethodMatcher}.
  * Both these basic terms and a Pointcut itself can be combined to build up combinations
- * (e.g. through {@link org.springframework.aop.support.ComposablePointcut}).
+ * (e.g. through {@link ComposablePointcut}).
  *
  * @author Rod Johnson
  * @see ClassFilter

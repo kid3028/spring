@@ -1,0 +1,15 @@
+### 核心类
+- org.springframework.aop.Pointcut
+- org.springframework.aop.ClassFilter
+- org.springframework.aop.support.Pointcuts
+- org.springframework.aop.support.ComposablePointcut
+- org.springframework.aop.aspectj.AspectJExpressionPointcut
+- org.springframework.aop.support.JdkRegexpMethodPointcut
+- org.springframework.aop.support.ControlFlowPointcut 1.4中开销是普通动态pointcut的5倍
+- org.springframework.aop.support.StaticMethodMatcherPointcut 静态pointcut的抽象，只需要复写match方法就可以实现一个静态的pointcut
+- org.aopalliance.intercept.MethodInterceptor  around根接口，通过调用proceed调用下游拦截链
+- org.springframework.aop.MethodBeforeAdvice  before根接口，在方法执行前调用，不需要调用proceed方法
+- org.springframework.aop.ThrowsAdvice 标记接口
+- org.springframework.aop.AfterReturningAdvice
+- org.springframework.aop.IntroductionInterceptor MethodInterceptor的子接口
+- org.springframework.aop.support.DelegatingIntroductionInterceptor IntroductionInterceptor的实现

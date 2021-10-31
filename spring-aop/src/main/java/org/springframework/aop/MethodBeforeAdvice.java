@@ -21,6 +21,8 @@ import java.lang.reflect.Method;
 import org.springframework.lang.Nullable;
 
 /**
+ * 方法级别的beforeAdvice
+ * 该方法不能阻止程序向下调用方法，但可以通过抛出异常阻止向下调用
  * Advice invoked before a method is invoked. Such advices cannot
  * prevent the method call proceeding, unless they throw a Throwable.
  *

@@ -27,6 +27,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * {@link ApplicationContextAware}的简单实现，可以非常方便地进行上下文bean访问，资源对象访问，国际化
+ *
+ * 大多数的框架类是被该类驱动，尤其是在web框架中
  * Convenient superclass for application objects that want to be aware of
  * the application context, e.g. for custom lookup of collaborating beans
  * or for context-specific resource access. It saves the application

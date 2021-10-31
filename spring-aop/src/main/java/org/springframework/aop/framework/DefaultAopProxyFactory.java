@@ -22,6 +22,13 @@ import java.io.Serializable;
 import java.lang.reflect.Proxy;
 
 /**
+ * 默认的 {@link AopProxyFactory} 实现，基于CGLIB 或者 JDK动态代理
+ * 如果
+ *  optimize = true
+ *  proxyTargetCLass = true
+ *  len(interfaces) = 0
+ * 其中一个满足将会使用CGLIB创建代理
+ *
  * Default {@link AopProxyFactory} implementation, creating either a CGLIB proxy
  * or a JDK dynamic proxy.
  *

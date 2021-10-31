@@ -44,6 +44,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * {@link LifecycleProcessor}的默认实现
  * Default implementation of the {@link LifecycleProcessor} strategy.
  *
  * @author Mark Fisher
@@ -90,6 +91,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	// Lifecycle implementation
 
 	/**
+	 * 启动所有{@link Lifecycle}类型的bean
 	 * Start all registered beans that implement {@link Lifecycle} and are <i>not</i>
 	 * already running. Any bean that implements {@link SmartLifecycle} will be
 	 * started within its 'phase', and all phases will be ordered from lowest to
@@ -104,6 +106,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	}
 
 	/**
+	 * 停止所有{@link Lifecycle}类型的bean
 	 * Stop all registered beans that implement {@link Lifecycle} and <i>are</i>
 	 * currently running. Any bean that implements {@link SmartLifecycle} will be
 	 * stopped within its 'phase', and all phases will be ordered from highest to

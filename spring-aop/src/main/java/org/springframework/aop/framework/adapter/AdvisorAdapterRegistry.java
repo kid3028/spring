@@ -19,8 +19,14 @@ package org.springframework.aop.framework.adapter;
 import org.aopalliance.intercept.MethodInterceptor;
 
 import org.springframework.aop.Advisor;
+import org.springframework.aop.AfterReturningAdvice;
+import org.springframework.aop.MethodBeforeAdvice;
+import org.springframework.aop.ThrowsAdvice;
 
 /**
+ * 注册advisorAdapter
+ *
+ * 这是一个SPI接口，用户不需要实现
  * Interface for registries of Advisor adapters.
  *
  * <p><i>This is an SPI interface, not to be implemented by any Spring user.</i>
@@ -31,12 +37,19 @@ import org.springframework.aop.Advisor;
 public interface AdvisorAdapterRegistry {
 
 	/**
+	 * 包装Advice为Advisor
+	 * advice可以是
+	 *  {@link MethodInterceptor}
+	 *  {@link MethodBeforeAdvice}
+	 *  {@link AfterReturningAdvice}
+	 *  {@link ThrowsAdvice}
+	 *
 	 * Return an {@link Advisor} wrapping the given advice.
 	 * <p>Should by default at least support
 	 * {@link org.aopalliance.intercept.MethodInterceptor},
-	 * {@link org.springframework.aop.MethodBeforeAdvice},
-	 * {@link org.springframework.aop.AfterReturningAdvice},
-	 * {@link org.springframework.aop.ThrowsAdvice}.
+	 * {@link MethodBeforeAdvice},
+	 * {@link AfterReturningAdvice},
+	 * {@link ThrowsAdvice}.
 	 * @param advice an object that should be an advice
 	 * @return an Advisor wrapping the given advice (never {@code null};
 	 * if the advice parameter is an Advisor, it is to be returned as-is)
@@ -46,6 +59,7 @@ public interface AdvisorAdapterRegistry {
 	Advisor wrap(Object advice) throws UnknownAdviceTypeException;
 
 	/**
+	 * 返回Advisor关联的MethodInterceptor
 	 * Return an array of AOP Alliance MethodInterceptors to allow use of the
 	 * given Advisor in an interception-based framework.
 	 * <p>Don't worry about the pointcut associated with the {@link Advisor}, if it is
@@ -58,6 +72,8 @@ public interface AdvisorAdapterRegistry {
 	MethodInterceptor[] getInterceptors(Advisor advisor) throws UnknownAdviceTypeException;
 
 	/**
+	 * 注册AdvisorAdapter
+	 * 不需要手动将Interceptors、Advices注册为adapter，AdvisorAdapterRegistry会自动识别
 	 * Register the given {@link AdvisorAdapter}. Note that it is not necessary to register
 	 * adapters for an AOP Alliance Interceptors or Spring Advices: these must be
 	 * automatically recognized by an {@code AdvisorAdapterRegistry} implementation.

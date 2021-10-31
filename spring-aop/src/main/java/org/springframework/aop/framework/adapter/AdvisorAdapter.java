@@ -22,6 +22,9 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.Advisor;
 
 /**
+ * 扩展Spring Aop框架，支持新的advisor和advice类型
+ * 子类可以自定义advice类型，创建自己的Interceptor，并在spring中使用
+ *
  * Interface allowing extension to the Spring AOP framework to allow
  * handling of new Advisors and Advice types.
  *
@@ -37,6 +40,8 @@ import org.springframework.aop.Advisor;
 public interface AdvisorAdapter {
 
 	/**
+	 * adapter是否支持advice
+	 * 如果方法返回true，那么调用getInterceptor也将是合法的
 	 * Does this adapter understand this advice object? Is it valid to
 	 * invoke the {@code getInterceptors} method with an Advisor that
 	 * contains this advice as an argument?
@@ -48,6 +53,7 @@ public interface AdvisorAdapter {
 	boolean supportsAdvice(Advice advice);
 
 	/**
+	 *
 	 * Return an AOP Alliance MethodInterceptor exposing the behavior of
 	 * the given advice to an interception-based AOP framework.
 	 * <p>Don't worry about any Pointcut contained in the Advisor;

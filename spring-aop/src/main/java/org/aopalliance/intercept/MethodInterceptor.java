@@ -17,6 +17,9 @@
 package org.aopalliance.intercept;
 
 /**
+ * 拦截方法调用
+ * 用户实现invoke方法，并且修改原始的运行行为。
+ * 通过调用
  * Intercepts calls on an interface on its way to the target. These
  * are nested "on top" of the target.
  *
@@ -43,6 +46,8 @@ package org.aopalliance.intercept;
 public interface MethodInterceptor extends Interceptor {
 
 	/**
+	 * 实现者可以在invocation执行前后进行额外的行为。
+	 * 通常，实现者需要调用{@link Joinpoint#proceed()}
 	 * Implement this method to perform extra treatments before and
 	 * after the invocation. Polite implementations would certainly
 	 * like to invoke {@link Joinpoint#proceed()}.

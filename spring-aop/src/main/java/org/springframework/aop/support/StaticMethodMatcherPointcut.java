@@ -21,6 +21,8 @@ import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 
 /**
+ * 抽象静态方法pointcut  默认ClassFilter始终为true
+ * 子类只需要实现 MethodMatcher 接口即可，
  * Convenient superclass when we want to force subclasses to implement the
  * {@link MethodMatcher} interface but subclasses will want to be pointcuts.
  *

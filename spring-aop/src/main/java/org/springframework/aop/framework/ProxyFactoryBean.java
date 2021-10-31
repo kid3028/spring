@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.Interceptor;
+import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -49,10 +50,25 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
+ * {@link ProxyCreatorSupport} 的基于 {@link BeanFactory} 的 {@link FactoryBean} 形式的实现
+ *
+ * 通过 interceptorNames 属性指定多个 {@link MethodInterceptor} {@link Advisor}，最后一个元素被
+ * 认为是target或者targetSource的名称。
+ * 但是通常通过 targetName/target/targetSource属性来指定
+ *
+ * 全局的interceptor、advisor可以在factory级别进行添加，通过使用通配符，如 "xxxx*" / "*"
+ *
+ * 将一个proxy转换为Advised，或者在获得ProxyFactoryBean引用后，通过编程的手法操作它，这个是可能。
+ * 但是这不适用与已经存在的独立的原型，后续创建的原型对象将会生效。
+ * interceptor的改变在单例对象上将会立即生效，包括已经存在对象。但是接口和target的改变还是需要从factory
+ * 中再次获取对象时才会生效。也就是说会有单例对象可能不完全相同。但是他们拥有相同的拦截器
+ *
+ *
+ *
  * {@link org.springframework.beans.factory.FactoryBean} implementation that builds an
  * AOP proxy based on beans in Spring {@link org.springframework.beans.factory.BeanFactory}.
  *
- * <p>{@link org.aopalliance.intercept.MethodInterceptor MethodInterceptors} and
+ * <p>{@link MethodInterceptor MethodInterceptors} and
  * {@link org.springframework.aop.Advisor Advisors} are identified by a list of bean
  * names in the current bean factory, specified through the "interceptorNames" property.
  * The last entry in the list can be the name of a target bean or a
@@ -84,7 +100,7 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
- * @see org.aopalliance.intercept.MethodInterceptor
+ * @see MethodInterceptor
  * @see org.springframework.aop.Advisor
  * @see Advised
  */
@@ -154,7 +170,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * <p><b>NOTE: Specifying a target bean as final name in the "interceptorNames"
 	 * list is deprecated and will be removed in a future Spring version.</b>
 	 * Use the {@link #setTargetName "targetName"} property instead.
-	 * @see org.aopalliance.intercept.MethodInterceptor
+	 * @see MethodInterceptor
 	 * @see org.springframework.aop.Advisor
 	 * @see org.aopalliance.aop.Advice
 	 * @see org.springframework.aop.target.SingletonTargetSource

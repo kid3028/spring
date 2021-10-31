@@ -22,6 +22,8 @@ import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
 
 /**
+ * 暴露eventType sourceType元数据
+ * 建议使用{@link GenericApplicationListener}，可以识别出泛型事件
  * Extended variant of the standard {@link ApplicationListener} interface,
  * exposing further metadata such as the supported event and source type.
  *

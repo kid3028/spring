@@ -17,6 +17,15 @@
 package org.springframework.aop.framework;
 
 /**
+ * factory实现该接口，基于{@link AdvisedSupport}的配置信息创建aop proxy
+ *
+ * proxy应该遵循下面的约束
+ *    实现所有配置的接口
+ *    实现{@link Advised}接口
+ *    实现equals方法
+ *    能够被序列化（如果所有的advisors，target是可序列化的）
+ *    线程安全（如果所有的advisor，target是线程安全的）
+ *
  * Interface to be implemented by factories that are able to create
  * AOP proxies based on {@link AdvisedSupport} configuration objects.
  *
