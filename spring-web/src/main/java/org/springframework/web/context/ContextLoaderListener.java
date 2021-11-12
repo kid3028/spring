@@ -16,10 +16,13 @@
 
 package org.springframework.web.context;
 
+import org.springframework.context.ConfigurableApplicationContext;
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 /**
+ * WebApplicationContext 启动和关闭的监听器，操作基本都委派给了ContextLoader
  * Bootstrap listener to start up and shut down Spring's root {@link WebApplicationContext}.
  * Simply delegates to {@link ContextLoader} as well as to {@link ContextCleanupListener}.
  *
@@ -37,6 +40,8 @@ import javax.servlet.ServletContextListener;
 public class ContextLoaderListener extends ContextLoader implements ServletContextListener {
 
 	/**
+	 * 基于 contextClass contextConfigLocation 两个servlet context-params 创建一个web application context
+	 * 在web.xml的场景下，会在<listener>标签下声明该监听器，这个无参构造器会得到调用
 	 * Create a new {@code ContextLoaderListener} that will create a web application
 	 * context based on the "contextClass" and "contextConfigLocation" servlet
 	 * context-params. See {@link ContextLoader} superclass documentation for details on
@@ -57,6 +62,18 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 	}
 
 	/**
+	 * 通常用于Servlet 3.0+，通过{@link javax.servlet.ServletContext#addListener}注册listener
+	 * 如果context还没有refresh，并且context是 {@link ConfigurableWebApplicationContext} 子类，
+	 * 那么将会执行如下操作：
+	 *  1、如果context还没通过{@link org.springframework.context.ConfigurableApplicationContext#setId(String)}，将为其指定id
+	 *  2、ServletContext/ServletConfig将被委派给application context
+	 *  3、调用{@link #customizeContext(ServletContext, ConfigurableWebApplicationContext)}
+	 *  4、通过contextInitializerClasses 指定的initializer将得到执行
+	 *  5、{@link ConfigurableApplicationContext#refresh()} 得到执行
+	 *
+	 *  如果context已将进行过refresh，或者没有实现{@link ConfigurableWebApplicationContext}
+	 *  那么上面的所有操作都不会执行，spring认为用户已经根据需要执行了必须的动作
+	 *
 	 * Create a new {@code ContextLoaderListener} with the given application context. This
 	 * constructor is useful in Servlet 3.0+ environments where instance-based
 	 * registration of listeners is possible through the {@link javax.servlet.ServletContext#addListener}
@@ -96,6 +113,7 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 
 
 	/**
+	 * 触发root WebApplicationContext的初始化
 	 * Initialize the root web application context.
 	 */
 	@Override
@@ -105,6 +123,7 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 
 
 	/**
+	 * 关闭WebApplicationContext
 	 * Close the root web application context.
 	 */
 	@Override

@@ -21,6 +21,9 @@ import javax.servlet.ServletConfig;
 import org.springframework.beans.factory.Aware;
 
 /**
+ * 实现该接口的子类将会在 ServletContext 启动时得到通知
+ *
+ * 只用在 Servlet类型的 WebApplicationContext环境下才会执行
  * Interface to be implemented by any object that wishes to be notified of the
  * {@link ServletConfig} (typically determined by the {@link WebApplicationContext})
  * that it runs in.
@@ -36,6 +39,9 @@ import org.springframework.beans.factory.Aware;
 public interface ServletConfigAware extends Aware {
 
 	/**
+	 * 向当前子类对象中注入 ServletConfig
+	 * 方法将会在 普通bean属性填充完成后
+	 *          init回调(InitializingBean#afterPropertiesSet or init-method) 执行前调用
 	 * Set the {@link ServletConfig} that this object runs in.
 	 * <p>Invoked after population of normal bean properties but before an init
 	 * callback like InitializingBean's {@code afterPropertiesSet} or a

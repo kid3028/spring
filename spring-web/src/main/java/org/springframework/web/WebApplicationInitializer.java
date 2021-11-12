@@ -16,10 +16,47 @@
 
 package org.springframework.web;
 
+import org.springframework.core.Ordered;
+import org.springframework.web.context.ContextLoaderListener;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.context.support.XmlWebApplicationContext;
+import org.springframework.web.filter.DelegatingFilterProxy;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 /**
+ * Servlet 3.0+环境下使用，用于编程式地配置ServletContext
+ * 这是一个SPI实现，将会被{@link SpringServletContainerInitializer}自动探测到，可以由任何
+ * Servlet 3.0容器引导。
+ *
+ * 在传统的xml方式中，spring用户构建一个web application需要在 WEB-INF/web.xml 注册一个 {@code DispatcherServlet}
+ *  <servlet>
+ *      <servlet-name>dispatcher</servlet-name>
+ *      <servlet-class>org.spring.framework.web.servlet.Dispatcher</servlet-class>
+ *      <init-param>
+ *         <param-name>contextConfigLocation</param-name>
+ *         <param-value>/WEB-INF/spring/dispatcher-config.xml</param-value>
+ *      </init-param>
+ *      <load-on-startup>1</load-on-startup>
+ *  </servlet>
+ *  <servlet-mapping>
+ *      <servlet-name>dispatcher</servlet-name>
+ *      <url-pattern>/</url-pattern>
+ *  </servlet-mapping>
+ *
+ *  public class MyWebApplicationInitializer implements WebApplicationInitializer {
+ *      public void onStartup(ServletContext container) {
+ *          XmlWebApplicationContext context = new XmlWebApplicationContext();
+ *          context.SetContextConfigLocation("/WEB-INF/spring/dispatcher-config.xml");
+ *          ServletRegistration.Dynamic dispatcher = container.addServlet(new DispatcherServlet(context));
+ *          dispatcher.SetLoadOnStartup(1);
+ *          dispatcher.addMapping("/")
+ *      }
+ *  }
+ *
+ *  另一种可选的方式是继承{@link AbstractDispatcherServletInitializer}
+ *
  * Interface to be implemented in Servlet 3.0+ environments in order to configure the
  * {@link ServletContext} programmatically -- as opposed to (or possibly in conjunction
  * with) the traditional {@code web.xml}-based approach.
@@ -71,6 +108,16 @@ import javax.servlet.ServletException;
  *
  * }</pre>
  *
+ * 另一种可选的方式是继承 AbstractDispatcherServletInitializer
+ * Servlet 3.0增加了 {@link ServletContext#addServlet}，提供了注册 {@link DispatcherServlet}
+ * 的能力，我们可以向操作其他bean一样操作DispatcherServlet，他可以在 applicationContext 进行构造器注入。
+ * 这种方式更加简单也更加简明，需要关心init-param，就当做一个有属性、构造器的普通javaBean处理即可。
+ *
+ * 大多数的Spring Web组件都已经支持编程式注册。像{@link DispatcherServlet} {@link FrameworkServlet}
+ * {@link ContextLoaderListener} {@link DelegatingFilterProxy} 都支持了构造器参数
+ * 即使一些第三方组件还没有更新支持编程式注册、构造器参数，也可以使用，Servlet 3.0的ServletContext API支持
+ * 编程式设置init-params context-params
+ *
  * As an alternative to the above, you can also extend from {@link
  * org.springframework.web.servlet.support.AbstractDispatcherServletInitializer}.
  *
@@ -92,6 +139,24 @@ import javax.servlet.ServletException;
  * may be used in any case. The Servlet 3.0 {@code ServletContext} API allows for setting
  * init-params, context-params, etc programmatically.
  *
+ * 到这里，大多数配置都code-based了，{@code WEB-INF/web.xml} 被{@link WebApplicationInitializer}替换，
+ * 但是 {@code dispatcher-config.xml} 还是通过xml-based。
+ * 下面将介绍使用 {@link AnnotationConfigWebApplicationContext} 替换 {@link XmlWebApplicationContext}
+ *
+ * public class MyWebAppInitializer implements WebApplicationInitializer {
+ *     public void onStartup(ServletContext container) {
+ *         AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplication()
+ *         rootContext.register(AppConfig.Class);
+ *         container.addListener(new ContextLoaderListener(rootContext));
+ *
+ *         AnnotationConfigWebApplicationContext dispatcherContext = new AnnotationConfigWebApplicationContext();
+ *         dispatcherContext.register(DispatcherConfig.class);
+ *         ServletRegistration.Dynamic dispatcher = container.addServlet("dispatcher", new DispatcherServlet(dispatcherContext));
+ *         dispatcher.setLoadOnStartup(1);
+ *         dispatcher.addMapping("/")
+ *     }
+ * }
+ *
  * <h2>A 100% code-based approach to configuration</h2>
  * In the example above, {@code WEB-INF/web.xml} was successfully replaced with code in
  * the form of a {@code WebApplicationInitializer}, but the actual
@@ -100,7 +165,7 @@ import javax.servlet.ServletException;
  * {@code @Configuration} classes. See @{@link
  * org.springframework.context.annotation.Configuration Configuration} Javadoc for
  * complete details, but the following example demonstrates refactoring to use Spring's
- * {@link org.springframework.web.context.support.AnnotationConfigWebApplicationContext
+ * {@link AnnotationConfigWebApplicationContext
  * AnnotationConfigWebApplicationContext} in lieu of {@code XmlWebApplicationContext}, and
  * user-defined {@code @Configuration} classes {@code AppConfig} and
  * {@code DispatcherConfig} instead of Spring XML files. This example also goes a bit
@@ -133,6 +198,16 @@ import javax.servlet.ServletException;
  *
  * }</pre>
  *
+ * 你也可以继承 AbstractAnnotationConfigDispatcherServletInitializer
+ * WebApplicationInitializer的实现类是可以被自动探测的。
+ * 可以通过 {@code @Order} {@link Ordered} 来定义Initializer的顺序
+ *
+ * web.xml 版本问题： WEB-INF/web.xml 与 WebApplicationInitializer不是互相排斥的。可以在web.xml中注册一个servlet，
+ * 在WebApplicationInitializer注册另一个servlet。
+ * initializer可以通过{@link ServletContext#getServletRegistration}改变web.xml注册的配置信息。
+ * 需要注意的是，如果 WEB-INF/web.xml 存在，那么它需要是 3.0+，否则 ServletContainerInitializer引导将会被忽略
+ *
+ * 根路径："/"。在Tomcat 7.0.14前，默认的根路径为"/"，且没办法通过编程的方式去覆盖，在7.0.15修复了该问题。
  * As an alternative to the above, you can also extend from {@link
  * org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer}.
  *
@@ -143,7 +218,7 @@ import javax.servlet.ServletException;
  * <h2>Ordering {@code WebApplicationInitializer} execution</h2>
  * {@code WebApplicationInitializer} implementations may optionally be annotated at the
  * class level with Spring's @{@link org.springframework.core.annotation.Order Order}
- * annotation or may implement Spring's {@link org.springframework.core.Ordered Ordered}
+ * annotation or may implement Spring's {@link Ordered Ordered}
  * interface. If so, the initializers will be ordered prior to invocation. This provides
  * a mechanism for users to ensure the order in which servlet container initialization
  * occurs. Use of this feature is expected to be rare, as typical applications will likely
@@ -177,6 +252,7 @@ import javax.servlet.ServletException;
 public interface WebApplicationInitializer {
 
 	/**
+	 * 在ServletContext中配置任何servlets/filters/listeners context-params/attributes
 	 * Configure the given {@link ServletContext} with any servlets, filters, listeners
 	 * context-params and attributes necessary for initializing this web application. See
 	 * examples {@linkplain WebApplicationInitializer above}.

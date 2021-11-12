@@ -58,7 +58,7 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 	 * @see #setTransactionAttributes(java.util.Properties)
 	 * @see #setTransactionAttributeSource(TransactionAttributeSource)
 	 */
-	public TransactionInterceptor() {
+	public  TransactionInterceptor() {
 	}
 
 	/**
