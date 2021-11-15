@@ -143,6 +143,7 @@ import org.springframework.web.util.WebUtils;
 public abstract class FrameworkServlet extends HttpServletBean implements ApplicationContextAware {
 
 	/**
+	 * WebApplicationContext namespace后缀
 	 * Suffix for WebApplicationContext namespaces. If a servlet of this class is
 	 * given the name "test" in a context, the namespace used by the servlet will
 	 * resolve to "test-servlet".
@@ -150,29 +151,37 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	public static final String DEFAULT_NAMESPACE_SUFFIX = "-servlet";
 
 	/**
+	 * 默认的context class {@link XmlWebApplicationContext}
 	 * Default context class for FrameworkServlet.
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 */
 	public static final Class<?> DEFAULT_CONTEXT_CLASS = XmlWebApplicationContext.class;
 
 	/**
+	 * {@link WebApplicationContext}在{@link ServletContext}中的属性前缀
 	 * Prefix for the ServletContext attribute for the WebApplicationContext.
 	 * The completion is the servlet name.
 	 */
 	public static final String SERVLET_CONTEXT_PREFIX = FrameworkServlet.class.getName() + ".CONTEXT.";
 
 	/**
+	 * init-param 分隔符
 	 * Any number of these characters are considered delimiters between
 	 * multiple values in a single init-param String value.
 	 */
 	private static final String INIT_PARAM_DELIMITERS = ",; \t\n";
 
 
-	/** ServletContext attribute to find the WebApplicationContext in. */
+	/** {@link WebApplicationContext} 在 {@link ServletContext}中的属性名称
+	 * ServletContext attribute to find the WebApplicationContext in.
+	 */
 	@Nullable
 	private String contextAttribute;
 
-	/** WebApplicationContext implementation class to create. */
+	/**
+	 * {@link WebApplicationContext}的具体实现类 context class
+	 * WebApplicationContext implementation class to create.
+	 */
 	private Class<?> contextClass = DEFAULT_CONTEXT_CLASS;
 
 	/** WebApplicationContext id to assign. */
@@ -183,51 +192,96 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	@Nullable
 	private String namespace;
 
-	/** Explicit context config location. */
+	/**
+	 * context config location 应用配置文件
+	 * Explicit context config location.
+	 */
 	@Nullable
 	private String contextConfigLocation;
 
-	/** Actual ApplicationContextInitializer instances to apply to the context. */
+	/**
+	 * 应用到上下文 initializer 列表
+	 * Actual ApplicationContextInitializer instances to apply to the context.
+	 */
 	private final List<ApplicationContextInitializer<ConfigurableApplicationContext>> contextInitializers =
 			new ArrayList<>();
 
-	/** Comma-delimited ApplicationContextInitializer class names set through init param. */
+	/**
+	 * init-param 中指定的initializer列表，通过逗号分隔的字符串
+	 * Comma-delimited ApplicationContextInitializer class names set through init param.
+	 */
 	@Nullable
 	private String contextInitializerClasses;
 
-	/** Should we publish the context as a ServletContext attribute?. */
+	/**
+	 * 是否将context作为 ServletContext的一个属性
+	 * Should we publish the context as a ServletContext attribute?.
+	 */
 	private boolean publishContext = true;
 
-	/** Should we publish a ServletRequestHandledEvent at the end of each request?. */
+	/**
+	 * 在请求处理结束是否发送事件 {@link ServletRequestHandledEvent}
+	 * Should we publish a ServletRequestHandledEvent at the end of each request?.
+	 */
 	private boolean publishEvents = true;
 
-	/** Expose LocaleContext and RequestAttributes as inheritable for child threads?. */
+	/**
+	 * 是否向子线程传递 {@link LocaleContext} {@link RequestAttributes}
+	 * Expose LocaleContext and RequestAttributes as inheritable for child threads?.
+	 */
 	private boolean threadContextInheritable = false;
 
-	/** Should we dispatch an HTTP OPTIONS request to {@link #doService}?. */
+	/**
+	 * 是否要让样 HTTP OPTIONS 请求执行到 {@link #doService(HttpServletRequest, HttpServletResponse)}
+	 * Should we dispatch an HTTP OPTIONS request to {@link #doService}?.
+	 */
 	private boolean dispatchOptionsRequest = false;
 
-	/** Should we dispatch an HTTP TRACE request to {@link #doService}?. */
+	/**
+	 * 是否要让样 HTTP TRACE 请求执行到 {@link #doService(HttpServletRequest, HttpServletResponse)}
+	 * Should we dispatch an HTTP TRACE request to {@link #doService}?.
+	 */
 	private boolean dispatchTraceRequest = false;
 
-	/** Whether to log potentially sensitive info (request params at DEBUG + headers at TRACE). */
+	/**
+	 * 是否在log中打印可能的敏感信息
+	 * 默认 debug ： 请求参数  trace ： 请求头
+	 * Whether to log potentially sensitive info (request params at DEBUG + headers at TRACE).
+	 */
 	private boolean enableLoggingRequestDetails = false;
 
-	/** WebApplicationContext for this servlet. */
+	/**
+	 * 应用的实际上下文对象
+	 * WebApplicationContext for this servlet.
+	 */
 	@Nullable
 	private WebApplicationContext webApplicationContext;
 
-	/** If the WebApplicationContext was injected via {@link #setApplicationContext}. */
+	/**
+	 * 上下文对应是否已经通过 {@link #setApplicationContext(ApplicationContext)} 注入
+	 * If the WebApplicationContext was injected via {@link #setApplicationContext}.
+	 */
 	private boolean webApplicationContextInjected = false;
 
-	/** Flag used to detect whether onRefresh has already been called. */
+	/**
+	 * 上下文是否已经刷新
+	 * Flag used to detect whether onRefresh has already been called.
+	 */
 	private volatile boolean refreshEventReceived = false;
 
-	/** Monitor for synchronized onRefresh execution. */
+	/**
+	 * 同步刷新上下文的监视锁
+	 * Monitor for synchronized onRefresh execution.
+	 */
 	private final Object onRefreshMonitor = new Object();
 
 
 	/**
+	 * 创建{@link FrameworkServlet}实例，同时会基于 servlet init-param 提供的配置和默认值创建一个内部的web application context.
+	 * 在Servlet 2.5和之前的版本中使用比较多，配置只能通过web.xml，因此需要一个无参的构造器。
+	 * 当调用{@link #setApplicationContext(ApplicationContext)}时 context class将探测xml文件并加载，然后读取 contextConfigLocation
+	 * 当调用{@link #setContextClass(Class)}时将使用（init-param "contextClass"）来替换掉 {@link XmlWebApplicationContext}
+	 * 当调用{@link #setContextInitializerClasses(String)}时将使用（init-param "contextInitializerClasses"）在refresh前配置 context
 	 * Create a new {@code FrameworkServlet} that will create its own internal web
 	 * application context based on defaults and values provided through servlet
 	 * init-params. Typically used in Servlet 2.5 or earlier environments, where the only
@@ -248,6 +302,30 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 * 使用给定的 context 来创建{@link FrameworkServlet}.
+	 * 在Servlet 3.0+广泛使用，通过{@link ServletContext#addServlet}来注册 Servlet 实例。
+	 * 通过这个构造器创建实例将忽略 xml 时代的 init-params
+	 *     <ul>
+	 *     <li>{@link #setContextClass(Class)} / 'contextClass'</li>
+	 *     <li>{@link #setContextConfigLocation(String)} / 'contextConfigLocation'</li>
+	 *     <li>{@link #setContextAttribute(String)} / 'contextAttribute'</li>
+	 *     <li>{@link #setNamespace(String)} / 'namespace'</li>
+	 *     </ul>
+	 *
+	 * 给定的context可能还没有调用 {@link ConfigurableApplicationContext#refresh()}。
+	 * 那么如果context是 {@link ConfigurableWebApplicationContext} 的子类，并且还没有refresh(推荐)，
+	 * 那么将会执行下面的操作：
+	 *   1、如果context还没有 {@link ConfigurableApplicationContext#setParent(ApplicationContext)}，
+	 *      那么root application context 将设置为 parent
+	 *   2、如果context还没有 {@link ConfigurableApplicationContext#setId(String)} 那么将会为它指定一个。
+	 *     {@code ServletContext} {@code ServletConfig}对象将会被委派个application context
+	 *   3、{@link #postProcessWebApplicationContext(ConfigurableWebApplicationContext)} 方法将会被调用
+	 *   4、通过init-param("contextInitializerClasses") 或者 {@link #setContextInitializers(ApplicationContextInitializer[])}
+	 *      指定的initializer将会被应用
+	 *   5、{@link ConfigurableApplicationContext#refresh()}将会被调用
+	 * 如果context已经被refresh或者context不是{@link ConfigurableWebApplicationContext}的子类，
+	 * 那么上面的所有操作都不会执行，用户需要根据自己的需要手动执行。
+	 *
 	 * Create a new {@code FrameworkServlet} with the given web application context. This
 	 * constructor is useful in Servlet 3.0+ environments where instance-based registration
 	 * of servlets is possible through the {@link ServletContext#addServlet} API.
@@ -310,6 +388,11 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 * 设置自定义的context class
+	 * context class需要实现 {@link WebApplicationContext}
+	 * 当使用默认的FrameworkServlet实现时，context class需要实现
+	 * {@link ConfigurableWebApplicationContext}
+	 *
 	 * Set a custom context class. This class must be of type
 	 * {@link org.springframework.web.context.WebApplicationContext}.
 	 * <p>When using the default FrameworkServlet implementation,
@@ -346,6 +429,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 * 设置servlet的namespace
+	 * 用来构建默认的context config location
 	 * Set a custom namespace for this servlet,
 	 * to be used for building a default context config location.
 	 */
@@ -404,6 +489,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 * 是否将context作为ServletContext的一个属性？这对web容器中所有的对象都是可用的。
+	 * 这在测试时是非常有用的，尽管这个做法是有争议的，但是通过这种方式让其他对象访问context是一种比较好的实践。
 	 * Set whether to publish this servlet's context as a ServletContext attribute,
 	 * available to all objects in the web container. Default is "true".
 	 * <p>This is especially handy during testing, although it is debatable whether
@@ -414,6 +501,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 * 在请求处理完成后是否发送{@link ServletRequestHandledEvent}事件，默认是true.
+	 * 如果没有listener依赖这个事件，那么关闭事件发送可能带来一点点性能提升
 	 * Set whether this servlet should publish a ServletRequestHandledEvent at the end
 	 * of each request. Default is "true"; can be turned off for a slight performance
 	 * improvement, provided that no ApplicationListeners rely on such events.
@@ -424,6 +513,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 * 是否通过 {@link InheritableThreadLocal} 向子线程暴露 LocalContext RequestAttributes对象
+	 * 默认是false，避免对后台线程产生副作用。
+	 * 注意不要在线程池中使用
 	 * Set whether to expose the LocaleContext and RequestAttributes as inheritable
 	 * for child threads (using an {@link java.lang.InheritableThreadLocal}).
 	 * <p>Default is "false", to avoid side effects on spawned background threads.
@@ -440,6 +532,12 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 * 是否将HTTP OPTIONS请求分发到 {@link #doService(HttpServletRequest, HttpServletResponse)}
+	 * FrameworkServlet默认是不分发 OPTIONS 请求，使用默认的HttpServlet行为
+	 * 但是从DispatcherServlet 4.3开始，这个规则被设置为true，因为有了对OPTIONS内建的支持
+	 *
+	 * 如果期望OPTIONS请求像正常的Http请求一样通过常规的调用链，那么可以打开这个开关。这样就意味着应用将接受这些请求。
+	 * 注意如果controller没有为请求设置 “Allow” header，那么httpServlet将会按照默认的行为处理OPTIONS请求
 	 * Set whether this servlet should dispatch an HTTP OPTIONS request to
 	 * the {@link #doService} method.
 	 * <p>Default in the {@code FrameworkServlet} is "false", applying
@@ -460,6 +558,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 * 是否将TRACE请求分发到{@link #doService(HttpServletRequest, HttpServletResponse)}
+	 * 默认是false，使用 HttpServlet 默认的行为处理TRACE请求
+	 * 注意如果controller没有在response中将 Context-Type 设置为 "message/http" 那么使用默认的HttpServlet行为
 	 * Set whether this servlet should dispatch an HTTP TRACE request to
 	 * the {@link #doService} method.
 	 * <p>Default is "false", applying {@link javax.servlet.http.HttpServlet}'s
@@ -488,6 +589,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 * 是否在debug trace的日志级别中打印敏感信息
 	 * Whether logging of potentially sensitive, request details at DEBUG and
 	 * TRACE level is allowed.
 	 * @since 5.1
@@ -497,6 +599,11 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 * 将会{@link ApplicationContextAware}调用来注入当前的application context
+	 * 由于这个方法的存在，FrameworkServlet可以作为一个spring bean注册到已经存在的{@link WebApplicationContext}中，
+	 * 而不用在通过{@link #findWebApplicationContext()} 查找引导上下文
+	 *
+	 * 主要是为了支持嵌入式servlet容器
 	 * Called by Spring via {@link ApplicationContextAware} to inject the current
 	 * application context. This method allows FrameworkServlets to be registered as
 	 * Spring beans inside an existing {@link WebApplicationContext} rather than
@@ -515,6 +622,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 
 	/**
+	 * 覆盖{@link HttpServletBean}的放在，在所有bean属性都被设置之后调用
 	 * Overridden method of {@link HttpServletBean}, invoked after any bean properties
 	 * have been set. Creates this servlet's WebApplicationContext.
 	 */
@@ -549,6 +657,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 * 初始WebApplicationContext，并在当前Servlet中发布他。
+	 * {@link #createWebApplicationContext(ApplicationContext)}方法将会委派给具体的实现，子类可以覆盖
 	 * Initialize and publish the WebApplicationContext for this servlet.
 	 * <p>Delegates to {@link #createWebApplicationContext} for actual creation
 	 * of the context. Can be overridden in subclasses.
@@ -562,6 +672,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 				WebApplicationContextUtils.getWebApplicationContext(getServletContext());
 		WebApplicationContext wac = null;
 
+		// context 不为null，说明在构造器阶段已经完成了context注入
 		if (this.webApplicationContext != null) {
 			// A context instance was injected at construction time -> use it
 			wac = this.webApplicationContext;
@@ -579,6 +690,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 				}
 			}
 		}
+		// 构造器中没有指定context，尝试从ServletContext的属性中取
 		if (wac == null) {
 			// No context instance was injected at construction time -> see if one
 			// has been registered in the servlet context. If one exists, it is assumed
@@ -586,6 +698,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			// user has performed any initialization such as setting the context id
 			wac = findWebApplicationContext();
 		}
+		// 如果ServletContext中也没有找到context，那么创建一个自己的context
 		if (wac == null) {
 			// No context instance is defined for this servlet -> create a local one
 			wac = createWebApplicationContext(rootContext);
@@ -634,6 +747,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 * 期望自定义的context能够实现 {@link ConfigurableWebApplicationContext}接口，子类可以覆盖实现。
+	 * 不要忘了将当前servlet注册为一个监听器，通过{@link #refresh()}回调，并在返回context前调用refresh
 	 * Instantiate the WebApplicationContext for this servlet, either a default
 	 * {@link org.springframework.web.context.support.XmlWebApplicationContext}
 	 * or a {@link #setContextClass custom context class}, if set.
@@ -670,6 +785,15 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		return wac;
 	}
 
+	/**
+	 * 1、如果没有id，为context生成一个id
+	 * 2、为context设置ServletContext、ServletConfig、Namespace
+	 * 3、注册一个监听器(SourceFilterListener)
+	 * 4、初始属性源
+	 * 5、调用后置处理器（默认空实现、子类可以覆盖）
+	 * 6、加载initializer，初始initializer，应用initializer
+	 * @param wac
+	 */
 	protected void configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext wac) {
 		if (ObjectUtils.identityToString(wac).equals(wac.getId())) {
 			// The application context id is still set to its original default value
@@ -703,6 +827,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 * 创建一个自己的context，默认是XmlWebApplicationContext 或者 {@link #setContextClass(Class)} 指定的context class
 	 * Instantiate the WebApplicationContext for this servlet, either a default
 	 * {@link org.springframework.web.context.support.XmlWebApplicationContext}
 	 * or a {@link #setContextClass custom context class}, if set.
@@ -717,6 +842,12 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 * 在context被refreshed/activated前对webApplicationContext执行后处理.
+	 * 默认为空实现，{@link #refresh()}将在本方法返回后被调用。
+	 *
+	 * 在这个方法中，子类可以修改applicationContext，用户也可以通过{@link ApplicationContextInitializer}
+	 * 在 {@link #initWebApplicationContext()}方法中对context进行修改
+	 *
 	 * Post-process the given WebApplicationContext before it is refreshed
 	 * and activated as context for this servlet.
 	 * <p>The default implementation is empty. {@code refresh()} will
@@ -734,6 +865,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 *
 	 * Delegate the WebApplicationContext before it is refreshed to any
 	 * {@link ApplicationContextInitializer} instances specified by the
 	 * "contextInitializerClasses" servlet init-param.
@@ -746,25 +878,36 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @see ConfigurableApplicationContext#refresh()
 	 */
 	protected void applyInitializers(ConfigurableApplicationContext wac) {
+		// web.xml中指定的initializer
 		String globalClassNames = getServletContext().getInitParameter(ContextLoader.GLOBAL_INITIALIZER_CLASSES_PARAM);
 		if (globalClassNames != null) {
 			for (String className : StringUtils.tokenizeToStringArray(globalClassNames, INIT_PARAM_DELIMITERS)) {
+				// 实例化initializer
 				this.contextInitializers.add(loadInitializer(className, wac));
 			}
 		}
-
+		// code-based执行的initializer
 		if (this.contextInitializerClasses != null) {
 			for (String className : StringUtils.tokenizeToStringArray(this.contextInitializerClasses, INIT_PARAM_DELIMITERS)) {
 				this.contextInitializers.add(loadInitializer(className, wac));
 			}
 		}
 
+		// 调用initializer配置context
 		AnnotationAwareOrderComparator.sort(this.contextInitializers);
 		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : this.contextInitializers) {
 			initializer.initialize(wac);
 		}
 	}
 
+	/**
+	 * 1、Class.forName加载 initializer 对应的class
+	 * 2、解析initializer的泛型参数（需要是ConfigurableApplicationContext类型）
+	 * 3、反射创建initializer实例
+	 * @param className
+	 * @param wac
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	private ApplicationContextInitializer<ConfigurableApplicationContext> loadInitializer(
 			String className, ConfigurableApplicationContext wac) {
