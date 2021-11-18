@@ -20,6 +20,8 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.lang.Nullable;
 
 /**
+ * 可以通过 {@link #usePrefix} 设置为true的方式过滤到 指定前缀的advisor
+ *
  * {@code BeanPostProcessor} implementation that creates AOP proxies based on all
  * candidate {@code Advisor}s in the current {@code BeanFactory}. This class is
  * completely generic; it contains no special code to handle any particular aspects,

@@ -16,25 +16,6 @@
 
 package org.springframework.web.filter;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -46,7 +27,18 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.*;
+
 /**
+ * 解析 PUT、PATCH、DELETE 请求、响应中的form data数据，并将它们以请求参数形式暴露
  * {@code Filter} that parses form data for HTTP PUT, PATCH, and DELETE requests
  * and exposes it as Servlet request parameters. By default the Servlet spec
  * only requires this for HTTP POST.
@@ -84,7 +76,7 @@ public class FormContentFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-
+		// 将请求参数拆分为键值对
 		MultiValueMap<String, String> params = parseIfNecessary(request);
 		if (!CollectionUtils.isEmpty(params)) {
 			filterChain.doFilter(new FormContentRequestWrapper(request, params), response);
@@ -94,6 +86,12 @@ public class FormContentFilter extends OncePerRequestFilter {
 		}
 	}
 
+	/**
+	 * 解析request
+	 * @param request
+	 * @return
+	 * @throws IOException
+	 */
 	@Nullable
 	private MultiValueMap<String, String> parseIfNecessary(HttpServletRequest request) throws IOException {
 		if (!shouldParse(request)) {
@@ -106,9 +104,16 @@ public class FormContentFilter extends OncePerRequestFilter {
 				return request.getInputStream();
 			}
 		};
+		// 将请求参数拆分为键值对
 		return this.formConverter.read(null, inputMessage);
 	}
 
+	/**
+	 * 1、是否是特定的方法{@link #HTTP_METHODS}
+	 * 2、是否是特定的请求类型{@link MediaType#APPLICATION_FORM_URLENCODED}
+	 * @param request
+	 * @return
+	 */
 	private boolean shouldParse(HttpServletRequest request) {
 		if (!HTTP_METHODS.contains(request.getMethod())) {
 			return false;

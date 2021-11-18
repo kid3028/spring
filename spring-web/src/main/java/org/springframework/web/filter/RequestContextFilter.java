@@ -16,18 +16,20 @@
 
 package org.springframework.web.filter;
 
-import java.io.IOException;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+import java.io.IOException;
 
 /**
+ * 暴露request到当前线程中
+ * 这个过滤器主要是在一些第三方的servlet中使用，如JSF FacesServlet,
+ * 在spring web中，DispatcherServlet已经可以满足
  * Servlet Filter that exposes the request to the current thread,
  * through both {@link org.springframework.context.i18n.LocaleContextHolder} and
  * {@link RequestContextHolder}. To be registered as filter in {@code web.xml}.

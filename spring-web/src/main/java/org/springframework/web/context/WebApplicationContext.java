@@ -16,24 +16,22 @@
 
 package org.springframework.web.context;
 
-import javax.servlet.ServletContext;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
-import org.springframework.web.context.support.WebApplicationContextUtils;
+
+import javax.servlet.ServletContext;
 
 /**
- * 对 web application 的配置接口
- * 当application运行时它是只读的，但是子类实现中可以支持reload
+ * webApplication 配置
+ * 当应用运行起来后整个应用是只读的，当然子类实现中也可以支持reload
  *
- * 这个接口在常规的 ApplicationContext 接口上增加了 {@link #getServletContext()} 接口，
- * 定义了大家熟知的 rootContext application 属性，并且在启动程序完成后会完成属性
+ * 增加了 {@link #getServletContext()}方法获取 ApplicationContext
  *
- * 跟其他application context一样，web application context 也是有层次的。
- * 每一个application都会拥有一个root context，同样地，应用中的每一个servlet也会有自己的 child context
+ * 跟常规的ApplicationContext一样，WebApplicationContext也是有层次的。
+ * 每个application可以拥有一个root context，每个servlet也可以有自己的child context(包括 dispatcher servlet)
  *
- * 除了标准的application context生命周期能力外，WebApplicationContext还具有自动探测 {@link ServletContextAware}
- * 对象的能力，并且调用对应的 {@link ServletContextAware#setServletContext(ServletContext)} 方法
+ * 除了标准的application context生命周期外，WebApplicationContext还需要能够探测
+ * {@link ServletContextAware}，并调用对应的{@code setServletContext}方法
  *
  * Interface to provide configuration for a web application. This is read-only while
  * the application is running, but may be reloaded if the implementation supports this.
@@ -58,15 +56,12 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 public interface WebApplicationContext extends ApplicationContext {
 
 	/**
-	 * 在应用成功启动时绑定 root WebApplicationContext 到该属性上
-	 * 如果root context启动失败，这个属性将会关联一个exception or error。
-	 * 使用{@link WebApplicationContextUtils}可以方便地访问到 root WebApplicationContext
 	 * Context attribute to bind root WebApplicationContext to on successful startup.
 	 * <p>Note: If the startup of the root context fails, this attribute can contain
 	 * an exception or error as value. Use WebApplicationContextUtils for convenient
 	 * lookup of the root WebApplicationContext.
-	 * @see WebApplicationContextUtils#getWebApplicationContext
-	 * @see WebApplicationContextUtils#getRequiredWebApplicationContext
+	 * @see org.springframework.web.context.support.WebApplicationContextUtils#getWebApplicationContext
+	 * @see org.springframework.web.context.support.WebApplicationContextUtils#getRequiredWebApplicationContext
 	 */
 	String ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE = WebApplicationContext.class.getName() + ".ROOT";
 

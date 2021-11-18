@@ -16,21 +16,19 @@
 
 package org.springframework.web.filter;
 
-import java.io.IOException;
-
-import javax.servlet.DispatcherType;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.util.WebUtils;
 
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
 /**
+ * 单次执行
+ * web.xml中配置的filter可以在一个异步的dispatcher中被调用。子类可以在覆盖
+ * {@link #shouldNotFilterAsyncDispatch()}来决定是否需要执行filter
  * Filter base class that aims to guarantee a single execution per request
  * dispatch, on any servlet container. It provides a {@link #doFilterInternal}
  * method with HttpServletRequest and HttpServletResponse arguments.
@@ -69,6 +67,7 @@ import org.springframework.web.util.WebUtils;
 public abstract class OncePerRequestFilter extends GenericFilterBean {
 
 	/**
+	 * 标记请求已经被filter处理的后缀
 	 * Suffix that gets appended to the filter name for the
 	 * "already filtered" request attribute.
 	 * @see #getAlreadyFilteredAttributeName
@@ -77,6 +76,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 
 
 	/**
+	 * 将会向request中放入一个attribute，标记请求已经被filter处理过
 	 * This {@code doFilter} implementation stores a request attribute for
 	 * "already filtered", proceeding without filtering again if the
 	 * attribute is already there.
@@ -94,11 +94,12 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
+		// filterName + .FILTERED
 		String alreadyFilteredAttributeName = getAlreadyFilteredAttributeName();
 		boolean hasAlreadyFilteredAttribute = request.getAttribute(alreadyFilteredAttributeName) != null;
 
+		// 是否要跳过filter
 		if (skipDispatch(httpRequest) || shouldNotFilter(httpRequest)) {
-
 			// Proceed without invoking this filter...
 			filterChain.doFilter(request, response);
 		}
@@ -116,6 +117,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 			// Do invoke this filter...
 			request.setAttribute(alreadyFilteredAttributeName, Boolean.TRUE);
 			try {
+				// 执行filter逻辑
 				doFilterInternal(httpRequest, httpResponse, filterChain);
 			}
 			finally {
@@ -136,6 +138,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	}
 
 	/**
+	 * 是否是 {@link DispatcherType#ASYNC}
 	 * The dispatcher type {@code javax.servlet.DispatcherType.ASYNC} introduced
 	 * in Servlet 3.0 means a filter can be invoked in more than one thread over
 	 * the course of a single request. This method returns {@code true} if the
@@ -160,6 +163,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	}
 
 	/**
+	 * 返回一个name字符串，标识一个请求早已执行过filter
 	 * Return the name of the request attribute that identifies that a request
 	 * is already filtered.
 	 * <p>The default implementation takes the configured name of the concrete filter
@@ -177,6 +181,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	}
 
 	/**
+	 * 默认不执行filter，子类可以覆盖实现
 	 * Can be overridden in subclasses for custom filtering control,
 	 * returning {@code true} to avoid filtering of the given request.
 	 * <p>The default implementation always returns {@code false}.
@@ -222,6 +227,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 
 
 	/**
+	 * 与 {@link #doFilter(ServletRequest, ServletResponse, FilterChain)} 等价
 	 * Same contract as for {@code doFilter}, but guaranteed to be
 	 * just invoked once per request within a single request thread.
 	 * See {@link #shouldNotFilterAsyncDispatch()} for details.
@@ -233,6 +239,8 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 			throws ServletException, IOException;
 
 	/**
+	 * ERROR dispatcher
+	 *
 	 * Typically an ERROR dispatch happens after the REQUEST dispatch completes,
 	 * and the filter chain starts anew. On some servers however the ERROR
 	 * dispatch may be nested within the REQUEST dispatch, e.g. as a result of

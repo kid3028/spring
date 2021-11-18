@@ -16,24 +16,9 @@
 
 package org.springframework.web.filter;
 
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.PropertyAccessorFactory;
-import org.springframework.beans.PropertyValue;
-import org.springframework.beans.PropertyValues;
+import org.springframework.beans.*;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -52,7 +37,19 @@ import org.springframework.web.context.support.ServletContextResourceLoader;
 import org.springframework.web.context.support.StandardServletEnvironment;
 import org.springframework.web.util.NestedServletException;
 
+import javax.servlet.*;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
+ * filter简单实现
+ * 使用对应的setter方法设置已自动完成类型转换的配置参数值。与bean属性不匹配的参数将会被忽略。
+ * 子类需要实现 {@link #doFilter(ServletRequest, ServletResponse, FilterChain)} 过滤逻辑
+ *
+ * 这个通用的过滤器是不依赖spring的，filter一般也不加载自己的上下文，而是通过
+ * {@link #getServletContext()}获取到设置在ServletContext属性来访问
+ * spring root web application context
  * Simple base implementation of {@link javax.servlet.Filter} which treats
  * its config parameters ({@code init-param} entries within the
  * {@code filter} tag in {@code web.xml}) as bean properties.
@@ -101,6 +98,8 @@ public abstract class GenericFilterBean implements Filter, BeanNameAware, Enviro
 
 
 	/**
+	 * 存储filter在spring beanFactory中的beanName
+	 *
 	 * Stores the bean name as defined in the Spring bean factory.
 	 * <p>Only relevant in case of initialization as bean, to have a name as
 	 * fallback to the filter name usually provided by a FilterConfig instance.
@@ -113,6 +112,10 @@ public abstract class GenericFilterBean implements Filter, BeanNameAware, Enviro
 	}
 
 	/**
+	 * 设置filter运行的环境变量。
+	 * 这里设置的任何环境变量都将覆盖 {@link StandardServletEnvironment} 设置的环境变量。
+	 * 这里的环境变量通常只涌过来解析init-parameters中的资源路径占位符，如果没有init-params，
+	 * 可以忽略这个环境变量
 	 * Set the {@code Environment} that this filter runs in.
 	 * <p>Any environment set here overrides the {@link StandardServletEnvironment}
 	 * provided by default.
@@ -126,6 +129,7 @@ public abstract class GenericFilterBean implements Filter, BeanNameAware, Enviro
 	}
 
 	/**
+	 * 返回filter关联的环境变量，如果没有指定，将new 一个 {@link StandardServletEnvironment} 返回
 	 * Return the {@link Environment} associated with this filter.
 	 * <p>If none specified, a default environment will be initialized via
 	 * {@link #createEnvironment()}.
@@ -140,6 +144,8 @@ public abstract class GenericFilterBean implements Filter, BeanNameAware, Enviro
 	}
 
 	/**
+	 * 创建一个环境变量
+	 * 此类可以覆盖实现
 	 * Create and return a new {@link StandardServletEnvironment}.
 	 * <p>Subclasses may override this in order to configure the environment or
 	 * specialize the environment type returned.
@@ -150,6 +156,7 @@ public abstract class GenericFilterBean implements Filter, BeanNameAware, Enviro
 	}
 
 	/**
+	 * 存储上下运行的ServletContext
 	 * Stores the ServletContext that the bean factory runs in.
 	 * <p>Only relevant in case of initialization as bean, to have a ServletContext
 	 * as fallback to the context usually provided by a FilterConfig instance.
@@ -162,6 +169,7 @@ public abstract class GenericFilterBean implements Filter, BeanNameAware, Enviro
 	}
 
 	/**
+	 * 初始化filter
 	 * Calls the {@code initFilterBean()} method that might
 	 * contain custom initialization of a subclass.
 	 * <p>Only relevant in case of initialization as bean, where the
@@ -175,6 +183,8 @@ public abstract class GenericFilterBean implements Filter, BeanNameAware, Enviro
 	}
 
 	/**
+	 * 子类可以覆盖该方法，执行自定义的filter销毁螺
+	 * 这个方法将被 standard filter destruction调用
 	 * Subclasses may override this to perform custom filter shutdown.
 	 * <p>Note: This method will be called from standard filter destruction
 	 * as well as filter bean destruction in a Spring application context.
@@ -186,6 +196,7 @@ public abstract class GenericFilterBean implements Filter, BeanNameAware, Enviro
 
 
 	/**
+	 * 子类调用该方法指定某个属性是必须的，通常在子类的构造器中被调用
 	 * Subclasses can invoke this method to specify that this property
 	 * (which must match a JavaBean property they expose) is mandatory,
 	 * and must be supplied as a config parameter. This should be called
@@ -200,6 +211,7 @@ public abstract class GenericFilterBean implements Filter, BeanNameAware, Enviro
 
 	/**
 	 * Standard way of initializing this filter.
+	 * 初始化filter的标准流程
 	 * Map config parameters onto bean properties of this filter, and
 	 * invoke subclass initialization.
 	 * @param filterConfig the configuration for this filter
@@ -213,6 +225,7 @@ public abstract class GenericFilterBean implements Filter, BeanNameAware, Enviro
 
 		this.filterConfig = filterConfig;
 
+		// 如果有必须的属性没有在filterConfig中，将会抛出异常
 		// Set bean properties from init parameters.
 		PropertyValues pvs = new FilterConfigPropertyValues(filterConfig, this.requiredProperties);
 		if (!pvs.isEmpty()) {
@@ -255,6 +268,8 @@ public abstract class GenericFilterBean implements Filter, BeanNameAware, Enviro
 	}
 
 	/**
+	 * 子类应该覆盖该方法执行自定义的初始化。
+	 * 在这个方法调用前，filter的所有属性都已经完成赋值了
 	 * Subclasses may override this to perform custom initialization.
 	 * All bean properties of this filter will have been set before this
 	 * method is invoked.

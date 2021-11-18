@@ -20,6 +20,8 @@ import org.springframework.core.NamedThreadLocal;
 import org.springframework.lang.Nullable;
 
 /**
+ * 提供了静态方法获取aop proxy。
+ * 默认不会暴露proxy，因为存在性能消耗。
  * Class containing static methods used to obtain information about the current AOP invocation.
  *
  * <p>The {@code currentProxy()} method is usable if the AOP framework is configured to

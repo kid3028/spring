@@ -21,6 +21,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.lang.Nullable;
 
 /**
+ * MethodInvocation的实现
  * Extension of the AOP Alliance {@link org.aopalliance.intercept.MethodInvocation}
  * interface, allowing access to the proxy that the method invocation was made through.
  *
@@ -36,6 +37,7 @@ import org.springframework.lang.Nullable;
 public interface ProxyMethodInvocation extends MethodInvocation {
 
 	/**
+	 * 返回方法调用的proxy
 	 * Return the proxy that this method invocation was made through.
 	 * @return the original proxy object
 	 */
@@ -69,6 +71,9 @@ public interface ProxyMethodInvocation extends MethodInvocation {
 	void setArguments(Object... arguments);
 
 	/**
+	 * 添加一些特殊的 user attribute
+	 * spring不会使用这些属性，属性将会作为invocation的一部分，用于特殊的拦截器
+	 * value为null则重置已有的值
 	 * Add the specified user attribute with the given value to this invocation.
 	 * <p>Such attributes are not used within the AOP framework itself. They are
 	 * just kept as part of the invocation object, for use in special interceptors.
@@ -78,6 +83,7 @@ public interface ProxyMethodInvocation extends MethodInvocation {
 	void setUserAttribute(String key, @Nullable Object value);
 
 	/**
+	 * 返回 user attribute
 	 * Return the value of the specified user attribute.
 	 * @param key the name of the attribute
 	 * @return the value of the attribute, or {@code null} if not set

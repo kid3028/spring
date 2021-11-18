@@ -28,6 +28,10 @@ import org.springframework.util.Assert;
 import java.util.List;
 
 /**
+ * 通用auto proxy creator:基于探测到的advisor为bean创建aop代理
+ * 子类需要覆盖 {@link #findCandidateAdvisors()}返回可以应用的advisors。
+ * 子类可以通过覆盖{@link #shouldSkip(Class, String)} 方法来排除某些bean
+ *
  * Generic auto proxy creator that builds AOP proxies for specific beans
  * based on detected Advisors for each bean.
  *
@@ -68,6 +72,13 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	}
 
 
+	/**
+	 * 能作用到bean的advisors/advices
+	 * @param beanClass the class of the bean to advise
+	 * @param beanName the name of the bean
+	 * @param targetSource
+	 * @return
+	 */
 	@Override
 	@Nullable
 	protected Object[] getAdvicesAndAdvisorsForBean(
@@ -81,6 +92,8 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	}
 
 	/**
+	 * 查找所有可用的advisor
+	 *
 	 * Find all eligible Advisors for auto-proxying this class.
 	 * @param beanClass the clazz to find advisors for
 	 * @param beanName the name of the currently proxied bean
@@ -103,6 +116,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	}
 
 	/**
+	 * 简单找出BeanFactory中所有 Advisor.class bean，经过helper筛选后得到候选advisors
 	 * Find all candidate Advisors to use in auto-proxying.
 	 * @return the List of candidate Advisors
 	 */

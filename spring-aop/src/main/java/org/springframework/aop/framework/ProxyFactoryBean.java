@@ -16,19 +16,11 @@
 
 package org.springframework.aop.framework;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
@@ -36,18 +28,19 @@ import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.UnknownAdviceTypeException;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.FactoryBeanNotInitializedException;
-import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.*;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * {@link ProxyCreatorSupport} 的基于 {@link BeanFactory} 的 {@link FactoryBean} 形式的实现
@@ -147,6 +140,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 
 
 	/**
+	 * 需要被代理的接口列表。如果为空，将通过cglib进行代理
 	 * Set the names of the interfaces we're proxying. If no interface
 	 * is given, a CGLIB for the actual class will be created.
 	 * <p>This is essentially equivalent to the "setInterfaces" method,
@@ -159,6 +153,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	}
 
 	/**
+	 * advice、advisor的名称列表，对应在beanFactory中的beanName
 	 * Set the list of Advice/Advisor bean names. This must always be set
 	 * to use this factory bean in a bean factory.
 	 * <p>The referenced beans should be of type Interceptor, Advisor or Advice
@@ -180,6 +175,10 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	}
 
 	/**
+	 * 指定targetBean的名称。
+	 * 另一种可选的方式是 将target放在interceptorNames的最后一个
+	 * 或者通过 target、targetSource 属性指定
+	 *
 	 * Set the name of the target bean. This is an alternative to specifying
 	 * the target name at the end of the "interceptorNames" array.
 	 * <p>You can also specify a target object or a TargetSource object
@@ -193,6 +192,8 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	}
 
 	/**
+	 * 是否自动探测接口
+	 * 默认为true，如果设置为false，将创建cglib代理
 	 * Set whether to autodetect proxy interfaces if none specified.
 	 * <p>Default is "true". Turn this flag off to create a CGLIB
 	 * proxy for the full target class if no interfaces specified.
@@ -203,6 +204,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	}
 
 	/**
+	 * proxy是否单例
 	 * Set the value of the singleton property. Governs whether this factory
 	 * should always return the same proxy instance (which implies the same target)
 	 * or whether it should return a new prototype instance, which implies that
@@ -215,6 +217,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	}
 
 	/**
+	 * 指定 AdvisorAdapterRegistry。默认是 GlobalAdvisorAdapterRegistry
 	 * Specify the AdvisorAdapterRegistry to use.
 	 * Default is the global AdvisorAdapterRegistry.
 	 * @see org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry
@@ -254,6 +257,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 
 
 	/**
+	 * 获取proxy对象
 	 * Return a proxy. Invoked when clients obtain beans from this factory bean.
 	 * Create an instance of the AOP proxy to be returned by this factory.
 	 * The instance will be cached for a singleton, and create on each call to
@@ -277,6 +281,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	}
 
 	/**
+	 * 返回proxy的类型
 	 * Return the type of the proxy. Will check the singleton instance if
 	 * already created, else fall back to the proxy interface (in case of just
 	 * a single one), the target bean type, or the TargetSource's target class.
@@ -311,6 +316,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 
 
 	/**
+	 * 创建一个interfaces的组合类实现
 	 * Create a composite interface Class for the given interfaces,
 	 * implementing the given interfaces in one single Class.
 	 * <p>The default implementation builds a JDK proxy class for the
@@ -324,6 +330,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	}
 
 	/**
+	 * 返回单例proxy
 	 * Return the singleton instance of this class's proxy object,
 	 * lazily creating it if it hasn't been created already.
 	 * @return the shared singleton proxy
@@ -347,6 +354,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	}
 
 	/**
+	 * 创建一个prototype proxy
 	 * Create a new prototype instance of this class's created proxy object,
 	 * backed by an independent AdvisedSupport configuration.
 	 * @return a totally independent proxy, whose advice we may manipulate in isolation
@@ -387,6 +395,9 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	}
 
 	/**
+	 * 检查interceptorNames的最后一个元素是不是targetName，如果是单独截取出targetName,剩余元素按interceptor处理
+	 * 判断最后一个是不是target的方式：
+	 *   从beanFactory中根据beanName获取bean，判断bean是否是Advice或者Advisor
 	 * Check the interceptorNames list whether it contains a target name as final element.
 	 * If found, remove the final name from the list and set it as targetName.
 	 */
@@ -410,6 +421,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	}
 
 	/**
+	 * 判断interceptorsNames中的元素是否是 advice、advisor、target
 	 * Look at bean factory metadata to work out whether this bean name,
 	 * which concludes the interceptorNames list, is an Advisor or Advice,
 	 * or may be a target.
@@ -431,6 +443,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	}
 
 	/**
+	 * 创建拦截器链
 	 * Create the advisor (interceptor) chain. Advisors that are sourced
 	 * from a BeanFactory will be refreshed each time a new prototype instance
 	 * is added. Interceptors added programmatically through the factory API
@@ -447,6 +460,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 						"- cannot resolve interceptor names " + Arrays.asList(this.interceptorNames));
 			}
 
+			// global interceptor不能是最后一个，除非执行了target
 			// Globals can't be last unless we specified a targetSource using the property...
 			if (this.interceptorNames[this.interceptorNames.length - 1].endsWith(GLOBAL_SUFFIX) &&
 					this.targetName == null && this.targetSource == EMPTY_TARGET_SOURCE) {
@@ -460,11 +474,13 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 						throw new AopConfigException(
 								"Can only use global advisors or interceptors with a ListableBeanFactory");
 					}
+					// 从IoC中找出名称以global通配符匹配的bean，加入拦截器列表
 					addGlobalAdvisors((ListableBeanFactory) this.beanFactory,
 							name.substring(0, name.length() - GLOBAL_SUFFIX.length()));
 				}
 
 				else {
+					// 根据proxy、interceptor是否单例决定advice的添加行为
 					// If we get here, we need to add a named interceptor.
 					// We must check if it's a singleton or prototype.
 					Object advice;
@@ -518,6 +534,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	}
 
 	/**
+	 * 遍历IoC中所有Advisor、Interceptor类型的bean，如果beanName以prefix开头，那么就是GlobalInterceptor
 	 * Add all global interceptors and pointcuts.
 	 */
 	private void addGlobalAdvisors(ListableBeanFactory beanFactory, String prefix) {
@@ -558,6 +575,11 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	}
 
 	/**
+	 * 返回 TargetSource
+	 * 如果在 InterceptorNames 中指定了target名称，那么每次从IoC中获取TargetSource返回，
+	 * 当target不是TargetSource类型时会自动封装为SingletonTargetSource类型
+	 *
+	 * 如果targetName没有指定，直接返回 this.targetSource
 	 * Return a TargetSource to use when creating a proxy. If the target was not
 	 * specified at the end of the interceptorNames list, the TargetSource will be
 	 * this class's TargetSource member. Otherwise, we get the target bean and wrap

@@ -16,15 +16,14 @@
 
 package org.springframework.web.bind.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import org.springframework.core.annotation.AliasFor;
 
+import java.lang.annotation.*;
+
 /**
+ * 将web请求映射到一个请求处理类的方法上
+ * Spring MVC 和 Spring WebFlux都支持注解方式绑定路由
+ *   {@link RequestMappingHandlerMapping} {@link RequestMappingHandlerAdapter}
  * Annotation for mapping web requests onto methods in request-handling classes
  * with flexible method signatures.
  *
@@ -46,6 +45,7 @@ import org.springframework.core.annotation.AliasFor;
  * </li>
  * </ul>
  *
+ * 这个注解可以用在类上和方法上，一般，方法上更加倾向于使用带有动作的注解
  * <p><strong>Note:</strong> This annotation can be used both at the class and
  * at the method level. In most cases, at the method level applications will
  * prefer to use one of the HTTP method specific variants
@@ -77,6 +77,8 @@ import org.springframework.core.annotation.AliasFor;
 public @interface RequestMapping {
 
 	/**
+	 * 指定mapping的名称
+	 * 当在class method上都使用时，使用 "#" 作为分隔符
 	 * Assign a name to this mapping.
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used on both levels, a combined name is derived by concatenation
@@ -87,6 +89,7 @@ public @interface RequestMapping {
 	String name() default "";
 
 	/**
+	 * 执行mapping path
 	 * The primary mapping expressed by this annotation.
 	 * <p>This is an alias for {@link #path}. For example
 	 * {@code @RequestMapping("/foo")} is equivalent to
@@ -99,6 +102,9 @@ public @interface RequestMapping {
 	String[] value() default {};
 
 	/**
+	 * 执行mapping path，可以是ant风格的，如 "/myPath/*.do"
+	 * 在方法级别，可以使用相对路径
+	 * path可以包含 占位符
 	 * The path mapping URIs (e.g. "/myPath.do").
 	 * Ant-style path patterns are also supported (e.g. "/myPath/*.do").
 	 * At the method level, relative paths (e.g. "edit.do") are supported
@@ -114,6 +120,8 @@ public @interface RequestMapping {
 	String[] path() default {};
 
 	/**
+	 * 支持的方法 GET POST HEAD OPTIONS PUT PATCH DELETE TRACE
+	 * 方法级别将会继承类级别的请求方法限制
 	 * The HTTP request methods to map to, narrowing the primary mapping:
 	 * GET, POST, HEAD, OPTIONS, PUT, PATCH, DELETE, TRACE.
 	 * <p><b>Supported at the type level as well as at the method level!</b>
@@ -124,6 +132,7 @@ public @interface RequestMapping {
 	RequestMethod[] method() default {};
 
 	/**
+	 * 限制必须有某个参数，参数值必须是多少，不能有某个参数等行为
 	 * The parameters of the mapped request, narrowing the primary mapping.
 	 * <p>Same format for any environment: a sequence of "myParam=myValue" style
 	 * expressions, with a request only mapped if each such parameter is found
@@ -144,6 +153,7 @@ public @interface RequestMapping {
 	String[] params() default {};
 
 	/**
+	 * 限制必须有某个header，header值必须是多少，不能有某个header、header值可以使用通配符等行为
 	 * The headers of the mapped request, narrowing the primary mapping.
 	 * <p>Same format for any environment: a sequence of "My-Header=myValue" style
 	 * expressions, with a request only mapped if each such header is found
@@ -167,6 +177,8 @@ public @interface RequestMapping {
 	String[] headers() default {};
 
 	/**
+	 * 限定接收的 Content-Type
+	 * 可以取反Content-Type
 	 * The consumable media types of the mapped request, narrowing the primary mapping.
 	 * <p>The format is a single media type or a sequence of media types,
 	 * with a request only mapped if the {@code Content-Type} matches one of these media types.
@@ -186,6 +198,8 @@ public @interface RequestMapping {
 	String[] consumes() default {};
 
 	/**
+	 * 限定Accept
+	 * 支持取反
 	 * The producible media types of the mapped request, narrowing the primary mapping.
 	 * <p>The format is a single media type or a sequence of media types,
 	 * with a request only mapped if the {@code Accept} matches one of these media types.

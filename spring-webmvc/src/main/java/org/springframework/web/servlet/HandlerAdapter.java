@@ -16,12 +16,17 @@
 
 package org.springframework.web.servlet;
 
+import org.springframework.lang.Nullable;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.lang.Nullable;
-
 /**
+ * MVC框架的SPI接口，允许参数式配置MVC工作流
+ * 每一个处理请求的handler都必须实现这个接口。
+ * DispatcherServlet访问所有通过这个接口注册的handler，
+ * handler可以是任何类型，可以和其他框架轻松集成，也支持注解驱动的handler(不需要实现任何特定的接口)
+ *
  * MVC framework SPI, allowing parameterization of the core MVC workflow.
  *
  * <p>Interface that must be implemented for each handler type to handle a request.
@@ -50,6 +55,8 @@ import org.springframework.lang.Nullable;
 public interface HandlerAdapter {
 
 	/**
+	 * handler是否支持。一般直接通过类型判断，如
+	 *   return handler instanceof MyHandler
 	 * Given a handler instance, return whether or not this {@code HandlerAdapter}
 	 * can support it. Typical HandlerAdapters will base the decision on the handler
 	 * type. HandlerAdapters will usually only support one handler type each.
@@ -63,6 +70,7 @@ public interface HandlerAdapter {
 	boolean supports(Object handler);
 
 	/**
+	 * 调用handler处理请求
 	 * Use the given handler to handle this request.
 	 * The workflow that is required may vary widely.
 	 * @param request current HTTP request
@@ -78,6 +86,7 @@ public interface HandlerAdapter {
 	ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception;
 
 	/**
+	 * 与 HttpServlet#getLastModified等价，如果handler不被支持，将返回-1
 	 * Same contract as for HttpServlet's {@code getLastModified} method.
 	 * Can simply return -1 if there's no support in the handler class.
 	 * @param request current HTTP request

@@ -16,21 +16,17 @@
 
 package org.springframework.web.cors;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 /**
+ * 默认情况下不允许任何跨域请求，必须先显式配置哪些是允许的。
  * A container for CORS configuration along with methods to check against the
  * actual origin, HTTP methods, and headers of a given request.
  *
@@ -108,6 +104,9 @@ public class CorsConfiguration {
 
 
 	/**
+	 * 设置允许的origin
+	 * 允许全部 *
+	 * 默认都不允许
 	 * Set the origins to allow, e.g. {@code "https://domain1.com"}.
 	 * <p>The special value {@code "*"} allows all domains.
 	 * <p>By default this is not set.
@@ -140,6 +139,10 @@ public class CorsConfiguration {
 	}
 
 	/**
+	 * 设置允许的method
+	 * * 允许所有
+	 * 默认只允许 GET HEAD
+	 *
 	 * Set the HTTP methods to allow, e.g. {@code "GET"}, {@code "POST"},
 	 * {@code "PUT"}, etc.
 	 * <p>The special value {@code "*"} allows all methods.
@@ -249,6 +252,8 @@ public class CorsConfiguration {
 	}
 
 	/**
+	 * 设置响应头(默认允许的header[Cache-Control/Content-Language/Content-Type/Expires/Last-Modified/Pragma])
+	 * * 允许所有header(非 non-credentialed 的请求)
 	 * Set the list of response headers other than simple headers (i.e.
 	 * {@code Cache-Control}, {@code Content-Language}, {@code Content-Type},
 	 * {@code Expires}, {@code Last-Modified}, or {@code Pragma}) that an
@@ -284,6 +289,8 @@ public class CorsConfiguration {
 	}
 
 	/**
+	 * 支持 user credentials
+	 * 默认是没有设置的
 	 * Whether user credentials are supported.
 	 * <p>By default this is not set (i.e. user credentials are not supported).
 	 */
@@ -301,6 +308,7 @@ public class CorsConfiguration {
 	}
 
 	/**
+	 * 设置缓存的 maxAge second
 	 * Configure how long, in seconds, the response from a pre-flight request
 	 * can be cached by clients.
 	 * <p>By default this is not set.
@@ -320,6 +328,10 @@ public class CorsConfiguration {
 
 
 	/**
+	 * origin : *
+	 * method : GET HEAD POST
+	 * header : *
+	 * maxAge : 1800s
 	 * By default a newly created {@code CorsConfiguration} does not permit any
 	 * cross-origin requests and must be configured explicitly to indicate what
 	 * should be allowed.
@@ -414,6 +426,8 @@ public class CorsConfiguration {
 	}
 
 	/**
+	 * 检查是否是允许的origin
+	 * return null --> 不允许
 	 * Check the origin of the request against the configured allowed origins.
 	 * @param requestOrigin the origin to check
 	 * @return the origin to use for the response, or {@code null} which
@@ -446,6 +460,8 @@ public class CorsConfiguration {
 	}
 
 	/**
+	 * 检查method是否允许
+	 * return null --> 不允许
 	 * Check the HTTP request method (or the method from the
 	 * {@code Access-Control-Request-Method} header on a pre-flight request)
 	 * against the configured allowed methods.
@@ -465,6 +481,8 @@ public class CorsConfiguration {
 	}
 
 	/**
+	 * 检查headers是否被允许
+	 * return null --> 不允许
 	 * Check the supplied request headers (or the headers listed in the
 	 * {@code Access-Control-Request-Headers} of a pre-flight request) against
 	 * the configured allowed headers.

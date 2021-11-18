@@ -17,8 +17,10 @@
 package org.springframework.web.context.support;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.support.AbstractRefreshableConfigApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.lang.Nullable;
@@ -35,6 +37,15 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
 /**
+ * web application context 抽象实现
+ * 子类仅需要实现 {@link #loadBeanDefinitions(DefaultListableBeanFactory)}，实现应该
+ * 支持从 {@link #getConfigLocations()} 返回的文件加载bean definition
+ *
+ * 解释资源路径作为servlet context resources,路径默认是在web application root，如果需要
+ * 使用绝对路径，通过 "file:" 指定，将会有 {@link DefaultResourceLoader}加载资源
+ *
+ * 该类还会探测{@link ThemeSource}类型的bean
+ *
  * {@link org.springframework.context.support.AbstractRefreshableApplicationContext}
  * subclass which implements the
  * {@link org.springframework.web.context.ConfigurableWebApplicationContext}
@@ -51,7 +62,7 @@ import javax.servlet.ServletContext;
  * <p>Interprets resource paths as servlet context resources, i.e. as paths beneath
  * the web application root. Absolute paths, e.g. for files outside the web app root,
  * can be accessed via "file:" URLs, as implemented by
- * {@link org.springframework.core.io.DefaultResourceLoader}.
+ * {@link DefaultResourceLoader}.
  *
  * <p>In addition to the special beans detected by
  * {@link org.springframework.context.support.AbstractApplicationContext},
@@ -167,6 +178,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	@Override
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		// aware行为大多以后置处理形式添加
+		// ServletContextAwareProcessor子类将完成handler的注册
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext, this.servletConfig));
 		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
 		beanFactory.ignoreDependencyInterface(ServletConfigAware.class);
@@ -197,6 +209,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	}
 
 	/**
+	 * 仅在web application context 下有实现，其他context都是空实现
 	 * Initialize the theme capability.
 	 */
 	@Override

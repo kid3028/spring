@@ -45,6 +45,12 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * 将bean包装为aop proxy
+ * 与普通的拦截器不同之处：
+ *   拦截器是共享的，一些特殊拦截器会每个bean对应一个
+ *  当有大量的bean需要被简单代理时，auto-proxy是非常实用的。
+ *  子类可以通过策略决定一个类怎么被代理(byName/byType/ByBeanDefinition)
+ *
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
  * that wraps each eligible bean with an AOP proxy, delegating to specified interceptors
  * before invoking the bean itself.
@@ -160,6 +166,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	}
 
 	/**
+	 * 设置自定义的 TargetSourceCreator
+	 * 如果没有指定TargetSourceCreator那么将使用SingletonTargetSource
+	 * TargetSourceCreator仅在BeanFactory环境下，并且BeanFactoryAware接口被回调时才是可用的
+	 * TargetSourceCreator的顺序是有意义的，第一个匹配的非空对象将会被使用
 	 * Set custom {@code TargetSourceCreators} to be applied in this order.
 	 * If the list is empty, or they all return null, a {@link SingletonTargetSource}
 	 * will be created for each bean.
@@ -178,6 +188,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	}
 
 	/**
+	 * 设置通用拦截器。beanName必须在beanFactory中存在。
+	 * Interceptor可以是任何spring支持的advice、advisor
+	 * 如果这个属性没有设置，也是合法的，我们将其视为是【特殊】拦截器，可以匹配所有我们想要的所有advisors
 	 * Set the common interceptors. These must be bean names in the current factory.
 	 * They can be of any advice or advisor type Spring supports.
 	 * <p>If this property isn't set, there will be zero common interceptors.
@@ -234,6 +247,12 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		return wrapIfNecessary(bean, beanName, cacheKey);
 	}
 
+	/**
+	 * bean实例化前调用
+	 * @param beanClass the class of the bean to be instantiated
+	 * @param beanName the name of the bean
+	 * @return
+	 */
 	@Override
 	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
 		Object cacheKey = getCacheKey(beanClass, beanName);
@@ -360,6 +379,22 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	}
 
 	/**
+	 * Subclasses should override this method to return {@code true} if the
+	 * given bean should not be considered for auto-proxying by this post-processor.
+	 * <p>Sometimes we need to be able to avoid this happening, e.g. if it will lead to
+	 * a circular reference or if the existing target instance needs to be preserved.
+	 * This implementation returns {@code false} unless the bean name indicates an
+	 * "original instance" according to {@code AutowireCapableBeanFactory} conventions.
+	 * @param beanClass the class of the bean
+	 * @param beanName the name of the bean
+	 * @return whether to skip the given bean
+	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#ORIGINAL_INSTANCE_SUFFIX
+	 */
+	protected boolean shouldSkip(Class<?> beanClass, String beanName) {
+		return AutoProxyUtils.isOriginalInstance(beanName, beanClass);
+	}
+
+	/**
 	 * Return whether the given bean class represents an infrastructure class
 	 * that should never be proxied.
 	 * <p>The default implementation considers Advices, Advisors and
@@ -380,22 +415,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 			logger.trace("Did not attempt to auto-proxy infrastructure class [" + beanClass.getName() + "]");
 		}
 		return retVal;
-	}
-
-	/**
-	 * Subclasses should override this method to return {@code true} if the
-	 * given bean should not be considered for auto-proxying by this post-processor.
-	 * <p>Sometimes we need to be able to avoid this happening, e.g. if it will lead to
-	 * a circular reference or if the existing target instance needs to be preserved.
-	 * This implementation returns {@code false} unless the bean name indicates an
-	 * "original instance" according to {@code AutowireCapableBeanFactory} conventions.
-	 * @param beanClass the class of the bean
-	 * @param beanName the name of the bean
-	 * @return whether to skip the given bean
-	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#ORIGINAL_INSTANCE_SUFFIX
-	 */
-	protected boolean shouldSkip(Class<?> beanClass, String beanName) {
-		return AutoProxyUtils.isOriginalInstance(beanName, beanClass);
 	}
 
 	/**

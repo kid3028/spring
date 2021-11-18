@@ -16,17 +16,33 @@
 
 package org.springframework.web.servlet;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.lang.Nullable;
+import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
+ * 定义request与handler之间的映射关系
+ * 框架内部已经有实现： {@link BeanNameUrlHandlerMapping} {@link RequestMappingHandlerMapping}
+ * HandlerMapping实现需要支持拦截器，但是不是必须的。一个handler将会被包装为一个
+ * {@link HandlerExecutionChain},可能伴随着一系列的{@link HandlerInterceptor}。
+ * DispatcherServlet将首先顺序调用每一个 {@link HandlerInterceptor#preHandle(HttpServletRequest, HttpServletResponse, Object)},
+ * 如果都返回true，那么将调用handler自身。
+ *
+ * mapping处理器还拥有非常强大的参数化能力。例如可以根据session状态、cookie状态
+ * 或者其他的变量来实现自定义的mapping映射。
+ *
+ * 子类可以实现{@link org.springframework.core.Ordered}接口指定顺序，默认情况
+ * 将会按照最低优先级处理。
+ *
  * Interface to be implemented by objects that define a mapping between
  * requests and handler objects.
  *
  * <p>This class can be implemented by application developers, although this is not
- * necessary, as {@link org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping}
- * and {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping}
+ * necessary, as {@link BeanNameUrlHandlerMapping}
+ * and {@link RequestMappingHandlerMapping}
  * are included in the framework. The former is the default if no
  * HandlerMapping bean is registered in the application context.
  *
@@ -50,8 +66,8 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @see org.springframework.core.Ordered
  * @see org.springframework.web.servlet.handler.AbstractHandlerMapping
- * @see org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping
- * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+ * @see BeanNameUrlHandlerMapping
+ * @see RequestMappingHandlerMapping
  */
 public interface HandlerMapping {
 
@@ -121,6 +137,9 @@ public interface HandlerMapping {
 	String PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE = HandlerMapping.class.getName() + ".producibleMediaTypes";
 
 	/**
+	 * 返回与request匹配的handler和interceptor，如果没有匹配到，那么返回null(不会抛出exception)
+	 * 选择可能是基于request uri，session state 或者其他特性。
+	 *
 	 * Return a handler and any interceptors for this request. The choice may be made
 	 * on request URL, session state, or any factor the implementing class chooses.
 	 * <p>The returned HandlerExecutionChain contains a handler Object, rather than

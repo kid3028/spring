@@ -16,12 +16,15 @@
 
 package org.springframework.web.servlet;
 
+import org.springframework.lang.Nullable;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.lang.Nullable;
-
 /**
+ * 处理在handler mapping 和 handler 执行期间出现的exception， 通常是返回一个error页面。
+ * 一般实现会作为一个bean注册到IOC
+ *
  * Interface to be implemented by objects that can resolve exceptions thrown during
  * handler mapping or execution, in the typical case to error views. Implementors are
  * typically registered as beans in the application context.

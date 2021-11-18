@@ -16,21 +16,19 @@
 
 package org.springframework.web.filter;
 
-import java.io.IOException;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import javax.servlet.*;
+import java.io.IOException;
+
 /**
+ * 代理标准的servlet filter,将其委派给一个实现了 Filter 接口的 spring管理的bean。
+ * 可以在 web.xml init-param 通过 targetBeanName 指定
+ *
  * Proxy for a standard Servlet Filter, delegating to a Spring-managed bean that
  * implements the Filter interface. Supports a "targetBeanName" filter init-param
  * in {@code web.xml}, specifying the name of the target bean in the Spring
@@ -281,6 +279,10 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 
 
 	/**
+	 * 获取 WebApplicationContext 首先看用户是否指定了webApplicationContext
+	 * 如果指定了，则使用，如果context还没启动，调用refresh启动context
+	 *
+	 * 如果用户没有指定context，那么尝试从 ServletContext 中根据 attribute 获取保存的context
 	 * Return the {@code WebApplicationContext} passed in at construction time, if available.
 	 * Otherwise, attempt to retrieve a {@code WebApplicationContext} from the
 	 * {@code ServletContext} attribute with the {@linkplain #setContextAttribute
@@ -333,8 +335,10 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	 * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
 	 */
 	protected Filter initDelegate(WebApplicationContext wac) throws ServletException {
+		// spring bean name
 		String targetBeanName = getTargetBeanName();
 		Assert.state(targetBeanName != null, "No target bean name set");
+		// 获取到spring bean
 		Filter delegate = wac.getBean(targetBeanName, Filter.class);
 		if (isTargetFilterLifecycle()) {
 			delegate.init(getFilterConfig());

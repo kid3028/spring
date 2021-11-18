@@ -30,6 +30,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * MethodInvocation的spring aop实现。
+ * 通过反射调用target，子类可以覆盖{@link #invokeJoinpoint()}改变默认的行为。
+ *
+ * 这个类仅在内部使用，不应该被直接访问。
  * Spring's implementation of the AOP Alliance
  * {@link org.aopalliance.intercept.MethodInvocation} interface,
  * implementing the extended

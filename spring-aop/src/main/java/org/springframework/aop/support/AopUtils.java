@@ -203,6 +203,7 @@ public abstract class AopUtils {
 	}
 
 	/**
+	 * pointcut 是否能匹配 targetClass
 	 * Can the given pointcut apply at all on the given class?
 	 * <p>This is an important test as it can be used to optimize
 	 * out a pointcut for a class.
@@ -262,6 +263,9 @@ public abstract class AopUtils {
 	}
 
 	/**
+	 * advisor 能否应用到 targetClass 上
+	 *  {@link IntroductionAdvisor#getClassFilter()} matches()
+	 *  {@link PointcutAdvisor} matches()
 	 * Can the given advisor apply at all on the given class?
 	 * <p>This is an important test as it can be used to optimize out a advisor for a class.
 	 * This version also takes into account introductions (for IntroductionAwareMethodMatchers).

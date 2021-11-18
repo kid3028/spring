@@ -16,22 +16,41 @@
 
 package org.springframework.web;
 
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ReflectionUtils;
+
+import javax.servlet.ServletContainerInitializer;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.HandlesTypes;
 import java.lang.reflect.Modifier;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.Set;
 
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.HandlesTypes;
-
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.lang.Nullable;
-import org.springframework.util.ReflectionUtils;
-
 /**
+ * Servlet 3.0 中 {@link ServletContainerInitializer} 被设计为支持code-based形式配置
+ * servlet container，通过{@link WebApplicationInitializer}的SPI能力
+ *
+ * 该类是一个内部使用类，不应该被扩展或者继承，有扩展需要的请扩展{@link WebApplicationInitializer}
+ *
+ * 机制：
+ * 当前类会在Servlet 3.0容器启动时被加载、完成实例化，并且会调用其 {@link #onStartup(Set, ServletContext)}方法
+ * 通过JAR Service API {@link ServiceLoader#load(Class, ClassLoader)} 方法加载 【spring web】模块下
+ *
+ * web.xml的整合
+ * 通过 web.xml 中 {@code metadata-complete} 属性可以限制servlet container在启动时扫描的classpath,
+ * 也控制了Servlet注解
+ * {@code <absolute-ordering>} 元素控制哪些web片段(jar)需要扫描{@code ServletContainerInitializer}
+ * 当使用这个特性时，可以在web.xml 的 web fragments中指定 "spring_web"激活{@link SpringServletContainerInitializer}
+ *  <absolute-ordering>
+ *      <name>some_web_fragment</name>
+ *      <name>spring_web</name>
+ *  </absolute-ordering>
+ *
+ * {@code MEAT-INF/services/java.servlet.ServletContainerInitializer} 指定Initializer
  * Servlet 3.0 {@link ServletContainerInitializer} designed to support code-based
  * configuration of the servlet container using Spring's {@link WebApplicationInitializer}
  * SPI as opposed to (or possibly in combination with) the traditional
@@ -64,6 +83,13 @@ import org.springframework.util.ReflectionUtils;
  *   &lt;name>spring_web&lt;/name&gt;
  * &lt;/absolute-ordering&gt;
  * </pre>
+ *
+ * 与 {@link WebApplicationInitializer}的关系
+ * {@link WebApplicationInitializer}的SPI只包含一个接口 {@link WebApplicationInitializer#onStartup(ServletContext)}
+ * {@link SpringServletContainerInitializer}的职责是实例化并且委派{@link ServletContext} 到所有用户自定义的
+ * {@link WebApplicationInitializer}实现。
+ * {@link WebApplicationInitializer}的职责是做实际的{@link ServletContext}初始化工作。
+ *
  *
  * <h2>Relationship to Spring's {@code WebApplicationInitializer}</h2>
  * Spring's {@code WebApplicationInitializer} SPI consists of just one method:
@@ -113,6 +139,20 @@ import org.springframework.util.ReflectionUtils;
 public class SpringServletContainerInitializer implements ServletContainerInitializer {
 
 	/**
+	 * 将{@link ServletContext}委派给存在于classpath下的{@link WebApplicationInitializer}
+	 * 该类在 @{code HandlerTypes}声明了 WebApplicationInitializer.class, Servlet 3.0+ container
+	 * 将会自动扫描classpath下所有{@link WebApplicationInitializer}的实现，然后作为参数传递给本方法。
+	 *
+	 * 如果在classpath下没有发现任何{@link WebApplicationInitializer}实现，这个方法不会产生任何效果。
+	 * 一条info日志打印提醒用户{@link ServletContainerInitializer}确实被调用了，但是没有找到任何
+	 * {@link WebApplicationInitializer}的实现。
+	 *
+	 * 如果有{@link WebApplicationInitializer}实现找到了，那么他们将被实例化，并且完成排序，
+	 * 然后依次调用每一个{@link WebApplicationInitializer#onStartup(ServletContext)}
+	 * 完成register、servlet(eg. DispatcherServlet)、listener(eg. ContextLoaderListener)
+	 * filter等Servlet API组件。
+	 *
+	 *
 	 * Delegate the {@code ServletContext} to any {@link WebApplicationInitializer}
 	 * implementations present on the application classpath.
 	 * <p>Because this class declares @{@code HandlesTypes(WebApplicationInitializer.class)},

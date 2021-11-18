@@ -16,23 +16,9 @@
 
 package org.springframework.web.servlet;
 
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.PropertyAccessorFactory;
-import org.springframework.beans.PropertyValue;
-import org.springframework.beans.PropertyValues;
+import org.springframework.beans.*;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
@@ -47,10 +33,25 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResourceLoader;
 import org.springframework.web.context.support.StandardServletEnvironment;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
+ * HttpServlet的简单扩展
+ * 读取web.xml <servlet> 标签下的 "init-param" 来填充bean属性
  * Simple extension of {@link javax.servlet.http.HttpServlet} which treats
  * its config parameters ({@code init-param} entries within the
  * {@code servlet} tag in {@code web.xml}) as bean properties.
+ *
+ * 子类可以是任何类型的servlet。配置参数将自动完成类型转换，并调用setter方法赋值转换后的值。
+ * 如果bean属性中没有与与parameter匹配，将被忽略
+ *
+ * 通用的servlet不依赖spring ioc。简单的servlet不需要创建自己的context，但可以
+ * 访问spring root application context管理的bean
  *
  * <p>A handy superclass for any type of servlet. Type conversion of config
  * parameters is automatic, with the corresponding setter method getting
@@ -92,6 +93,8 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 
 
 	/**
+	 * 子类通过这个方式设置一些必须存在的配置参数。
+	 * 这个方法应该在子类的构造器中调用，
 	 * Subclasses can invoke this method to specify that this property
 	 * (which must match a JavaBean property they expose) is mandatory,
 	 * and must be supplied as a config parameter. This should be called
@@ -140,6 +143,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	}
 
 	/**
+	 * 将配置参数映射到bean属性上，并且调用子类的init
 	 * Map config parameters onto bean properties of this servlet, and
 	 * invoke subclass initialization.
 	 * @throws ServletException if bean properties are invalid (or required

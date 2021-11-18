@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
+ * 解析AspectJ注解
+ * 被AspectJ注解标记的类会被自动识别，
+ *
  * aop核心类，实现 BeanPostProcessor，spring加载这个bean时会在实例化前调用其postProcessAfterInitialization
  * {@link AspectJAwareAdvisorAutoProxyCreator} subclass that processes all AspectJ
  * annotation aspects in the current application context, as well as Spring Advisors.
@@ -61,6 +64,8 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 
 
 	/**
+	 * 设置匹配的 @AspectJ beanName
+	 * 默认全部标记了 @AspectJ 的bean都匹配
 	 * Set a list of regex patterns, matching eligible @AspectJ bean names.
 	 * <p>Default is to consider all @AspectJ beans as eligible.
 	 */

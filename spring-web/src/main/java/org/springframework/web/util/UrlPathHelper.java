@@ -16,24 +16,23 @@
 
 package org.springframework.web.util;
 
-import java.net.URLDecoder;
-import java.nio.charset.UnsupportedCharsetException;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
+import javax.servlet.http.HttpServletRequest;
+import java.net.URLDecoder;
+import java.nio.charset.UnsupportedCharsetException;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Properties;
+
 /**
+ * URL路径匹配辅助类。
  * Helper class for URL path matching. Provides support for URL paths in
  * {@code RequestDispatcher} includes and support for consistent URL decoding.
  *
@@ -75,6 +74,7 @@ public class UrlPathHelper {
 
 
 	/**
+	 * 总是使用全路径
 	 * Whether URL lookups should always use the full path within the current
 	 * web application context, i.e. within
 	 * {@link javax.servlet.ServletContext#getContextPath()}.
@@ -89,6 +89,7 @@ public class UrlPathHelper {
 	}
 
 	/**
+	 * context path / request uri 是否要decoded
 	 * Whether the context path and request URI should be decoded -- both of
 	 * which are returned <i>undecoded</i> by the Servlet API, in contrast to
 	 * the servlet path.
@@ -120,6 +121,7 @@ public class UrlPathHelper {
 	}
 
 	/**
+	 * ; 是否应该跳过
 	 * Set if ";" (semicolon) content should be stripped from the request URI.
 	 * <p>Default is "true".
 	 */
@@ -137,6 +139,7 @@ public class UrlPathHelper {
 	}
 
 	/**
+	 * 设置默认的编码，默认使用 servlet 标准 ISO-8859-1
 	 * Set the default character encoding to use for URL decoding.
 	 * Default is ISO-8859-1, according to the Servlet spec.
 	 * <p>If the request specifies a character encoding itself, the request
@@ -162,6 +165,7 @@ public class UrlPathHelper {
 	}
 
 	/**
+	 * readOnly 配置将不能再被修改
 	 * Switch to read-only mode where further configuration changes are not allowed.
 	 */
 	private void setReadOnly() {
@@ -174,6 +178,7 @@ public class UrlPathHelper {
 
 
 	/**
+	 * 返回request对应的映射路径
 	 * Return the mapping lookup path for the given request, within the current
 	 * servlet mapping if applicable, else within the web application.
 	 * <p>Detects include request URL if called within a RequestDispatcher include.
@@ -183,6 +188,7 @@ public class UrlPathHelper {
 	 * @see #getPathWithinApplication
 	 */
 	public String getLookupPathForRequest(HttpServletRequest request) {
+		// full path
 		// Always use full path within current servlet context?
 		if (this.alwaysUseFullPath) {
 			return getPathWithinApplication(request);
@@ -253,6 +259,13 @@ public class UrlPathHelper {
 	}
 
 	/**
+	 * http://localhost:8000/app/user/create -> /user/create
+	 *
+	 * contextPath /app
+	 * requestUri /app/user/create
+	 * servletPath /user/create
+	 * realPath http://localhost:8000/app/user/create
+	 *
 	 * Return the path within the web application for the given request.
 	 * <p>Detects include request URL if called within a RequestDispatcher include.
 	 * @param request current HTTP request
@@ -260,6 +273,7 @@ public class UrlPathHelper {
 	 * @see #getLookupPathForRequest
 	 */
 	public String getPathWithinApplication(HttpServletRequest request) {
+		// context path
 		String contextPath = getContextPath(request);
 		String requestUri = getRequestUri(request);
 		String path = getRemainingPath(requestUri, contextPath, true);
@@ -273,6 +287,7 @@ public class UrlPathHelper {
 	}
 
 	/**
+	 * /app/user/create -> /user/create
 	 * Match the given "mapping" to the start of the "requestUri" and if there
 	 * is a match return the extra part. This method is needed because the
 	 * context path and the servlet path returned by the HttpServletRequest are
@@ -310,6 +325,7 @@ public class UrlPathHelper {
 	}
 
 	/**
+	 * 将 "//" 替换为 "/"
 	 * Sanitize the given path. Uses the following rules:
 	 * <ul>
 	 * <li>replace all "//" by "/"</li>
@@ -330,6 +346,7 @@ public class UrlPathHelper {
 	}
 
 	/**
+	 * 返回request uri
 	 * Return the request URI for the given request, detecting an include request
 	 * URL if called within a RequestDispatcher include.
 	 * <p>As the value returned by {@code request.getRequestURI()} is <i>not</i>
@@ -349,6 +366,8 @@ public class UrlPathHelper {
 	}
 
 	/**
+	 * request对应的context path
+	 * {@link HttpServletRequest#getContextPath()}返回的path是编码过的，这里会进行解码
 	 * Return the context path for the given request, detecting an include request
 	 * URL if called within a RequestDispatcher include.
 	 * <p>As the value returned by {@code request.getContextPath()} is <i>not</i>
@@ -369,6 +388,7 @@ public class UrlPathHelper {
 	}
 
 	/**
+	 * 返回servlet path {@link HttpServletRequest#getServletPath()} 已经进行过decode，这里不需要再解码了
 	 * Return the servlet path for the given request, regarding an include request
 	 * URL if called within a RequestDispatcher include.
 	 * <p>As the value returned by {@code request.getServletPath()} is already
@@ -381,6 +401,7 @@ public class UrlPathHelper {
 		if (servletPath == null) {
 			servletPath = request.getServletPath();
 		}
+		// 默认不需要移除 /
 		if (servletPath.length() > 1 && servletPath.endsWith("/") && shouldRemoveTrailingServletPathSlash(request)) {
 			// On WebSphere, in non-compliant mode, for a "/foo/" case that would be "/foo"
 			// on all other servlet containers: removing trailing slash, proceeding with
@@ -392,6 +413,7 @@ public class UrlPathHelper {
 
 
 	/**
+	 * 如果是forward请求，解析出原请求的 request uri
 	 * Return the request URI for the given request. If this is a forwarded request,
 	 * correctly resolves to the request URI of the original request.
 	 */
@@ -456,13 +478,16 @@ public class UrlPathHelper {
 	 * Decode the supplied URI string and strips any extraneous portion after a ';'.
 	 */
 	private String decodeAndCleanUriString(HttpServletRequest request, String uri) {
+		//  /a/b;jsessionid=xxx/c/d --> /a/b/c/d
 		uri = removeSemicolonContent(uri);
 		uri = decodeRequestString(request, uri);
+		// 将 "//" 替换为 "/"
 		uri = getSanitizedPath(uri);
 		return uri;
 	}
 
 	/**
+	 * 使用URLDecoder解码
 	 * Decode the given source string with a URLDecoder. The encoding will be taken
 	 * from the request, falling back to the default "ISO-8859-1".
 	 * <p>The default implementation uses {@code URLDecoder.decode(input, enc)}.
@@ -515,6 +540,7 @@ public class UrlPathHelper {
 	}
 
 	/**
+	 * /a/b;jsessionid=1/c/d --> /a/b/c/d
 	 * Remove ";" (semicolon) content from the given request URI if the
 	 * {@linkplain #setRemoveSemicolonContent removeSemicolonContent}
 	 * property is set to "true". Note that "jsessionid" is always removed.

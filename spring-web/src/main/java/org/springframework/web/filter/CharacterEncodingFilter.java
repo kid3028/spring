@@ -16,17 +16,17 @@
 
 package org.springframework.web.filter;
 
-import java.io.IOException;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
+import java.io.IOException;
 
 /**
+ * 设置request、response强制编码格式
  * Servlet Filter that allows one to specify a character encoding for requests.
  * This is useful because current browsers typically do not set a character
  * encoding even if specified in the HTML page or form.

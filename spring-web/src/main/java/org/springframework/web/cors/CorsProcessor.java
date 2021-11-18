@@ -16,14 +16,16 @@
 
 package org.springframework.web.cors;
 
-import java.io.IOException;
+import org.springframework.lang.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.lang.Nullable;
+import java.io.IOException;
 
 /**
+ * 根据request、{@link CorsConfiguration} 更新response
+ * 如果请求是被拒绝的， {@link #processRequest(CorsConfiguration, HttpServletRequest, HttpServletResponse)}
+ * 方法返回false
  * A strategy that takes a request and a {@link CorsConfiguration} and updates
  * the response.
  *
@@ -41,6 +43,7 @@ import org.springframework.lang.Nullable;
 public interface CorsProcessor {
 
 	/**
+	 * 如果请求被拒绝，返回false
 	 * Process a request given a {@code CorsConfiguration}.
 	 * @param configuration the applicable CORS configuration (possibly {@code null})
 	 * @param request the current request

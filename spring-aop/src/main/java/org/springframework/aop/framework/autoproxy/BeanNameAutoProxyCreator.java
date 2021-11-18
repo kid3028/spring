@@ -16,9 +16,6 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
@@ -27,7 +24,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
+ * 通过 beanName 列表 指定需要代理的bean
  * Auto proxy creator that identifies beans to proxy via a list of names.
  * Checks for direct, "xxx*", and "*xxx" matches.
  *
@@ -51,6 +52,9 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 
 
 	/**
+	 * 需要被代理的bean name list
+	 * 支持通配符 *
+	 * 如果是FactoryBean, 需要使用 &myFactoryBean, 否则代理对的是factoryBean创建的对象
 	 * Set the names of the beans that should automatically get wrapped with proxies.
 	 * A name can specify a prefix to match by ending with "*", e.g. "myBean,tx*"
 	 * will match the bean named "myBean" and all beans whose name start with "tx".

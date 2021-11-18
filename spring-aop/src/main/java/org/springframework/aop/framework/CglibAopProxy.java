@@ -40,6 +40,7 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.util.*;
 
 /**
+ * AopProxy的cglib实现
  * CGLIB-based {@link AopProxy} implementation for the Spring AOP framework.
  *
  * <p>Objects of this type should be obtained through proxy factories,
@@ -148,6 +149,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			Class<?> rootClass = this.advised.getTargetClass();
 			Assert.state(rootClass != null, "Target class must be available for creating a CGLIB proxy");
 
+			// 如果target是proxy，那么获取其superclass
 			Class<?> proxySuperClass = rootClass;
 			if (ClassUtils.isCglibProxyClass(rootClass)) {
 				proxySuperClass = rootClass.getSuperclass();
@@ -157,7 +159,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 				}
 			}
 
-			// 验证class
+			// 验证class，final方法检查
 			// Validate the class, writing log messages as necessary.
 			validateClassIfNecessary(proxySuperClass, classLoader);
 

@@ -16,15 +16,6 @@
 
 package org.springframework.web.filter;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -32,7 +23,24 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.WebUtils;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
 /**
+ * 在请求处理前后打印log
+ * 子类需要覆盖{@link #beforeRequest(HttpServletRequest, String)} {@link #afterRequest(HttpServletRequest, String)}
+ * 来执行请求前后的日志打印
+ * 默认实现中只有URI会被打印，设置{@link #includeQueryString = true} 进行请求参数打印，
+ * 同样可以设置 {@link #includeClientInfo} {@link #includeHeaders} {@link #includePayload}
+ *
+ * 可以使用 {@link #beforeMessagePrefix} {@link #afterMessagePrefix}
+ *         {@link #beforeMessageSuffix} {@link #afterMessageSuffix}
+ * 设置消息打印的前后缀
  * Base class for {@code Filter}s that perform logging operations before and after a request
  * is processed.
  *

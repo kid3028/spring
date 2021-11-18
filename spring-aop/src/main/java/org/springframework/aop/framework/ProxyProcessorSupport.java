@@ -94,6 +94,7 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 
 
 	/**
+	 * 检查给定class实现的接口，并将合适的应用到ProxyFactory(非Spring Aware接口，非spring内部groovy等语言类接口)
 	 * Check the interfaces on the given bean class and apply them to the {@link ProxyFactory},
 	 * if appropriate.
 	 * <p>Calls {@link #isConfigurationCallbackInterface} and {@link #isInternalLanguageInterface}
@@ -118,7 +119,7 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 			}
 		}
 		else {
-			// 添加代理接口
+			// 没有合适的接口，代理class
 			proxyFactory.setProxyTargetClass(true);
 		}
 	}

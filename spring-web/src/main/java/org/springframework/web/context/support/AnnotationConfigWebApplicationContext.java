@@ -16,24 +16,28 @@
 
 package org.springframework.web.context.support;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
-import org.springframework.context.annotation.AnnotationConfigRegistry;
-import org.springframework.context.annotation.AnnotationConfigUtils;
-import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
-import org.springframework.context.annotation.ScopeMetadataResolver;
+import org.springframework.context.annotation.*;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ContextLoader;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 /**
+ * 可以一个一个指定需要注册的bean，也可以用过classpath scanning注册备案
+ * 如果要使用该类，那么 ContextLoader 的 context-param 参数 {@code contextClass} and/or
+ * FrameworkServlet的init-param 参数 {@code contextClass} 需要指定本类的全限定名
+ * 从spring3.1开始，该类可以直接实例化并注入到DispatcherServlet ContextLoaderListener（WebApplicationInitializer场景下）
+ *
+ * 不像web.xml可以有默认值，它需要指定 ContextLoader#contextConfigLocation and/or
+ * FrameworkServlet#contextConfigLocation
+ *
  * {@link org.springframework.web.context.WebApplicationContext WebApplicationContext}
  * implementation which accepts <em>component classes</em> as input &mdash; in particular
  * {@link org.springframework.context.annotation.Configuration @Configuration}-annotated
@@ -139,6 +143,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 
 
 	/**
+	 * 注册新的组件，需要调用refresh()方法，使新的class能够被应用
 	 * Register one or more component classes to be processed.
 	 * <p>Note that {@link #refresh()} must be called in order for the context
 	 * to fully process the new classes.
@@ -156,6 +161,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	}
 
 	/**
+	 * 执行路径扫描，refresh()方法需要被调用
 	 * Perform a scan within the specified base packages.
 	 * <p>Note that {@link #refresh()} must be called in order for the context
 	 * to fully process the new classes.
@@ -173,6 +179,9 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 
 
 	/**
+	 * 注册来自register、scan的bean definition
+	 * 对于contextConfigLocations首先使用Class.forName尝试加载class，如果成功调用register注册bean definition，
+	 * 如果失败，则尝试scan
 	 * Register a {@link org.springframework.beans.factory.config.BeanDefinition} for
 	 * any classes specified by {@link #register(Class...)} and scan any packages
 	 * specified by {@link #scan(String...)}.

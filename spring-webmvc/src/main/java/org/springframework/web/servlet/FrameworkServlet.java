@@ -16,28 +16,8 @@
 
 package org.springframework.web.servlet;
 
-import java.io.IOException;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
-
-import javax.servlet.DispatcherType;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
-
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationContextException;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.*;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.SourceFilteringListener;
 import org.springframework.context.i18n.LocaleContext;
@@ -70,7 +50,30 @@ import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.util.NestedServletException;
 import org.springframework.web.util.WebUtils;
 
+import javax.servlet.DispatcherType;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
+import java.io.IOException;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
+
 /**
+ * spring web的底层Servlet。与IOC集成。
+ * 该类提供了如下的功能：
+ * 为每一个servlet管理 {@link WebApplicationContext}。
+ * 发布请求是否被成功处理对的事件。
+ *
+ * 子类在{@link #doService(HttpServletRequest, HttpServletResponse)} 方法中定义处理请求的逻辑。
+ * 由于是继承自{@link HttpServletBean}，而不是直接继承HttpServlet，bean的属性会被自动填充，
+ * 子类也可以覆盖{@link #initFrameworkServlet()}方法自定义初始化逻辑。
+ *
  * Base servlet for Spring's web framework. Provides integration with
  * a Spring application context, in a JavaBean-based overall solution.
  *
@@ -88,6 +91,10 @@ import org.springframework.web.util.WebUtils;
  * automatically mapped onto it. Subclasses can override {@link #initFrameworkServlet()}
  * for custom initialization.
  *
+ * 根据servlet init-param "contextClass" 探测context class，如果没有找到，将会降级
+ * {@link XmlWebApplicationContext}。在FrameworkServlet下，自定义的context class
+ * 需要实现{@link ConfigurableWebApplicationContext} SPI接口
+ *
  * <p>Detects a "contextClass" parameter at the servlet init-param level,
  * falling back to the default context class,
  * {@link org.springframework.web.context.support.XmlWebApplicationContext
@@ -96,6 +103,9 @@ import org.springframework.web.util.WebUtils;
  * {@link org.springframework.web.context.ConfigurableWebApplicationContext
  * ConfigurableWebApplicationContext} SPI.
  *
+ * 通过 servlet init-param "contextInitializerClasses"指定一个或多个 {@link ApplicationContextInitializer}
+ * 对application context 的管理将委托给这些initializer，允许编码自定义配置，如增加数据源，
+ * 激活配置等。
  * <p>Accepts an optional "contextInitializerClasses" servlet init-param that
  * specifies one or more {@link org.springframework.context.ApplicationContextInitializer
  * ApplicationContextInitializer} classes. The managed web application context will be
@@ -106,6 +116,7 @@ import org.springframework.web.util.WebUtils;
  * supports a "contextInitializerClasses" context-param with identical semantics for
  * the "root" web application context.
  *
+ * 通过servlet init-param "contextConfigLocation" 指定context
  * <p>Passes a "contextConfigLocation" servlet init-param to the context instance,
  * parsing it into potentially multiple file paths which can be separated by any
  * number of commas and spaces, like "test-servlet.xml, myServlet.xml".
@@ -117,6 +128,9 @@ import org.springframework.web.util.WebUtils;
  * default ApplicationContext implementation. This can be leveraged to
  * deliberately override certain bean definitions via an extra XML file.
  *
+ * 默认的namespace是 "servlet-name"-servlet
+ * 如"test-servlet" 表明servlet-name=test
+ * namespace可以通过servlet init-param "namespace" 显式设置
  * <p>The default namespace is "'servlet-name'-servlet", e.g. "test-servlet" for a
  * servlet-name "test" (leading to a "/WEB-INF/test-servlet.xml" default location
  * with XmlWebApplicationContext). The namespace can also be set explicitly via
@@ -636,6 +650,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 		try {
 			this.webApplicationContext = initWebApplicationContext();
+			// 默认空实现
 			initFrameworkServlet();
 		}
 		catch (ServletException | RuntimeException ex) {
@@ -704,6 +719,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			wac = createWebApplicationContext(rootContext);
 		}
 
+		// 还没refresh，调用refresh
 		if (!this.refreshEventReceived) {
 			// Either the context is not a ConfigurableApplicationContext with refresh
 			// support or the context injected at construction time had already been
@@ -951,6 +967,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 
 	/**
+	 * 在bean属性设置完，context启动后调用
+	 * 默认空实现，子类可以覆盖这个方法实现初始化
 	 * This method will be invoked after any bean properties have been set and
 	 * the WebApplicationContext has been loaded. The default implementation is empty;
 	 * subclasses may override this method to perform any initialization they require.
@@ -974,6 +992,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 * context refresh后发送refresh events
 	 * Callback that receives refresh events from this servlet's WebApplicationContext.
 	 * <p>The default implementation calls {@link #onRefresh},
 	 * triggering a refresh of this servlet's context-dependent state.
@@ -987,6 +1006,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 * 模板方法：可以被复写实现自定义的servlet refresh
+	 * 在context成功刷新后被调用
 	 * Template method which can be overridden to add servlet-specific refresh work.
 	 * Called after successful context refresh.
 	 * <p>This implementation is empty.
@@ -1012,6 +1033,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 
 	/**
+	 * 覆盖父类方法，拦截PATCH方法
 	 * Override the parent class implementation in order to intercept PATCH requests.
 	 */
 	@Override
@@ -1028,6 +1050,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 * 将GET请求委派给 {@link #processRequest(HttpServletRequest, HttpServletResponse)}
+	 *
 	 * Delegate GET requests to processRequest/doService.
 	 * <p>Will also be invoked by HttpServlet's default implementation of {@code doHead},
 	 * with a {@code NoBodyResponse} that just captures the content length.
@@ -1092,6 +1116,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			}
 		}
 
+		// 将PATCH添加到ALLOW header
 		// Use response wrapper in order to always add PATCH to the allowed methods
 		super.doOptions(request, new HttpServletResponseWrapper(response) {
 			@Override
@@ -1124,6 +1149,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 * 处理请求
 	 * Process this request, publishing an event regardless of the outcome.
 	 * <p>The actual event handling is performed by the abstract
 	 * {@link #doService} template method.

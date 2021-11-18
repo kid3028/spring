@@ -16,13 +16,18 @@
 
 package org.springframework.web;
 
-import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
+ * http请求的原生处理接口，与 HttpServlet等价，只保留了核心的handle接口
+ *
+ * 使用HttpRequestHandler最简单的方式是在Spring root web application context 中
+ * 将它定义为一个bean，并在 web.xml 中定义 HttpRequestHandlerServlet,通过{@code servlet-name}
+ * 指定 HttpRequestHandler 的beanName
+ *
  * Plain handler interface for components that process HTTP requests,
  * analogous to a Servlet. Only declares {@link javax.servlet.ServletException}
  * and {@link java.io.IOException}, to allow for usage within any

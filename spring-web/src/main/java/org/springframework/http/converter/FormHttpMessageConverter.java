@@ -16,6 +16,12 @@
 
 package org.springframework.http.converter;
 
+import org.springframework.core.io.Resource;
+import org.springframework.http.*;
+import org.springframework.lang.Nullable;
+import org.springframework.util.*;
+
+import javax.mail.internet.MimeUtility;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -23,28 +29,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.mail.internet.MimeUtility;
-
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpInputMessage;
-import org.springframework.http.HttpOutputMessage;
-import org.springframework.http.MediaType;
-import org.springframework.http.StreamingHttpOutputMessage;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MimeTypeUtils;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.StreamUtils;
-import org.springframework.util.StringUtils;
+import java.util.*;
 
 /**
  * Implementation of {@link HttpMessageConverter} to read and write 'normal' HTML
@@ -241,16 +226,26 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		return false;
 	}
 
+	/**
+	 * 读取request请求流，将请求参数拆分为键值对
+	 * @param clazz the type of object to return. This type must have previously been passed to the
+	 * {@link #canRead canRead} method of this interface, which must have returned {@code true}.
+	 * @param inputMessage the HTTP input message to read from
+	 * @return
+	 * @throws IOException
+	 * @throws HttpMessageNotReadableException
+	 */
 	@Override
 	public MultiValueMap<String, String> read(@Nullable Class<? extends MultiValueMap<String, ?>> clazz,
 			HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
-
+		// 按照编码格式将request中的数据流转化为字符串
 		MediaType contentType = inputMessage.getHeaders().getContentType();
 		Charset charset = (contentType != null && contentType.getCharset() != null ?
 				contentType.getCharset() : this.charset);
 		String body = StreamUtils.copyToString(inputMessage.getBody(), charset);
-
+		// 按照 & 拆分请求参数
 		String[] pairs = StringUtils.tokenizeToStringArray(body, "&");
+		// 按照 = 将请求参数拆分为 键值对
 		MultiValueMap<String, String> result = new LinkedMultiValueMap<>(pairs.length);
 		for (String pair : pairs) {
 			int idx = pair.indexOf('=');
