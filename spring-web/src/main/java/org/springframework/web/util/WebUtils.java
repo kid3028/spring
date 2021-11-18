@@ -490,6 +490,9 @@ public abstract class WebUtils {
 	}
 
 	/**
+	 * 给定的request是否是一个 include request，即不是外部请求的顶级http请求。
+	 * 检查request attribute中是否有 "javax.servlet.include.request_uri"属性，
+	 * 也可以检查任何只有是include request才会有的attribute
 	 * Determine whether the given request is an include request,
 	 * that is, not a top-level HTTP request coming in from the outside.
 	 * <p>Checks the presence of the "javax.servlet.include.request_uri"

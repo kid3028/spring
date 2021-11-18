@@ -101,6 +101,12 @@ public abstract class BeanUtils {
 	}
 
 	/**
+	 * 使用主/默认构造器实现话一个class的具体对象
+	 * 如果构造器是 non-accessible，那么这个方法会将其设置accessible
+	 *
+	 * 如果bean无法实例化，将会抛出{@link BeanInstantiationException}
+	 * 如果完全没有可用的构造器，那么将会抛出{@link NoSuchMethodException}
+	 * 也可能抛出 {@link NoClassDefFoundError} {@link LinkageError}
 	 * Instantiate a class using its 'primary' constructor (for Kotlin classes,
 	 * potentially having default arguments declared) or its default constructor
 	 * (for regular Java classes, expecting a standard no-arg setup).
@@ -137,6 +143,8 @@ public abstract class BeanUtils {
 	}
 
 	/**
+	 * 使用无参构造器创建实例对象。
+	 *
 	 * Instantiate a class using its no-arg constructor and return the new instance
 	 * as the specified assignable type.
 	 * <p>Useful in cases where the type of the class to instantiate (clazz) is not
