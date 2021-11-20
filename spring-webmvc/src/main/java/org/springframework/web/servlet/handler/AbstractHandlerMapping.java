@@ -444,6 +444,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
+	 * 查找与request匹配的handler，如果没有找到返回null
+	 * {@link #getHandler(HttpServletRequest)}方法调用到这里，如果返回null，那么将使用default handler.
+	 *
 	 * Look up a handler for the given request, returning {@code null} if no
 	 * specific one is found. This method is called by {@link #getHandler};
 	 * a {@code null} return value will lead to the default handler, if one is set.

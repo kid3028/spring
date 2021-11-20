@@ -188,17 +188,21 @@ public class UrlPathHelper {
 	 * @see #getPathWithinApplication
 	 */
 	public String getLookupPathForRequest(HttpServletRequest request) {
-		// full path
+		// http://localhost:8080/app//user/create
+		// 使用full path
 		// Always use full path within current servlet context?
 		if (this.alwaysUseFullPath) {
+			// /user/create
 			return getPathWithinApplication(request);
 		}
 		// Else, use path within current servlet mapping if applicable
+		// /
 		String rest = getPathWithinServletMapping(request);
 		if (!"".equals(rest)) {
 			return rest;
 		}
 		else {
+			// /user/create
 			return getPathWithinApplication(request);
 		}
 	}
@@ -218,16 +222,23 @@ public class UrlPathHelper {
 	 * @see #getLookupPathForRequest
 	 */
 	public String getPathWithinServletMapping(HttpServletRequest request) {
+		// http://localhost:8080/app//user/create
+		// //user/create
 		String pathWithinApp = getPathWithinApplication(request);
+		// //user/create
 		String servletPath = getServletPath(request);
+		// /user/create
 		String sanitizedPathWithinApp = getSanitizedPath(pathWithinApp);
 		String path;
 
+		//
 		// If the app container sanitized the servletPath, check against the sanitized version
 		if (servletPath.contains(sanitizedPathWithinApp)) {
+			// /
 			path = getRemainingPath(sanitizedPathWithinApp, servletPath, false);
 		}
 		else {
+			// /
 			path = getRemainingPath(pathWithinApp, servletPath, false);
 		}
 
@@ -273,9 +284,12 @@ public class UrlPathHelper {
 	 * @see #getLookupPathForRequest
 	 */
 	public String getPathWithinApplication(HttpServletRequest request) {
-		// context path
+		// http://localhost:8000/app/user/create
+		// context path /app
 		String contextPath = getContextPath(request);
+		// /app/user/create
 		String requestUri = getRequestUri(request);
+		// /user/create
 		String path = getRemainingPath(requestUri, contextPath, true);
 		if (path != null) {
 			// Normal case: URI contains context path.
@@ -287,6 +301,8 @@ public class UrlPathHelper {
 	}
 
 	/**
+	 * requestUri : /app/user/create
+	 * mapping : /app
 	 * /app/user/create -> /user/create
 	 * Match the given "mapping" to the start of the "requestUri" and if there
 	 * is a match return the extra part. This method is needed because the
