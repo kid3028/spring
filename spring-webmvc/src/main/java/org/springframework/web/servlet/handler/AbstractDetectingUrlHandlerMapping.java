@@ -23,6 +23,7 @@ import org.springframework.context.ApplicationContextException;
 import org.springframework.util.ObjectUtils;
 
 /**
+ * 通过遍历IoC中的bean name探测 URL -> handler的映射
  * Abstract implementation of the {@link org.springframework.web.servlet.HandlerMapping}
  * interface, detecting URL mappings for handler beans through introspection of all
  * defined beans in the application context.
@@ -37,6 +38,7 @@ public abstract class AbstractDetectingUrlHandlerMapping extends AbstractUrlHand
 
 
 	/**
+	 * 是否探测父context中handler，默认是false，仅仅探测当前context中handler bean。
 	 * Set whether to detect handler beans in ancestor ApplicationContexts.
 	 * <p>Default is "false": Only handler beans in the current ApplicationContext
 	 * will be detected, i.e. only in the context that this HandlerMapping itself
@@ -60,6 +62,7 @@ public abstract class AbstractDetectingUrlHandlerMapping extends AbstractUrlHand
 	}
 
 	/**
+	 * 注册在IoC中找到的所有handler，
 	 * Register all handlers found in the current ApplicationContext.
 	 * <p>The actual URL determination for a handler is up to the concrete
 	 * {@link #determineUrlsForHandler(String)} implementation. A bean for
@@ -68,6 +71,7 @@ public abstract class AbstractDetectingUrlHandlerMapping extends AbstractUrlHand
 	 * @see #determineUrlsForHandler(String)
 	 */
 	protected void detectHandlers() throws BeansException {
+		// 获取到IoC容器中所有bean name
 		ApplicationContext applicationContext = obtainApplicationContext();
 		String[] beanNames = (this.detectHandlersInAncestorContexts ?
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(applicationContext, Object.class) :
@@ -75,8 +79,10 @@ public abstract class AbstractDetectingUrlHandlerMapping extends AbstractUrlHand
 
 		// Take any bean name that we can determine URLs for.
 		for (String beanName : beanNames) {
+			// 看bean name以及alias name是否是以 / 开头，如果是，则对应的 name返回
 			String[] urls = determineUrlsForHandler(beanName);
 			if (!ObjectUtils.isEmpty(urls)) {
+				// 以 / 开头，进行注册
 				// URL paths found: Let's consider it a handler.
 				registerHandler(urls, beanName);
 			}

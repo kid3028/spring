@@ -6,6 +6,8 @@ dependencies {
     compile(project(":spring-context"))
     compile(project(":spring-context-support"))
     compile(project(":spring-core"))
+    compile(project(":spring-webmvc"))
+
     testCompile(project(":spring-test"))
     compile("org.yaml:snakeyaml:1.23")
     compile("commons-io:commons-io:2.6")

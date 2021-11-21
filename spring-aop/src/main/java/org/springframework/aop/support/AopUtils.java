@@ -108,6 +108,7 @@ public abstract class AopUtils {
 	}
 
 	/**
+	 * 查找可以被调用的方法 不能是 private 不能是static 不能是SpringProxy的实现
 	 * Select an invocable method on the target type: either the given method itself
 	 * if actually exposed on the target type, or otherwise a corresponding method
 	 * on one of the target type's interfaces or on the target type itself.

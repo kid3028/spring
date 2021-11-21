@@ -81,8 +81,14 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
+	/**
+	 * 原始的 interceptor
+	 */
 	private final List<Object> interceptors = new ArrayList<>();
 
+	/**
+	 * 将各类interceptor适配为 HandlerInterceptor
+	 */
 	private final List<HandlerInterceptor> adaptedInterceptors = new ArrayList<>();
 
 	private CorsConfigurationSource corsConfigurationSource = new UrlBasedCorsConfigurationSource();
@@ -291,6 +297,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	/**
 	 * 初始化interceptor
+	 * 1、探测IoC中所有的interceptor
+	 * 2、适配各类interceptor为 {@link HandlerInterceptor}
 	 * Initializes the interceptors.
 	 * @see #extendInterceptors(java.util.List)
 	 * @see #initInterceptors()
@@ -402,6 +410,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 
 	/**
+	 * 查找与request匹配的handler
 	 * Look up a handler for the given request, falling back to the default
 	 * handler if no specific one is found.
 	 * @param request current HTTP request
@@ -424,6 +433,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			handler = obtainApplicationContext().getBean(handlerName);
 		}
 
+		// 查找匹配的interceptors，并与handler一起组装成 HandlerExecutionChain
 		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
 
 		if (logger.isTraceEnabled()) {
@@ -433,6 +443,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			logger.debug("Mapped to " + executionChain.getHandler());
 		}
 
+		// cors interceptor
 		if (CorsUtils.isCorsRequest(request)) {
 			CorsConfiguration globalConfig = this.corsConfigurationSource.getCorsConfiguration(request);
 			CorsConfiguration handlerConfig = getCorsConfiguration(handler, request);
@@ -466,6 +477,16 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	protected abstract Object getHandlerInternal(HttpServletRequest request) throws Exception;
 
 	/**
+	 * 使用给定的handler构建一个 {@link HandlerExecutionChain}
+	 *
+	 * 默认实现是构建一个标准的{@link HandlerExecutionChain}，包含handler和通用interceptors、
+	 * 与request匹配的interceptors。interceptors按照注册的顺序添加到chain中。
+	 * 参数handler可能是一个raw handler 也可能是一个 HandlerExecutionChain，这个方法会显式处理
+	 * 这两种情况，构建一个新的{@link HandlerExecutionChain}或者继承已经存在的{@link HandlerExecutionChain}.
+	 *
+	 * 如果想要在子类中添加interceptor，可以使用 {@code super.getHandlerExecutionChain} 然后
+	 * 调用{@link HandlerExecutionChain#addInterceptor}
+	 *
 	 * Build a {@link HandlerExecutionChain} for the given handler, including
 	 * applicable interceptors.
 	 * <p>The default implementation builds a standard {@link HandlerExecutionChain}

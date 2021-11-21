@@ -20,6 +20,10 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerMethodMappingNamingStrategy;
 
 /**
+ * handlerMethod's mapping 名称生成策略
+ * 如果 RequestMappingInfo 的name属性有值，直接使用，否则基于class name生成， class 与 method
+ * 之间通过 # 分隔
+ * eg. TestController#getFoo -> TC#getFoo
  * A {@link org.springframework.web.servlet.handler.HandlerMethodMappingNamingStrategy
  * HandlerMethodMappingNamingStrategy} for {@code RequestMappingInfo}-based handler
  * method mappings.

@@ -16,10 +16,6 @@
 
 package org.springframework.web.context.support;
 
-import java.io.File;
-
-import javax.servlet.ServletContext;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.lang.Nullable;
@@ -28,7 +24,14 @@ import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.WebUtils;
 
+import javax.servlet.ServletContext;
+import java.io.File;
+
 /**
+ * 获取application中对象的辅助类
+ * {@link #getWebApplicationContext()} {@link #getServletContext()} {@link #getTempDir()}
+ *
+ * 比较推荐的方式是为真实的回调场景使用自定义的回调接口，该类设计主要是为方便框架使用，如 ServletContext的访问。
  * Convenient superclass for application objects running in a {@link WebApplicationContext}.
  * Provides {@code getWebApplicationContext()}, {@code getServletContext()}, and
  * {@code getTempDir()} accessors.
@@ -47,6 +50,10 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	private ServletContext servletContext;
 
 
+	/**
+	 * {@link ServletContextAwareProcessor#postProcessBeforeInitialization(Object, String)} 中调用该方法
+	 * @param servletContext the ServletContext object to be used by this object
+	 */
 	@Override
 	public final void setServletContext(ServletContext servletContext) {
 		if (servletContext != this.servletContext) {
@@ -56,6 +63,7 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	}
 
 	/**
+	 * 强制要求application object 需要运行在 applicationContext中
 	 * Overrides the base class behavior to enforce running in an ApplicationContext.
 	 * All accessors will throw IllegalStateException if not running in a context.
 	 * @see #getApplicationContext()
@@ -143,6 +151,7 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	}
 
 	/**
+	 * servlet container生成的临时目录
 	 * Return the temporary directory for the current web application,
 	 * as provided by the servlet container.
 	 * @return the File representing the temporary directory

@@ -16,17 +16,8 @@
 
 package org.springframework.web.method;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.GenericTypeResolver;
@@ -42,7 +33,19 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 /**
+ * 将bean和method进行封装，提供了便利的方法访问方法参数，方法返回值，返回注解等
+ *
+ * 实例化需要使用一个bean实例或者beanName(延迟初始化/prototype)。
+ * 使用{@link #createWithResolvedBean()}或者{@link HandlerMethod}实例
  * Encapsulates information about a handler method consisting of a
  * {@linkplain #getMethod() method} and a {@linkplain #getBean() bean}.
  * Provides convenient access to method parameters, the method return value,
@@ -98,6 +101,7 @@ public class HandlerMethod {
 		Assert.notNull(method, "Method is required");
 		this.bean = bean;
 		this.beanFactory = null;
+		// 返回bean class，bean可能是cglib代理的，getUserClass 会获取到真实的class
 		this.beanType = ClassUtils.getUserClass(bean);
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);

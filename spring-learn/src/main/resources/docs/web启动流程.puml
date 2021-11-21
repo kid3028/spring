@@ -1,0 +1,29 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+ServletContainerInitializer -> SpringServletContainerInitializer: service loader SPI、@HandlesTypes
+SpringServletContainerInitializer -> WebApplicationInitializer: new() for()
+WebApplicationInitializer -> AbstractContextLoaderInitializer: new(ContextLoaderListener) addListener(ContextLoaderListener)
+WebApplicationInitializer -> AbstractDispatcherServletInitializer: new(DispatcherServlet) addServlet(DispatcherServlet) addFilter
+ServletContext -> ContextLoaderListener: contextInitialized(event)
+ContextLoaderListener -> ContextLoader: initWebApplicationContext 创建webApplicationContext，执行ApplicationContextInitializer，refresh，context放ServletContext
+Aware -> ApplicationObjectSupport: setApplicationContext -> initWebApplicationContext
+ApplicationObjectSupport -> WebApplicationObjectSupport: initServletContext
+AbstractHandlerMapping -> WebApplicationObjectSupport: extends
+ApplicationObjectSupport -> AbstractHandlerMapping: initWebApplicationContext 找出所有MethodInterceptor
+AbstractDetectingHandlerMapping -> AbstractHandlerMapping: extends 重写 initWebApplicationContext，增加 url 探测，找出beanName以 / 开头的作为handler
+AbstractHandlerMethodMapping -> AbstractHandlerMapping: extends
+AbstractHandlerMethodMapping -> InitializingBean: implements afterPropertiesSet 找出@Controller @RequestMapping
+
+HttpServletBean -> GenericServlet: extends init
+FrameworkServlet -> HttpServletBean: extends initServletBean
+
+
+
+
+
+Alice -> Bob: Another authentication Request
+Alice <-- Bob: another authentication Response
+@enduml

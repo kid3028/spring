@@ -50,6 +50,9 @@ import java.util.Set;
  *      <name>spring_web</name>
  *  </absolute-ordering>
  *
+ *  @HandlesTypes(WebApplicationInitializer.class) 所有WebApplicationInitializer的子类都将被 ServletContainer
+ *  发现，并以参数形式传给 {@link #onStartup} 方法
+ *
  * {@code MEAT-INF/services/java.servlet.ServletContainerInitializer} 指定Initializer
  * Servlet 3.0 {@link ServletContainerInitializer} designed to support code-based
  * configuration of the servlet container using Spring's {@link WebApplicationInitializer}
@@ -184,8 +187,10 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 
 		List<WebApplicationInitializer> initializers = new LinkedList<>();
 
+		// 对所有传入的WebInitializer调用构造器完成实例化
 		if (webAppInitializerClasses != null) {
 			for (Class<?> waiClass : webAppInitializerClasses) {
+				// 防御性编程：排除接口、抽象类、非WebApplicationInitializer实现
 				// Be defensive: Some servlet containers provide us with invalid classes,
 				// no matter what @HandlesTypes says...
 				if (!waiClass.isInterface() && !Modifier.isAbstract(waiClass.getModifiers()) &&
@@ -207,6 +212,7 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 		}
 
 		servletContext.log(initializers.size() + " Spring WebApplicationInitializers detected on classpath");
+		// 排序后调用 onStartup 方法
 		AnnotationAwareOrderComparator.sort(initializers);
 		for (WebApplicationInitializer initializer : initializers) {
 			initializer.onStartup(servletContext);

@@ -649,6 +649,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		long startTime = System.currentTimeMillis();
 
 		try {
+			// org.springframework.web.servlet.support.AbstractDispatcherServletInitializer.createDispatcherServlet
+			// 在 servletContext initialized时候已经注入
 			this.webApplicationContext = initWebApplicationContext();
 			// 默认空实现
 			initFrameworkServlet();

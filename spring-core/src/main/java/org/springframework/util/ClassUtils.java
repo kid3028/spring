@@ -716,6 +716,7 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * 获取class实现的接口，包括父类接口
 	 * Return all interfaces that the given class implements as a Set,
 	 * including ones implemented by superclasses.
 	 * <p>If the class itself is an interface, it gets returned as sole interface.

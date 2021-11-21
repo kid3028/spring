@@ -16,17 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Nullable;
@@ -48,7 +37,14 @@ import org.springframework.web.servlet.mvc.condition.RequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
 
+import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.function.Predicate;
+
 /**
+ * 解析 {@link Controller} {@link RequestMapping} 创建对应 {@link RequestMappingInfo}
  * Creates {@link RequestMappingInfo} instances from type and method-level
  * {@link RequestMapping @RequestMapping} annotations in
  * {@link Controller @Controller} classes.
@@ -78,6 +74,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 
 	/**
+	 * 是否使用后缀匹配(.*格式)，默认是是true
+	 * 如果启用，那么 处理“/users”路径的method也能处理"/users.*"的请求
 	 * Whether to use suffix pattern match (".*") when matching patterns to
 	 * requests. If enabled a method mapped to "/users" also matches to "/users.*".
 	 * <p>The default value is {@code true}.
@@ -89,6 +87,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
+	 * 后缀匹配是否只有对应的 后缀扩展 注册到{@link ContentNegotiationManager}时才生效，
+	 * 默认false。
 	 * Whether suffix pattern matching should work only against path extensions
 	 * explicitly registered with the {@link ContentNegotiationManager}. This
 	 * is generally recommended to reduce ambiguity and to avoid issues such as
@@ -101,6 +101,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
+	 * 是否在匹配中忽略结尾的 /
+	 * 即 "/users" 也能匹配到 "/users/"
 	 * Whether to match to URLs irrespective of the presence of a trailing slash.
 	 * If enabled a method mapped to "/users" also matches to "/users/".
 	 * <p>The default value is {@code true}.
@@ -110,6 +112,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
+	 * 设置controller method的路径前缀
 	 * Configure path prefixes to apply to controller methods.
 	 * <p>Prefixes are used to enrich the mappings of every {@code @RequestMapping}
 	 * method whose controller type is matched by the corresponding
@@ -132,6 +135,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
+	 * 设置 {@link ContentNegotiationManager} 来探测请求的媒体类型
 	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
 	 * If not set, the default constructor is used.
 	 */
@@ -208,6 +212,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
+	 *
 	 * Uses method and type-level @{@link RequestMapping} annotations to create
 	 * the RequestMappingInfo.
 	 * @return the created RequestMappingInfo, or {@code null} if the method
@@ -262,6 +267,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
+	 * 获取一个自定义的class级别请求筛选器
+	 *
 	 * Provide a custom type-level request condition.
 	 * The custom {@link RequestCondition} can be of any type so long as the
 	 * same condition type is returned from all calls to this method in order
@@ -278,6 +285,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
+	 * 返回一个方法级别的筛选器
 	 * Provide a custom method-level request condition.
 	 * The custom {@link RequestCondition} can be of any type so long as the
 	 * same condition type is returned from all calls to this method in order
@@ -294,6 +302,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
+	 * 根据 {@link RequestMapping} 注解信息创建一个对应的 {@link RequestMappingInfo}
 	 * Create a {@link RequestMappingInfo} from the supplied
 	 * {@link RequestMapping @RequestMapping} annotation, which is either
 	 * a directly declared annotation, a meta-annotation, or the synthesized

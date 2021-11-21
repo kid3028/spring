@@ -16,19 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.InvalidMediaTypeException;
@@ -47,7 +34,13 @@ import org.springframework.web.servlet.handler.AbstractHandlerMethodMapping;
 import org.springframework.web.servlet.mvc.condition.NameValueExpression;
 import org.springframework.web.util.WebUtils;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Method;
+import java.util.*;
+
 /**
+ * request 与 handler method 之间的映射
  * Abstract base class for classes for which {@link RequestMappingInfo} defines
  * the mapping between a request and a handler method.
  *
@@ -69,13 +62,14 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		}
 	}
 
-
+	// 设置handlerMethod's mapping name生成测录
 	protected RequestMappingInfoHandlerMapping() {
 		setHandlerMethodMappingNamingStrategy(new RequestMappingInfoHandlerMethodMappingNamingStrategy());
 	}
 
 
 	/**
+	 * 获取 {@link RequestMappingInfo}关联的 URL path patterns
 	 * Get the URL path patterns associated with this {@link RequestMappingInfo}.
 	 */
 	@Override
@@ -84,6 +78,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	}
 
 	/**
+	 * 返回与request匹配的RequestMappingInfo
 	 * Check if the given RequestMappingInfo matches the current request and
 	 * return a (potentially new) instance with conditions that match the
 	 * current request -- for example with a subset of URL patterns.
@@ -176,6 +171,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	}
 
 	/**
+	 * 重新查找是否有URL能匹配的 HandlerMethod，如果没有找到，抛出异常
 	 * Iterate all RequestMappingInfo's once again, look if any match by URL at
 	 * least and raise exceptions according to what doesn't match.
 	 * @throws HttpRequestMethodNotSupportedException if there are matches by URL

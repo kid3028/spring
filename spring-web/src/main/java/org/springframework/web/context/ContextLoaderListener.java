@@ -23,6 +23,8 @@ import javax.servlet.ServletContextListener;
 
 /**
  * WebApplicationContext 启动和关闭的监听器，操作基本都委派给了ContextLoader
+ * {@link ContextLoaderListener} 实现了 {@link ServletContextListener}，会在ServletContext启动时得到通知
+ *
  * Bootstrap listener to start up and shut down Spring's root {@link WebApplicationContext}.
  * Simply delegates to {@link ContextLoader} as well as to {@link ContextCleanupListener}.
  *

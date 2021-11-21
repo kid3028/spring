@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="WebApp_ID" version="3.0"
+		 xmlns="http://java.sun.com/xml/ns/javaee"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+>
+	<display-name>SpringMvc</display-name>
+
+<!--	init-param 配置-->
+<!--	spring 配置文件位置，可多个，逗号分隔，默认 XmlWebApplication /WEB-INF/applicationContext.xml-->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:applicationContext.xml</param-value>
+	</context-param>
+
+<!--
+	spring mvc的前端控制器
+	当DispatcherServlet载入之后，它将从一个xml文件中载入spring上下文，xml文件由 <servlet-name> 指定
+	这里DispatcherServlet将尝试从 SpringMvc-servlet.xml 文件中载入应用上下文，默认放在 WEB-INF 下
+-->
+	<servlet>
+		<servlet-name>SpringMvc</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/SpringMvc-servlet.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SpringMvc</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+	
+	<filter>
+		<filter-name>charsetFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>charsetFilter</filter-name>
+		<url-pattern>/</url-pattern>
+	</filter-mapping>
+
+<!--
+	配置上下文载入器
+	上下文载入器载入除DispatcherServlet载入的配置文件之外的其他上下文配置文件
+	最常用的上下文载入器是一个servlet监听器
+-->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+</web-app>

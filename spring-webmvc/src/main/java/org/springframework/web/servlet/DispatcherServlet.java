@@ -1129,10 +1129,12 @@ public class DispatcherServlet extends FrameworkServlet {
 					}
 				}
 
+				// 执行interceptor#preHandler，如果有返回false的，请求立即返回
 				if (!mappedHandler.applyPreHandle(processedRequest, response)) {
 					return;
 				}
 
+				// 执行handler
 				// Actually invoke the handler.
 				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
@@ -1340,6 +1342,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
+	 * 没有匹配的handler，设置一个合适的http状态码
 	 * No handler found -> set appropriate HTTP response status.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
@@ -1359,6 +1362,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
+	 * 为匹配的handler返回一个handlerAdpater
 	 * Return the HandlerAdapter for this handler object.
 	 * @param handler the handler object to find an adapter for
 	 * @throws ServletException if no HandlerAdapter can be found for the handler. This is a fatal error.

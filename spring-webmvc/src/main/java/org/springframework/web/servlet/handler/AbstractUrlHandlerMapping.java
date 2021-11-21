@@ -16,16 +16,6 @@
 
 package org.springframework.web.servlet.handler;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
@@ -33,6 +23,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.*;
 
 /**
  * 基于url映射的{@link HandlerMapping}抽象实现。
@@ -349,6 +343,10 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	}
 
 	/**
+	 *  Url path -> handler 映射
+	 *  / --> root mapping
+	 *  /* --> default mapping
+	 *
 	 * Register the specified handler for the given URL path.
 	 * @param urlPath the URL the bean should be mapped to
 	 * @param handler the handler instance or handler bean name String
@@ -370,6 +368,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			}
 		}
 
+		// 保证url path -> handler的唯一
 		Object mappedHandler = this.handlerMap.get(urlPath);
 		if (mappedHandler != null) {
 			if (mappedHandler != resolvedHandler) {
@@ -416,6 +415,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	}
 
 	/**
+	 * 是否支持class级别的映射，默认false
 	 * Indicates whether this handler mapping support type-level mappings. Default to {@code false}.
 	 */
 	protected boolean supportsTypeLevelMappings() {

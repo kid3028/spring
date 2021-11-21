@@ -16,19 +16,27 @@
 
 package org.springframework.web.servlet.handler;
 
+import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.util.StringUtils;
-
 /**
- * Implementation of the {@link org.springframework.web.servlet.HandlerMapping}
+ * {@link HandlerMapping} 的实现，维护 URLs 到 bean 之间的映射
+ * 在DispatcherServlet中与{@link RequestMappingHandlerMapping}一起作为默认实现使用，
+ * 也是使用{@link SimpleUrlHandlerMapping} 来自定义handler mapping
+ *
+ * 注意，如果在xml中，url只能设置在name上，应为id是不能含有 "/"
+ *
+ * Implementation of the {@link HandlerMapping}
  * interface that map from URLs to beans with names that start with a slash ("/"),
  * similar to how Struts maps URLs to action names.
  *
  * <p>This is the default implementation used by the
  * {@link org.springframework.web.servlet.DispatcherServlet}, along with
- * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping}.
+ * {@link RequestMappingHandlerMapping}.
  * Alternatively, {@link SimpleUrlHandlerMapping} allows for customizing a
  * handler mapping declaratively.
  *

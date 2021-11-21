@@ -16,16 +16,16 @@
 
 package org.springframework.core;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Defines the algorithm for searching for metadata-associated methods exhaustively
@@ -45,6 +45,8 @@ public final class MethodIntrospector {
 
 
 	/**
+	 * 根据metadataLookup筛选出targetType中特定的方法
+	 * 调用方可以通过 metadataLookup 定义感兴趣的方法定义
 	 * Select methods on the given target type based on the lookup of associated metadata.
 	 * <p>Callers define methods of interest through the {@link MetadataLookup} parameter,
 	 * allowing to collect the associated metadata into the result map.
@@ -60,10 +62,12 @@ public final class MethodIntrospector {
 		Set<Class<?>> handlerTypes = new LinkedHashSet<>();
 		Class<?> specificHandlerType = null;
 
+		// cglib背后真实的class
 		if (!Proxy.isProxyClass(targetType)) {
 			specificHandlerType = ClassUtils.getUserClass(targetType);
 			handlerTypes.add(specificHandlerType);
 		}
+		// 所有实现的接口，包括父类实现的
 		handlerTypes.addAll(ClassUtils.getAllInterfacesForClassAsSet(targetType));
 
 		for (Class<?> currentHandlerType : handlerTypes) {
@@ -98,6 +102,7 @@ public final class MethodIntrospector {
 	}
 
 	/**
+	 * 查找targetType中可以被调用的方法
 	 * Select an invocable method on the target type: either the given method itself
 	 * if actually exposed on the target type, or otherwise a corresponding method
 	 * on one of the target type's interfaces or on the target type itself.
@@ -140,6 +145,7 @@ public final class MethodIntrospector {
 
 
 	/**
+	 * 获取方法的元数据
 	 * A callback interface for metadata lookup on a given method.
 	 * @param <T> the type of metadata returned
 	 */
@@ -147,6 +153,7 @@ public final class MethodIntrospector {
 	public interface MetadataLookup<T> {
 
 		/**
+		 * 获取方法相关的元数据
 		 * Perform a lookup on the given method and return associated metadata, if any.
 		 * @param method the method to inspect
 		 * @return non-null metadata to be associated with a method if there is a match,

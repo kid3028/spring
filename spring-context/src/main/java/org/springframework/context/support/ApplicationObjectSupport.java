@@ -91,6 +91,7 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	}
 
 	/**
+	 * 是否必须有 ApplicationContext
 	 * Determine whether this application object needs to run in an ApplicationContext.
 	 * <p>Default is "false". Can be overridden to enforce running in a context
 	 * (i.e. to throw IllegalStateException on accessors if outside a context).
@@ -102,6 +103,7 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	}
 
 	/**
+	 * 指定 applicationContext 的类型
 	 * Determine the context class that any context passed to
 	 * {@code setApplicationContext} must be an instance of.
 	 * Can be overridden in subclasses.
@@ -112,6 +114,7 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	}
 
 	/**
+	 * 子类需要覆盖这个方法，实现自定义的init 逻辑.
 	 * Subclasses can override this for custom initialization behavior.
 	 * Gets called by {@code setApplicationContext} after setting the context instance.
 	 * <p>Note: Does <i>not</i> get called on re-initialization of the context
@@ -128,6 +131,7 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	}
 
 	/**
+	 * 子类应该覆盖这个方法
 	 * Subclasses can override this for custom initialization behavior.
 	 * <p>The default implementation is empty. Called by
 	 * {@link #initApplicationContext(org.springframework.context.ApplicationContext)}.
