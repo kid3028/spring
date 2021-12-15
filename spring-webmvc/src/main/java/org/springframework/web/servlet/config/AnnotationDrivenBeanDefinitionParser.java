@@ -86,6 +86,25 @@ import org.springframework.web.servlet.mvc.method.annotation.ServletWebArgumentR
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 /**
+ * 解析spring mvc xml文件中的 <annotation-driven/> 标签
+ * 自动注册 HandlerMapping BeanDefinition:
+ *   RequestMappingHandlerMapping order=0
+ *   BeanNameUrlHandlerMapping order=2
+ * 也可以通过 <view-controller> <resource> 注册额外的HandlerMappings
+ *
+ * 自动注册 HandlerAdapter BeanDefinition
+ *   RequestMappingHandlerAdapter
+ *   HttpRequestHandlerAdapter
+ *   SimpleControllerHandlerAdapter
+ *
+ * 自动注册 HandlerExceptionResolver BeanDefinition
+ *   ExceptionHandlerExceptionResolver
+ *   ResponseStatusExceptionResolver
+ *   DefaultHandlerExceptionResolver
+ *
+ * 自动注册 AntPathMatcher UrlPathHelper用于RequestMappingHandlerMapping、HandlerMapping ViewControllers、HandlerMapping for
+ * serving resources
+ *
  * A {@link BeanDefinitionParser} that provides the configuration for the
  * {@code <annotation-driven/>} MVC namespace element.
  *
@@ -207,6 +226,21 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		handlerMappingDef.getPropertyValues().add("order", 0);
 		handlerMappingDef.getPropertyValues().add("contentNegotiationManager", contentNegotiationManager);
 
+		/*
+		MatrixVariable注解拓展了URL请求地址的功能。使用@Matrixvariable注解时多个变量可以使用;(分号)分隔,该注解允许开发者进行多条件组合査询。
+		如下则自动将URL中模板变量{userId}绑定到通过@Pathvariable注解的同名形式参数上,即方法的形式参数userId将被赋值为1;
+		通过@MatrixVariable注解绑定了形式参数name和age,即形式参数name将被赋值为jack,形式参数age将被赋值为23
+		
+		该方法映射的请求为/VariableTest/matrixVariableTest/1;name=jack;age=23
+		@GetMapping(value = "/matrixVariableTest/{userId}")
+		public void matrixVariableTest(@PathVariable Integer userId,
+				@MatrixVariable(value = "name", pathVar = "userId") String name,
+				@MatrixVariable(value = "age", pathVar = "userId") Integer age)
+		{
+			System.out.println("通过@PathVariable获得数据： userId=" + userId);
+			System.out.println("通过@MatrixVariable获得数据： name=" + name + " age=" + age);
+		}
+		 */
 		if (element.hasAttribute("enable-matrix-variables")) {
 			boolean enableMatrixVariables = Boolean.parseBoolean(element.getAttribute("enable-matrix-variables"));
 			handlerMappingDef.getPropertyValues().add("removeSemicolonContent", !enableMatrixVariables);

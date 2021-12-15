@@ -235,6 +235,7 @@ public class HandlerMethod {
 	}
 
 	/**
+	 * 获取handler method的方法参数列表
 	 * Return the method parameters for this handler method.
 	 */
 	public MethodParameter[] getMethodParameters() {

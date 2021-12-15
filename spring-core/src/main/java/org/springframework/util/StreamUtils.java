@@ -71,6 +71,8 @@ public abstract class StreamUtils {
 	}
 
 	/**
+	 * 将流的内容copy到字符串
+	 * 【注意】处理完流还是打开的
 	 * Copy the contents of the given InputStream into a String.
 	 * <p>Leaves the stream open when done.
 	 * @param in the InputStream to copy from (may be {@code null} or empty)
@@ -109,6 +111,7 @@ public abstract class StreamUtils {
 	}
 
 	/**
+	 * 将给定的字符串in写入到给定的输出流out中
 	 * Copy the contents of the given String to the given OutputStream.
 	 * <p>Leaves the stream open when done.
 	 * @param in the String to copy from

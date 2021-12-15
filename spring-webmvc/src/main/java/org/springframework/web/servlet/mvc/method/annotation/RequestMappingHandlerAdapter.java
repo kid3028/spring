@@ -99,6 +99,8 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
+ * 基于注解，通过解析注解信息来寻找相应的方法处理当前的http请求，在处理过程中，通过反射来发现探测处理方法的参数，
+ * 调用处理方法，并映射返回值到模型和控制器对象
  * Extension of {@link AbstractHandlerMethodAdapter} that supports
  * {@link RequestMapping @RequestMapping} annotated {@link HandlerMethod HandlerMethods}.
  *
@@ -210,6 +212,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 
 	/**
+	 * 增加自定义的参数解析器。自定义的参数解析器将会排在内建的之后。如果想要覆盖内建的支持，使用 {@link #setArgumentResolvers}
 	 * Provide resolvers for custom argument types. Custom resolvers are ordered
 	 * after built-in ones. To override the built-in support for argument
 	 * resolution use {@link #setArgumentResolvers} instead.
@@ -227,6 +230,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * 配置完整的参数解析器，将会覆盖默认的参数解析器列表，如果没有配置则使用默认的
 	 * Configure the complete list of supported argument types thus overriding
 	 * the resolvers that would otherwise be configured by default.
 	 */
@@ -241,6 +245,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * 获取配置的参数解析器列表，如果{@Link #afterPropertiesSet}还没有执行，那么可能返回null
 	 * Return the configured argument resolvers, or possibly {@code null} if
 	 * not initialized yet via {@link #afterPropertiesSet()}.
 	 */
@@ -250,6 +255,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * 配置参数绑定器
 	 * Configure the supported argument types in {@code @InitBinder} methods.
 	 */
 	public void setInitBinderArgumentResolvers(@Nullable List<HandlerMethodArgumentResolver> argumentResolvers) {
@@ -272,6 +278,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * 设置自定义的返回值处理器，自定义处理器将排在内建的之后，如果想要覆盖内建处理器使用{@link #setReturnValueHandlers}
 	 * Provide handlers for custom return value types. Custom handlers are
 	 * ordered after built-in ones. To override the built-in support for
 	 * return value handling use {@link #setReturnValueHandlers}.
@@ -289,6 +296,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * 配置完成的返回值处理器，将会覆盖默认的内建实现，如果没有配置，那么将使用默认的内建处理器
 	 * Configure the complete list of supported return value types thus
 	 * overriding handlers that would otherwise be configured by default.
 	 */
@@ -312,6 +320,12 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * 设置自定义的{@link ModelAndViewResolver}视图解析器
+	 * 这个方法只是为了向后兼容。
+	 * 建议将{@link ModelAndViewResolver} 使用 {@link HandlerMethodReturnValueHandler} 重写。
+	 * 没有办法在 ModelAndViewResolver、HandlerMethodReturnValueHandler两个接口之间做适配，
+	 * ModelAndViewResolver将在所有返回值处理器之后调用。
+	 * HandlerMethodReturnValueHandler提供对返回值、方法信息、handler排序的更好支持
 	 * Provide custom {@link ModelAndViewResolver ModelAndViewResolvers}.
 	 * <p><strong>Note:</strong> This method is available for backwards
 	 * compatibility only. However, it is recommended to re-write a
@@ -338,6 +352,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * 设置内容协商管理器决定媒体类型
 	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
 	 * If not set, the default constructor is used.
 	 */
@@ -346,6 +361,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * 设置参数解析、返回值处理的转换器
 	 * Provide the converters to use in argument resolvers and return value
 	 * handlers that support reading and/or writing to the body of the
 	 * request and response.
@@ -362,6 +378,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * 增加 {@link RequestBodyAdvice}在请求被读取、转换前进行拦截
 	 * Add one or more {@code RequestBodyAdvice} instances to intercept the
 	 * request before it is read and converted for {@code @RequestBody} and
 	 * {@code HttpEntity} method arguments.
@@ -373,6 +390,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * 增加{@link ResponseBodyAdvice}在返回值被写入响应体之前进行拦截
 	 * Add one or more {@code ResponseBodyAdvice} instances to intercept the
 	 * response before {@code @ResponseBody} or {@code ResponseEntity} return
 	 * values are written to the response body.
@@ -400,6 +418,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * 设置异步任务执行器{@link AsyncTaskExecutor}，用于controller方法返回一个{@link Callable}对象的情况。
+	 * 默认{@link AsyncTaskExecutor} 是一个 {@link SimpleAsyncTaskExecutor}，在生产环境不应该使用这个
+	 * 默认配置，因为他不会重用线程
 	 * Set the default {@link AsyncTaskExecutor} to use when a controller method
 	 * return a {@link Callable}. Controller methods can override this default on
 	 * a per-request basis by returning an {@link WebAsyncTask}.
@@ -412,6 +433,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * 设置异步处理超时时间(milliseconds).超时时间从主请求线程退出开始计时
 	 * Specify the amount of time, in milliseconds, before concurrent handling
 	 * should time out. In Servlet 3, the timeout begins after the main request
 	 * processing thread has exited and ends when the request is dispatched again
@@ -425,6 +447,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * 设置 {@link CallableProcessingInterceptor} 来注册异步请求
 	 * Configure {@code CallableProcessingInterceptor}'s to register on async requests.
 	 * @param interceptors the interceptors to register
 	 */
@@ -433,6 +456,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * 设置 {@link DeferredResultProcessingInterceptor} 来注册异步请求
 	 * Configure {@code DeferredResultProcessingInterceptor}'s to register on async requests.
 	 * @param interceptors the interceptors to register
 	 */
@@ -458,6 +482,27 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * 在渲染和重定向时是否使用默认的模型
+	 * 可以在controller handler method上声明一个 {@link RedirectAttributes} 类型的参数，
+	 * 在里面添加属性用于重定向
+	 *
+	 * @Controller
+	 * @RequestMapping("/my")
+	 * public class MyController {
+	 *    @GetMapping("/account")
+	 *    public String account(Account account, BindingResult binding, RedirectAttribute attribute) {
+	 *        if(binding.hasErrors()) {
+	 *            return "accounts/new"
+	 *        }
+	 *        attribute.addAttribute("id", account.getId()).addFlashAttribute("message", "account created")
+	 *        return "redirect:/account/{id}"
+	 *    }
+	 * }
+	 *
+	 * 设置为true，那么默认的 model 将不会在redirect中使用，尽管 RedirectAttribute 参数在方法上没有声明。
+	 * 设置为false，那么当controller方法没有声明 RedirectAttribute 参数时默认的 model 将用于重定向
+	 *
+	 *
 	 * By default the content of the "default" model is used both during
 	 * rendering and redirect scenarios. Alternatively a controller method
 	 * can declare a {@link RedirectAttributes} argument and use it to provide
@@ -476,6 +521,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * 指定session属性的存储策略
+	 * 默认实现为 {@link DefaultSessionAttributeStore} 将使用 httpSession 中相同的名字存储session到model
 	 * Specify the strategy to store session attributes with. The default is
 	 * {@link org.springframework.web.bind.support.DefaultSessionAttributeStore},
 	 * storing session attributes in the HttpSession with the same attribute
@@ -486,6 +533,10 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * {@code @SessionAttributes} 注解的方法生成的session 属性过期时间。
+	 * -1 没有指定任何相关的header
+	 * 0  Cache-Control: no-store (默认)
+	 * >= 1 Cache-Control: max-age=seconds
 	 * Cache content produced by {@code @SessionAttributes} annotated handlers
 	 * for the given number of seconds.
 	 * <p>Possible values are:
@@ -506,6 +557,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * 同一个客户端一个session下的请求是否要同步串行调用。
+	 * 设置为true，则{@code handleRequestInternal}将同步串行执行。
 	 * Set if controller execution should be synchronized on the session,
 	 * to serialize parallel invocations from the same client.
 	 * <p>More specifically, the execution of the {@code handleRequestInternal}
@@ -528,6 +581,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * 参数名称解析器 解析方法参数名
 	 * Set the ParameterNameDiscoverer to use for resolving method parameter names if needed
 	 * (e.g. for default attribute names).
 	 * <p>Default is a {@link org.springframework.core.DefaultParameterNameDiscoverer}.
@@ -579,21 +633,24 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		if (getApplicationContext() == null) {
 			return;
 		}
-
+		// 获取所有 @ControllerAdvice 注解的类，获取其上 @ControllerAdvice 注解的信息，构建 ControlerAdviceBean
 		List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
 		AnnotationAwareOrderComparator.sort(adviceBeans);
 
 		List<Object> requestResponseBodyAdviceBeans = new ArrayList<>();
 
 		for (ControllerAdviceBean adviceBean : adviceBeans) {
+			// 获取标记了 @ControllerAdvice 的bean类型
 			Class<?> beanType = adviceBean.getBeanType();
 			if (beanType == null) {
 				throw new IllegalStateException("Unresolvable type for ControllerAdviceBean: " + adviceBean);
 			}
+			// 过滤到存在 @ModelAttribute 注解，但是没有 @RequestMapping 注解的方法
 			Set<Method> attrMethods = MethodIntrospector.selectMethods(beanType, MODEL_ATTRIBUTE_METHODS);
 			if (!attrMethods.isEmpty()) {
 				this.modelAttributeAdviceCache.put(adviceBean, attrMethods);
 			}
+			// 有 @InitBinder 注解的方法
 			Set<Method> binderMethods = MethodIntrospector.selectMethods(beanType, INIT_BINDER_METHODS);
 			if (!binderMethods.isEmpty()) {
 				this.initBinderAdviceCache.put(adviceBean, binderMethods);
@@ -759,6 +816,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 
 	/**
+	 * 总是返回true，因为方法参数和返回值可以以许多方式进行处理。
+	 * 当方法参数无法被任何{@link HandlerMethodArgumentResolver}解析时将会被视为是一个简单的类型，或者作为model attribute。
+	 * 返回值无法被任何{@link HandlerMethodReturnValueHandler}解析时将会被视为一个model attribute
 	 * Always return {@code true} since any method argument and return value
 	 * type will be processed in some way. A method argument not recognized
 	 * by any HandlerMethodArgumentResolver is interpreted as a request parameter
@@ -776,8 +836,10 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 
 		ModelAndView mav;
+		// 请求方法是否被限制，session是否必须，不满足则抛出异常
 		checkRequest(request);
 
+		// 如果期望一个session的请求是同步处理的
 		// Execute invokeHandlerMethod in synchronized block if required.
 		if (this.synchronizeOnSession) {
 			HttpSession session = request.getSession(false);
@@ -821,6 +883,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 
 	/**
+	 * 读取handler class上 {@code SessionAttributes}注解信息构建一个SessionAttributesHandler
 	 * Return the {@link SessionAttributesHandler} instance for the given handler type
 	 * (never {@code null}).
 	 */
@@ -840,6 +903,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * 调用 {@link RequestMapping @RequestMapping}标记的方法
 	 * Invoke the {@link RequestMapping} handler method preparing a {@link ModelAndView}
 	 * if view resolution is required.
 	 * @since 4.2
@@ -854,6 +918,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
 			ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);
 
+			// ServletInvocableHandlerMethod 执行handler method调用、返回值处理的对象
 			ServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);
 			if (this.argumentResolvers != null) {
 				invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
@@ -888,7 +953,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				});
 				invocableMethod = invocableMethod.wrapConcurrentResult(result);
 			}
-
+			// 1、解析请求参数
+			// 2、handler method调用
+			// 3、解析返回值
 			invocableMethod.invokeAndHandle(webRequest, mavContainer);
 			if (asyncManager.isConcurrentHandlingStarted()) {
 				return null;
@@ -902,6 +969,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * 根据{@link HandlerMethod}创建一个{@link ServletInvocableHandlerMethod}
 	 * Create a {@link ServletInvocableHandlerMethod} from the given {@link HandlerMethod} definition.
 	 * @param handlerMethod the {@link HandlerMethod} definition
 	 * @return the corresponding {@link ServletInvocableHandlerMethod} (or custom subclass thereof)

@@ -27,6 +27,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
+ * 解析BridgeMethod
+ * BridgeMethod：如果一个类继承或者实现了泛型类或接口，那么编译器就会生成一个桥接方法的合成方法synthetic
  * Helper for resolving synthetic {@link Method#isBridge bridge Methods} to the
  * {@link Method} being bridged.
  *
@@ -52,6 +54,7 @@ public final class BridgeMethodResolver {
 
 
 	/**
+	 * 查找桥接方法
 	 * Find the original method for the supplied {@link Method bridge Method}.
 	 * <p>It is safe to call this method passing in a non-bridge {@link Method} instance.
 	 * In such a case, the supplied {@link Method} instance is returned directly to the caller.

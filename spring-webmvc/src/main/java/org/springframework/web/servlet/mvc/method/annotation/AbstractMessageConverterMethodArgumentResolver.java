@@ -60,6 +60,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
 /**
+ * 使用{@link HttpMessageConverter}解析请求体
  * A base class for resolving method argument values by reading from the body of
  * a request with {@link HttpMessageConverter HttpMessageConverters}.
  *
@@ -107,6 +108,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 
 
 	/**
+	 * 返回converters支持的mediaTypes
 	 * Return the media types supported by all provided message converters sorted
 	 * by specificity via {@link MediaType#sortBySpecificity(List)}.
 	 */
@@ -131,6 +133,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	}
 
 	/**
+	 * 读取请求数据到parameter代表类型的实例
 	 * Create the method argument value of the expected parameter type by
 	 * reading from the given request.
 	 * @param <T> the expected type of the argument value to be created
@@ -165,7 +168,11 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	@Nullable
 	protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage, MethodParameter parameter,
 			Type targetType) throws IOException, HttpMediaTypeNotSupportedException, HttpMessageNotReadableException {
-
+		// 找到targetClass/contentType
+		// 遍历找到一个合适的converter
+		// 作用前置advice
+		// 读取body
+		// 作用后置advice
 		MediaType contentType;
 		boolean noContentType = false;
 		try {
@@ -199,6 +206,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 						(converter instanceof GenericHttpMessageConverter ? (GenericHttpMessageConverter<?>) converter : null);
 				if (genericConverter != null ? genericConverter.canRead(targetType, contextClass, contentType) :
 						(targetClass != null && converter.canRead(targetClass, contentType))) {
+					// 读取body，并应用advice
 					if (message.hasBody()) {
 						HttpInputMessage msgToUse =
 								getAdvice().beforeBodyRead(message, parameter, targetType, converterType);

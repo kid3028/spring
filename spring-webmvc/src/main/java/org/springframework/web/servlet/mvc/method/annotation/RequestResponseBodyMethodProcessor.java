@@ -46,6 +46,11 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 /**
+ * 使用{@link HttpMessageConverter}解析 {@link RequestBody} {@link ResponseBody}
+ *
+ * {@link RequestBody}参数可以使用{@code @Valid}标记进行校验。如果校验失败，{@link DefaultHandlerExceptionResolver}
+ * 将会抛出{@link MethodArgumentNotValidException} 状态码400
+ *
  * Resolves method arguments annotated with {@code @RequestBody} and handles return
  * values from methods annotated with {@code @ResponseBody} by reading and writing
  * to the body of the request or response with an {@link HttpMessageConverter}.

@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
+
 /**
  * Default implementation of the {@link NamespaceHandlerResolver} interface.
  * Resolves namespace URIs to implementation classes based on the mappings
@@ -50,6 +51,7 @@ import org.springframework.util.CollectionUtils;
 public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver {
 
 	/**
+	 * 服务启动开始加载所有classpath下的 META-INF/spring.handlers文件
 	 * The location to look for the mapping files. Can be present in multiple JAR files.
 	 */
 	public static final String DEFAULT_HANDLER_MAPPINGS_LOCATION = "META-INF/spring.handlers";
@@ -182,6 +184,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 
 	@Override
 	public String toString() {
+		logger.info("toString() will invoke getHandlerMappings()");
 		return "NamespaceHandlerResolver using mappings " + getHandlerMappings();
 	}
 

@@ -25,6 +25,9 @@ import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
+ * http请求处理适配器
+ * 仅支持对http请求处理器的适配（{@link HttpRequestHandler}），简单地将请求对象和响应对象传递给http请求处理器，
+ * 不处理返回值，主要应用在基于http的远程调用的实现上
  * Adapter to use the plain {@link org.springframework.web.HttpRequestHandler}
  * interface with the generic {@link org.springframework.web.servlet.DispatcherServlet}.
  * Supports handlers that implement the {@link LastModified} interface.
@@ -49,7 +52,7 @@ public class HttpRequestHandlerAdapter implements HandlerAdapter {
 	@Nullable
 	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
-
+		// 什么也不做，直接调用 HttpRequestHandler
 		((HttpRequestHandler) handler).handleRequest(request, response);
 		return null;
 	}

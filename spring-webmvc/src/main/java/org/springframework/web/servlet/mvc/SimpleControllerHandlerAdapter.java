@@ -24,6 +24,7 @@ import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
+ * 将http请求适配到一个控制器的实现进行处理。handler需要实现{@link Controller}接口 or 继承 {@link AbstractController}
  * Adapter to use the plain {@link Controller} workflow interface with
  * the generic {@link org.springframework.web.servlet.DispatcherServlet}.
  * Supports handlers that implement the {@link LastModified} interface.

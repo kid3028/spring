@@ -33,6 +33,10 @@ import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
 /**
+ * 封装 {@link ControllerAdvice @ControllerAdvice} bean，不要求被实例化
+ *
+ * {@link #findAnnotatedBeans(ApplicationContext)} 方法将找到这些bean，ControllerAdviceBean可能
+ * 从任何object中创建，可以是没有 {@link  ControllerAdvice @ControllerAdvice}注解的
  * Encapsulates information about an {@linkplain ControllerAdvice @ControllerAdvice}
  * Spring-managed bean without necessarily requiring it to be instantiated.
  *
@@ -80,6 +84,7 @@ public class ControllerAdviceBean implements Ordered {
 		this.beanFactory = beanFactory;
 		Class<?> beanType;
 
+		// 针对beanName或bean实例处理
 		if (bean instanceof String) {
 			String beanName = (String) bean;
 			Assert.hasText(beanName, "Bean name must not be null");
@@ -97,9 +102,10 @@ public class ControllerAdviceBean implements Ordered {
 			this.order = initOrderFromBean(bean);
 		}
 
+		// 探测bean上 @ControllerAdvice 注解信息
 		ControllerAdvice annotation = (beanType != null ?
 				AnnotatedElementUtils.findMergedAnnotation(beanType, ControllerAdvice.class) : null);
-
+		// 使用注解信息构建一个HandlerTypePredicate对象
 		if (annotation != null) {
 			this.beanTypePredicate = HandlerTypePredicate.builder()
 					.basePackage(annotation.basePackages())
@@ -183,6 +189,7 @@ public class ControllerAdviceBean implements Ordered {
 
 
 	/**
+	 * 找出所有使用{@link ControllerAdvice @ControllerAdvice}注解的bean，并包装成ControllerAdviceBean
 	 * Find the names of beans annotated with
 	 * {@linkplain ControllerAdvice @ControllerAdvice} in the given
 	 * ApplicationContext and wrap them as {@code ControllerAdviceBean} instances.

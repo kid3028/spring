@@ -25,6 +25,8 @@ import java.lang.annotation.Target;
 import org.springframework.http.converter.HttpMessageConverter;
 
 /**
+ * 方法的参数应该被绑定到request body。request body通过 {@link HttpMessageConverter} 解析到方法参数上。
+ * 可以在方法参数添加 {@link javax.validation.Valid @Valid}进行参数验证
  * Annotation indicating a method parameter should be bound to the body of the web request.
  * The body of the request is passed through an {@link HttpMessageConverter} to resolve the
  * method argument depending on the content type of the request. Optionally, automatic

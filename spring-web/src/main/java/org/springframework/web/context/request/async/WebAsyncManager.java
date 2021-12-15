@@ -37,6 +37,11 @@ import java.util.concurrent.RejectedExecutionException;
 
 /**
  * 管理异步请求处理的核心接口，主要通过SPI的方式使用，很少在应用程序中直接使用
+ * 异步处理从线程（t1）的请求处理开始。
+ * 并发请求处理可以调用{@link #startCallableProcessing} {@link #startDeferredResultProcessing}初始化，并在线程（t2）生成一个结果。
+ * 结果将被保存，并且请求被分发到container，来恢复对线程（t3）中保存结果的处理。当分发到线程（t3）后，
+ * 可以通过{@link #getConcurrentResult()}访问保存的结果，或通过{@link #hasConcurrentResult()}检测结果是否存在
+ *
  * The central class for managing asynchronous request processing, mainly intended
  * as an SPI and not typically used directly by application classes.
  *

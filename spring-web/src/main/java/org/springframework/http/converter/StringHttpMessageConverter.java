@@ -31,6 +31,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 
 /**
+ * 使用字符串方式处理http请求响应
+ * 默认支持所有的输入类型，统一使用 text/plain 的方式写出。可以通过覆盖{@link #setSupportedMediaTypes} 来指定支持的输入类型
+ * 默认使用 {@link StandardCharsets.ISO_8859_1} 编解码数据
  * Implementation of {@link HttpMessageConverter} that can read and write strings.
  *
  * <p>By default, this converter supports all media types ({@code &#42;&#47;&#42;}),
@@ -112,6 +115,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 
 
 	/**
+	 * 返回受支持的 AcceptCharsets
 	 * Return the list of supported {@link Charset Charsets}.
 	 * <p>By default, returns {@link Charset#availableCharsets()}.
 	 * Can be overridden in subclasses.
@@ -127,9 +131,11 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	}
 
 	private Charset getContentTypeCharset(@Nullable MediaType contentType) {
+		// 如果MediaType指定了字符集
 		if (contentType != null && contentType.getCharset() != null) {
 			return contentType.getCharset();
 		}
+		// 如果MediaType与 {@code MediaType.APPLICATION_JSON} 兼容，使用utf8
 		else if (contentType != null && contentType.isCompatibleWith(MediaType.APPLICATION_JSON)) {
 			// Matching to AbstractJackson2HttpMessageConverter#DEFAULT_CHARSET
 			return StandardCharsets.UTF_8;

@@ -36,6 +36,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * {@link HttpMessageConverter} 默认实现
+ * 可以指定支持的 MediaTypes Content-Type Content-Length
  * Abstract base class for most {@link HttpMessageConverter} implementations.
  *
  * <p>This base class adds support for setting supported {@code MediaTypes}, through the
@@ -137,6 +139,9 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	}
 
 	/**
+	 * media type是否可读？supported media type中是否包含指定的MediaType(一般取自Content-Type)
+	 * 遍历supportedMediaType，使用include看是否能匹配给定的mediaType
+	 *
 	 * Returns {@code true} if any of the {@linkplain #setSupportedMediaTypes(List)
 	 * supported} media types {@link MediaType#includes(MediaType) include} the
 	 * given media type.
@@ -169,6 +174,8 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	}
 
 	/**
+	 * 是否支持以给定的mediaType写出数据
+	 * supportedMediaTypes 一般取自 Accept Header
 	 * Returns {@code true} if the given media type includes any of the
 	 * {@linkplain #setSupportedMediaTypes(List) supported media types}.
 	 * @param mediaType the media type to write, can be {@code null} if not specified.
@@ -293,6 +300,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 
 
 	/**
+	 * converter是否支持给定的class
 	 * Indicates whether the given class is supported by this converter.
 	 * @param clazz the class to test for support
 	 * @return {@code true} if supported; {@code false} otherwise

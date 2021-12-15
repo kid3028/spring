@@ -30,6 +30,9 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
 
 /**
+ * 为每一个需要异步执行的task创建一个新的线程
+ * 可以通过 "concurrencyLimit" 限制并发执行的线程数，默认并发线程数是无限制的
+ * 这个实现不会重用线程，可以考虑实现一个线程池，尤其是在大量短任务的场景下
  * {@link TaskExecutor} implementation that fires up a new Thread for each task,
  * executing it asynchronously.
  *

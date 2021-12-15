@@ -24,8 +24,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.web.context.request.WebRequest;
 
 /**
+ * 声明handler将会使用的session属性
+ * 例如model attribute的属性名，属性将透明地存储在session中，或者会话存储中。在class上进行声明，并应用在model attribute
+ * session attributes 将在对应的handler's model attributes中使用，在会话中透明地存储。一旦会话结束，这些属性将会被删除。
+ * 因此会话中的属性是临时。如果想要持久存session attributes(如授权)，使用{@code session.setAttribute}方法。
+ * 也可以实现{@link WebRequest}获得属性管理的能力
+ *
+ *
  * Annotation that indicates the session attributes that a specific handler uses.
  *
  * <p>This will typically list the names of model attributes which should be
@@ -44,7 +52,7 @@ import org.springframework.core.annotation.AliasFor;
  * <p>For permanent session attributes, e.g. a user authentication object,
  * use the traditional {@code session.setAttribute} method instead.
  * Alternatively, consider using the attribute management capabilities of the
- * generic {@link org.springframework.web.context.request.WebRequest} interface.
+ * generic {@link WebRequest} interface.
  *
  * <p><b>NOTE:</b> When using controller interfaces (e.g. for AOP proxying),
  * make sure to consistently put <i>all</i> your mapping annotations &mdash;

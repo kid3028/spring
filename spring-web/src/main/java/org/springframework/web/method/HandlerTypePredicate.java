@@ -30,6 +30,11 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
+ * 如果下面的任意条件中匹配请求处理组件
+ *   packages
+ *   types
+ *   annotations
+ *
  * A {@code Predicate} to match request handling component types if
  * <strong>any</strong> of the following selectors match:
  * <ul>
@@ -70,20 +75,24 @@ public final class HandlerTypePredicate implements Predicate<Class<?>> {
 
 	@Override
 	public boolean test(Class<?> controllerType) {
+		// 如果没有设置任何的条件，直接返回true
 		if (!hasSelectors()) {
 			return true;
 		}
 		else if (controllerType != null) {
+			// controller是否在basePackage下
 			for (String basePackage : this.basePackages) {
 				if (controllerType.getName().startsWith(basePackage)) {
 					return true;
 				}
 			}
+			// controller是否是子类
 			for (Class<?> clazz : this.assignableTypes) {
 				if (ClassUtils.isAssignable(clazz, controllerType)) {
 					return true;
 				}
 			}
+			// controller是否有注解
 			for (Class<? extends Annotation> annotationClass : this.annotations) {
 				if (AnnotationUtils.findAnnotation(controllerType, annotationClass) != null) {
 					return true;
@@ -93,6 +102,10 @@ public final class HandlerTypePredicate implements Predicate<Class<?>> {
 		return false;
 	}
 
+	/**
+	 * 是否有package、type、annotation任意一级的的条件，如果有返回true，没有设置任何条件，返回false
+	 * @return
+	 */
 	private boolean hasSelectors() {
 		return (!this.basePackages.isEmpty() || !this.assignableTypes.isEmpty() || !this.annotations.isEmpty());
 	}

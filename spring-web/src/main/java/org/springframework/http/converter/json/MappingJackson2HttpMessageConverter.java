@@ -25,6 +25,10 @@ import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 
 /**
+ * 使用ObjectMapper读取、写Json数据
+ * 可以将数据绑定到一个指定类型的bean或者泛型的map
+ * 默认实现支持UTF-8编码的 application/json application/**json
+ *
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter} that can read and
  * write JSON using <a href="https://github.com/FasterXML/jackson">Jackson 2.x's</a> {@link ObjectMapper}.
  *

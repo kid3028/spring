@@ -58,6 +58,7 @@ public class SessionAttributesHandler {
 
 
 	/**
+	 * 读取class上 {@code SessionAttributes}注解，构建一个SessionAttributesHandler
 	 * Create a new session attributes handler. Session attribute names and types
 	 * are extracted from the {@code @SessionAttributes} annotation, if present,
 	 * on the given type.

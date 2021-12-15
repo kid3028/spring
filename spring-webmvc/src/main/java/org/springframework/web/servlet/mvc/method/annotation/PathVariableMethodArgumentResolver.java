@@ -42,6 +42,8 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
+ * 解析被 {@link PathVariable @PathVariable}注解的方法参数
+ * @PathVariable 从uri模板变量中解析，并且是必须存在的，不能降级默认值。
  * Resolves method arguments annotated with an @{@link PathVariable}.
  *
  * <p>An @{@link PathVariable} is a named value that gets resolved from a URI template variable.
@@ -68,6 +70,12 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	private static final TypeDescriptor STRING_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(String.class);
 
 
+	/**
+	 * 解析器是否支持解析方法参数
+	 *  方法参数需要有{@link PathVariable @PathVariable}注解
+	 * @param parameter the method parameter to check
+	 * @return
+	 */
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		if (!parameter.hasParameterAnnotation(PathVariable.class)) {
@@ -80,6 +88,11 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 		return true;
 	}
 
+	/**
+	 * 使用 {@link PathVariable @PathVariable}注解创建一个PathVariableNamedValueInfo
+	 * @param parameter the method parameter
+	 * @return
+	 */
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
 		PathVariable ann = parameter.getParameterAnnotation(PathVariable.class);
@@ -87,6 +100,15 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 		return new PathVariableNamedValueInfo(ann);
 	}
 
+	/**
+	 * 根据 {@link PathVariable} name属性查找uri变量name对应的值
+	 * @param name the name of the value being resolved
+	 * @param parameter the method parameter to resolve to an argument value
+	 * (pre-nested in case of a {@link java.util.Optional} declaration)
+	 * @param request the current request
+	 * @return
+	 * @throws Exception
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	@Nullable
@@ -96,11 +118,25 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 		return (uriTemplateVars != null ? uriTemplateVars.get(name) : null);
 	}
 
+	/**
+	 * 如果uri上没找到对应的值，那么抛出异常
+	 * @param name the name for the value
+	 * @param parameter the method parameter
+	 * @throws ServletRequestBindingException
+	 */
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
 		throw new MissingPathVariableException(name, parameter);
 	}
 
+	/**
+	 * 保存所有的pathVariable
+	 * @param arg the resolved argument value name对应的value
+	 * @param name the argument name  {@link PathVariable} name属性
+	 * @param parameter the argument parameter type
+	 * @param mavContainer the {@link ModelAndViewContainer} (may be {@code null})
+	 * @param request
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	protected void handleResolvedValue(@Nullable Object arg, String name, MethodParameter parameter,

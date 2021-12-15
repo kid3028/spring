@@ -1105,6 +1105,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			Exception dispatchException = null;
 
 			try {
+				// 判断是否是 multipartRequest，如果是转换为 MultipartHttpServletRequest
 				processedRequest = checkMultipart(request);
 				multipartRequestParsed = (processedRequest != request);
 
@@ -1116,6 +1117,7 @@ public class DispatcherServlet extends FrameworkServlet {
 					return;
 				}
 
+				// 为handler寻找合适的HandlerAdapter
 				// Determine handler adapter for the current request.
 				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 
@@ -1129,7 +1131,7 @@ public class DispatcherServlet extends FrameworkServlet {
 					}
 				}
 
-				// 执行interceptor#preHandler，如果有返回false的，请求立即返回
+				// 执行interceptor#preHandle，如果有返回false的，请求立即返回
 				if (!mappedHandler.applyPreHandle(processedRequest, response)) {
 					return;
 				}
@@ -1141,8 +1143,9 @@ public class DispatcherServlet extends FrameworkServlet {
 				if (asyncManager.isConcurrentHandlingStarted()) {
 					return;
 				}
-
+				// 如果mv不为null，解析出视图名称
 				applyDefaultViewName(processedRequest, mv);
+				// 执行interceptor#postHandle
 				mappedHandler.applyPostHandle(processedRequest, response, mv);
 			}
 			catch (Exception ex) {
@@ -1212,6 +1215,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 
+		// 如果handler返回了view，那么渲染页面
 		// Did the handler return a view to render?
 		if (mv != null && !mv.wasCleared()) {
 			render(mv, request, response);
@@ -1230,6 +1234,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			return;
 		}
 
+		// 执行interceptor#afterCompletion
 		if (mappedHandler != null) {
 			mappedHandler.triggerAfterCompletion(request, response, null);
 		}

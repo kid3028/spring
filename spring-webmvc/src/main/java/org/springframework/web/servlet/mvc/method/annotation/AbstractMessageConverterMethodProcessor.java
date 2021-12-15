@@ -62,6 +62,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
+ * 在{@link AbstractMessageConverterMethodArgumentResolver}的基础上增加对handler method 返回值的处理
  * Extends {@link AbstractMessageConverterMethodArgumentResolver} with the ability to handle method
  * return values by writing to the response with {@link HttpMessageConverter HttpMessageConverters}.
  *
@@ -188,6 +189,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			targetType = GenericTypeResolver.resolveType(getGenericType(returnType), returnType.getContainingClass());
 		}
 
+		// 返回值是否是 Resource.class InputStreamResource.class 的子类
 		if (isResourceType(value, returnType)) {
 			outputMessage.getHeaders().set(HttpHeaders.ACCEPT_RANGES, "bytes");
 			if (value != null && inputMessage.getHeaders().getFirst(HttpHeaders.RANGE) != null &&
@@ -417,7 +419,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 		HttpServletRequest servletRequest = request.getServletRequest();
 		String requestUri = UrlPathHelper.rawPathInstance.getOriginatingRequestUri(servletRequest);
-
+		// /f.txt
 		int index = requestUri.lastIndexOf('/') + 1;
 		String filename = requestUri.substring(index);
 		String pathParams = "";
@@ -427,8 +429,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			pathParams = filename.substring(index);
 			filename = filename.substring(0, index);
 		}
-
+		// f.txt
 		filename = UrlPathHelper.defaultInstance.decodeRequestString(servletRequest, filename);
+		// txt
 		String ext = StringUtils.getFilenameExtension(filename);
 
 		pathParams = UrlPathHelper.defaultInstance.decodeRequestString(servletRequest, pathParams);

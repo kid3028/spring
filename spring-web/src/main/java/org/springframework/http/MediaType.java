@@ -447,6 +447,7 @@ public class MediaType extends MimeType implements Serializable {
 	}
 
 	/**
+	 * 当前MediaType能否通配给定的mediaType
 	 * Indicate whether this {@code MediaType} includes the given media type.
 	 * <p>For instance, {@code text/*} includes {@code text/plain} and {@code text/html},
 	 * and {@code application/*+xml} includes {@code application/soap+xml}, etc.

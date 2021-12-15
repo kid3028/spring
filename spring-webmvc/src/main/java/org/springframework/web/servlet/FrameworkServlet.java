@@ -1162,6 +1162,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		long startTime = System.currentTimeMillis();
 		Throwable failureCause = null;
 
+		// ================================ //
+		// 为保证当前线程的LocaleContext、RequestAttributes可以在当前请求后还能恢复，提取当前线程的这两个属性。
+		// 根据当前request创建对应的LocaleContext、RequestAttributes，并绑定到当前线程
 		LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();
 		LocaleContext localeContext = buildLocaleContext(request);
 
@@ -1172,7 +1175,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		asyncManager.registerCallableInterceptor(FrameworkServlet.class.getName(), new RequestBindingInterceptor());
 
 		initContextHolders(request, localeContext, requestAttributes);
-
+		// =============================== //
 		try {
 			doService(request, response);
 		}

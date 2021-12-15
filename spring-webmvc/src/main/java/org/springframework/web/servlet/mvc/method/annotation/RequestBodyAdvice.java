@@ -20,11 +20,17 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 
 /**
+ * 允许在读取请求体并将其转换为对象前自定义请求
+ * 允许在将结果对象作为@RequestBody或者HttpEntity方法参数传入controller方法前进行处理
+ * 子类使用可以直接通过{@link RequestMappingHandlerAdapter}注解，或者使用
+ * {@link ControllerAdvice @ControllerAdvice}注解，进行自动探测
  * Allows customizing the request before its body is read and converted into an
  * Object and also allows for processing of the resulting Object before it is
  * passed into a controller method as an {@code @RequestBody} or an
@@ -40,6 +46,7 @@ import org.springframework.lang.Nullable;
 public interface RequestBodyAdvice {
 
 	/**
+	 * 1、是否支持
 	 * Invoked first to determine if this interceptor applies.
 	 * @param methodParameter the method parameter
 	 * @param targetType the target type, not necessarily the same as the method
@@ -51,11 +58,13 @@ public interface RequestBodyAdvice {
 			Class<? extends HttpMessageConverter<?>> converterType);
 
 	/**
+	 * 2、在body读取转换前调用
 	 * Invoked second before the request body is read and converted.
 	 * @param inputMessage the request
 	 * @param parameter the target method parameter
 	 * @param targetType the target type, not necessarily the same as the method
-	 * parameter type, e.g. for {@code HttpEntity<String>}.
+	 * parameter type, e.g. for {@code HttpEntity<String>
+	}.
 	 * @param converterType the converter used to deserialize the body
 	 * @return the input request or a new instance, never {@code null}
 	 */
@@ -63,6 +72,7 @@ public interface RequestBodyAdvice {
 			Type targetType, Class<? extends HttpMessageConverter<?>> converterType) throws IOException;
 
 	/**
+	 * 3、在body被转换到对象之后
 	 * Invoked third (and last) after the request body is converted to an Object.
 	 * @param body set to the converter Object before the first advice is called
 	 * @param inputMessage the request
@@ -76,6 +86,7 @@ public interface RequestBodyAdvice {
 			Type targetType, Class<? extends HttpMessageConverter<?>> converterType);
 
 	/**
+	 * 如果body是空时调用
 	 * Invoked second (and last) if the body is empty.
 	 * @param body usually set to {@code null} before the first advice is called
 	 * @param inputMessage the request
