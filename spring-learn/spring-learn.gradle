@@ -15,4 +15,6 @@ dependencies {
 //    compile("javax.el:javax.el-api:2.2.4")
 //    compile("org.glassfish.web:javax.el:2.2.4")
     compile("org.mortbay.jasper:apache-el:9.0.48")
+    compile("javax.servlet:javax.servlet-api:3.0.1")
+
 }

@@ -1,0 +1,58 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+interface BeanFactory
+interface BeanDefinition
+interface BeanDefinitionRegistry
+interface BeanDefinitionReader
+interface ApplicationContext
+interface ConfigurableApplicationContext
+abstract AbstractApplicationContext
+abstract AbstractRefreshableApplicationContext
+
+BeanFactory <|-- DefaultListableBeanFactory
+BeanFactory <|-- ApplicationContext
+ApplicationContext <|-- ConfigurableApplicationContext
+AbstractApplicationContext <|-- AbstractRefreshableApplicationContext
+ConfigurableApplicationContext <|-- AbstractApplicationContext
+AbstractRefreshableApplicationContext <|-- ClassPathXmlApplicationContext
+AbstractApplicationContext <|-- GenericApplicationContext
+GenericApplicationContext <|-- AnnotationConfigApplicationContext
+'BeanDefinitionRegistry <|-- DefaultListableBeanFactory
+GenericApplicationContext *- DefaultListableBeanFactory
+AbstractRefreshableApplicationContext *- DefaultListableBeanFactory
+DefaultListableBeanFactory o- BeanDefinition
+ClassPathXmlApplicationContext *- BeanDefinitionReader
+BeanDefinitionReader *- BeanDefinitionRegistry
+ClasspathBeanDefinitionScanner *- BeanDefinitionRegistry
+AnnotationConfigApplicationContext *-- ClasspathBeanDefinitionScanner
+AnnotationConfigApplicationContext *-- AnnotatedBeanDefinitionReader
+AnnotatedBeanDefinitionReader *- BeanDefinitionRegistry
+
+interface BeanFactory {
+{method} T getBean(Class<T> clazz)
+}
+
+abstract class ConfigurableApplicationContext {
+{method} void refresh()
+{method} void setEnvironment(ConfigurableEnvironment env)
+{method} void addBeanFactoryPostProcessor(BeanFactoryPostProcessor processor)
+{method} void addApplicationListener(ApplicationListener listener)
+}
+
+interface BeanDefinitionRegistry{
+{method} void registryBeanDefinition(String beanName, BeanDefinition beanDefinition)
+{method} BeanDefinition getBeanDefinition(String beanName)
+{method} void removeBeanDefinition(String beanName)
+}
+
+interface BeanDefinitionReader {
+{method} BeanDefinition loadBeanDefinition()
+}
+
+
+
+
+
+
+@enduml

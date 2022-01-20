@@ -87,7 +87,7 @@ import org.springframework.lang.Nullable;
  * (only applicable when running in an application context)
  * <li>MessageSourceAware's {@code setMessageSource}
  * (only applicable when running in an application context)
- * <li>ApplicationContextAware's {@code setApplicationContext}
+ * <li>ApplicationContextAware's {@code setApplicationContext}q
  * (only applicable when running in an application context)
  * <li>ServletContextAware's {@code setServletContext}
  * (only applicable when running in a web application context)

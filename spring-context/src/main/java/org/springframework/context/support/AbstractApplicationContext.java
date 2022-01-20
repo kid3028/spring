@@ -567,7 +567,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 				// ==============================
 				// 激活各种BeanFactory处理器
-				// Invoke factory processors re gistered as beans in the context.
+				// Invoke factory processors registered as beans in the context.
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// 注册拦截bean创建的Bean处理器，这里只是注册，真正调用在getBean时候
@@ -1083,7 +1083,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Stop using the temporary ClassLoader for type matching.
 		beanFactory.setTempClassLoader(null);
 
-		// 冻结所欲的bean定义，说明注册的bean定义将不被修改或任何进一步的处理
+		// 冻结所有的bean定义，说明注册的bean定义将不被修改或任何进一步的处理
 		// Allow for caching all bean definition metadata, not expecting further changes.
 		beanFactory.freezeConfiguration();
 
@@ -1096,7 +1096,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.preInstantiateSingletons();
 	}
 
-	/**
+		/**
 	 * Finish the refresh of this context, invoking the LifecycleProcessor's
 	 * onRefresh() method and publishing the
 	 * {@link org.springframework.context.event.ContextRefreshedEvent}.

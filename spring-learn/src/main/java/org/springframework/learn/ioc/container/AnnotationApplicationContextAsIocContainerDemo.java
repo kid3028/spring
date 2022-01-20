@@ -4,10 +4,12 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.learn.ioc.domain.User;
 
 import java.util.Map;
 
+@Configuration
 public class AnnotationApplicationContextAsIocContainerDemo {
 	public static void main(String[] args) {
 		// 创建beanFactory
